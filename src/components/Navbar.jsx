@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Search, 
   Bell, 
   Settings, 
   ChevronDown, 
@@ -14,9 +13,6 @@ import {
 import { 
   Box, 
   Flex, 
-  Input, 
-  InputGroup, 
-  InputLeftElement, 
   IconButton, 
   Avatar, 
   Text, 
@@ -26,8 +22,6 @@ import {
   MenuList,
   MenuItem,
   Button,
-  Kbd,
-  InputRightElement,
   useDisclosure,
   AlertDialog,
   AlertDialogBody,

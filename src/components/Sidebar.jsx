@@ -12,14 +12,8 @@ import {
   FileText,
   ChevronsLeft,
   ChevronsRight,
-  Circle,
   Receipt,
-  PlusCircle,
-  History,
-  DownloadCloud,
-  ArrowRightLeft,
-  AlertTriangle
-} from 'lucide-react';
+  ArrowRightLeft} from 'lucide-react';
 import { 
   Box, 
   VStack, 
