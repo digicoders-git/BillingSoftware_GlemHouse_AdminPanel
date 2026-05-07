@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Grid, 
@@ -9,7 +10,10 @@ import {
   HStack,
   Badge,
   VStack,
-  Button} from '@chakra-ui/react';
+  Button,
+  Spinner,
+  useToast
+} from '@chakra-ui/react';
 import { 
   TrendingUp, 
   EllipsisVertical as MoreVertical,
@@ -34,16 +38,7 @@ import {
 } from 'recharts';
 import Layout from '../components/Layout';
 import { useNavigate } from 'react-router-dom';
-
-const data = [
-  { name: 'Mon', dispatches: 40, revenue: 2400 },
-  { name: 'Tue', dispatches: 30, revenue: 1398 },
-  { name: 'Wed', dispatches: 50, revenue: 9800 },
-  { name: 'Thu', dispatches: 27, revenue: 3908 },
-  { name: 'Fri', dispatches: 18, revenue: 4800 },
-  { name: 'Sat', dispatches: 23, revenue: 3800 },
-  { name: 'Sun', dispatches: 34, revenue: 4300 },
-];
+import API from '../utils/api';
 
 const ColoredStatCard = ({ title, value, icon, trend, trendValue, color, onClick }) => (
   <Box 
@@ -87,22 +82,59 @@ const ColoredStatCard = ({ title, value, icon, trend, trendValue, color, onClick
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({ stats: {}, chartData: [], todayDate: '' });
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchDashboardData();
+    
+    // Refresh when dispatch happens
+    const handleRefresh = () => fetchDashboardData();
+    window.addEventListener('refresh_page_data', handleRefresh);
+    return () => window.removeEventListener('refresh_page_data', handleRefresh);
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const { data } = await API.get('/dashboard');
+      setData(data);
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error fetching dashboard data",
+        status: "error",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner size="xl" color="brand.500" />
+        </Flex>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <Box pb="10">
         {/* Welcome Header */}
-        <Flex justify="space-between" align="end" mb="10">
+        <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'end' }} mb="10" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Master Control Dashboard</Heading>
-            <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
-               Managing <Text as="span" color="brand.500" fontWeight="600">12 Branches</Text> and <Text as="span" color="brand.500" fontWeight="600">48 Active Transfers</Text> today
-            </Text>
+             <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
+                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats.totalBranches} Branches</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats.todaySales} New Sales</Text> recorded today
+             </Text>
           </Box>
           <Box bg="white" p="2" borderRadius="xl" shadow="sm" border="1px solid" borderColor="gray.100">
              <HStack spacing="2" px="2">
                 <Icon as={Calendar} size={14} color="brand.500" />
-                <Text fontSize="12px" fontWeight="600" color="gray.600">May 06, 2026</Text>
+                <Text fontSize="12px" fontWeight="600" color="gray.600">{data.todayDate}</Text>
              </HStack>
           </Box>
         </Flex>
@@ -110,38 +142,42 @@ const Dashboard = () => {
         {/* Top Colored Stats */}
         <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="10">
           <ColoredStatCard 
-            title="Registered Branches" 
-            value="12 Units" 
-            icon={Building} 
+            title="Total Network Revenue" 
+            value={data.stats.totalRevenue >= 1000 
+              ? `₹${(data.stats.totalRevenue / 1000).toFixed(1)}k` 
+              : `₹${data.stats.totalRevenue.toLocaleString()}`} 
+            icon={TrendingUp} 
             trend="up" 
-            trendValue="+2 New"
-            color="secondary" 
-            onClick={() => navigate('/manage-branches')}
+            trendValue="Active"
+            color="green" 
+            onClick={() => navigate('/reports/daily')}
           />
           <ColoredStatCard 
-            title="Total Stock Dispatched" 
-            value="18.6k Units" 
+            title="Total Retail Sales" 
+            value={`${data.stats.totalSalesCount} Invoices`} 
+            icon={Activity} 
+            trend="up" 
+            trendValue={`${data.stats.todaySales} New`}
+            color="brand" 
+            onClick={() => navigate('/reports/daily')}
+          />
+          <ColoredStatCard 
+            title="Stock Units Dispatched" 
+            value={data.stats.totalUnitsDispatched >= 1000 
+              ? `${(data.stats.totalUnitsDispatched / 1000).toFixed(1)}k Units` 
+              : `${data.stats.totalUnitsDispatched} Units`} 
             icon={Package} 
             trend="up" 
-            trendValue="+12.5%"
-            color="brand" 
+            trendValue="Network"
+            color="secondary" 
             onClick={() => navigate('/total-dispatch-stock')}
           />
           <ColoredStatCard 
-            title="Network Allocation" 
-            value="82.4%" 
-            icon={Activity} 
-            trend="up" 
-            trendValue="+5.2%"
-            color="green" 
-            onClick={() => navigate('/product-allocation')}
-          />
-          <ColoredStatCard 
-            title="Active Transfers" 
-            value="48 Loads" 
+            title="Pending Transfers" 
+            value={`${data.stats.activeTransfers} Loads`} 
             icon={Truck} 
             trend="up" 
-            trendValue="High Speed"
+            trendValue="In Transit"
             color="blue" 
             onClick={() => navigate('/product-movement')}
           />
@@ -167,15 +203,15 @@ const Dashboard = () => {
             </Flex>
             <Box h="300px">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
+                <BarChart data={data.chartData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#919EAB', fontSize: 10, fontWeight: 600}} dy={5} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill: '#919EAB', fontSize: 10, fontWeight: 600}} />
                   <Tooltip 
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
-                    cursor={{fill: 'rgba(255, 159, 67, 0.05)'}}
+                    cursor={{fill: 'rgba(41, 138, 198, 0.05)'}}
                   />
-                  <Bar dataKey="dispatches" fill="#FF9F43" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="dispatches" fill="#298AC6" radius={[4, 4, 0, 0]} barSize={30} />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -196,7 +232,7 @@ const Dashboard = () => {
             </Flex>
             <Box h="300px">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={data.chartData}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#2167E3" stopOpacity={0.1}/>

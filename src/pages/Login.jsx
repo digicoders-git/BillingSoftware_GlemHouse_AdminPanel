@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Flex, 
@@ -13,113 +13,136 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
-  Select
+  useToast
 } from '@chakra-ui/react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import API from '../utils/api';
 
 const Login = () => {
-  const [show, setShow] = React.useState(false);
-  const [role, setRole] = React.useState('admin');
+  const [show, setShow] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
+  const toast = useToast();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    localStorage.setItem('userRole', role);
-    if (role === 'admin') {
-      navigate('/');
-    } else {
-      navigate('/branch/dashboard');
+    setLoading(true);
+    try {
+      const { data } = await API.post('/auth/login', { email, password });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.role);
+      localStorage.setItem('userData', JSON.stringify(data));
+      
+      toast({
+        title: 'Login Successful',
+        description: `Welcome back, ${data.name}!`,
+        status: 'success',
+        duration: 2000,
+        position: 'top-right'
+      });
+
+      if (data.role === 'admin') {
+        navigate('/');
+      } else {
+        navigate('/branch/dashboard');
+      }
+    } catch (error) {
+      toast({
+        title: 'Login Failed',
+        description: error.response?.data?.message || 'Invalid credentials',
+        status: 'error',
+        duration: 3000,
+        position: 'top-right'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Flex minH="100vh" align="center" justify="center" bg="gray.50" p="4">
+    <Flex minH="100vh" align="center" justify="center" bg="background" p="4">
       <Box 
         bg="white"
         w="full" 
-        maxW="450px" 
-        p={{ base: 8, md: 10 }}
+        maxW="420px" 
+        p={{ base: 6, md: 8 }}
         borderRadius="2xl"
         boxShadow="0 10px 40px rgba(0,0,0,0.08)"
         border="1px solid"
         borderColor="gray.100"
       >
-        <VStack spacing="6" align="center" mb="8">
-          <Flex justify="center" w="full" mb="2">
+        <VStack spacing="4" align="center" mb="6">
+          <Box 
+            bg="#222021" 
+            p="0" 
+            borderRadius="2xl" 
+            w="full" 
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
+            boxShadow="md"
+          >
             <Image 
-              src={logo} 
+              src="/main.png" 
               alt="DreamsPOS Logo" 
-              w="180px"
+              w="170px"
               h="auto"
-              style={{ mixBlendMode: 'multiply' }}
             />
-          </Flex>
+          </Box>
           <Box textAlign="center">
-            <Heading size="lg" color="#1B2850" fontWeight="800">Sign In</Heading>
-            <Text fontSize="sm" color="gray.500" mt="2" fontWeight="500">Please select your role and enter details</Text>
+            <Heading size="md" color="#222021" fontWeight="800">Sign In</Heading>
+            <Text fontSize="xs" color="gray.500" mt="1" fontWeight="500">Enter your credentials to access your panel</Text>
           </Box>
         </VStack>
 
         <form onSubmit={handleLogin}>
-          <VStack spacing="5">
-            <FormControl id="role">
-              <FormLabel fontSize="sm" fontWeight="600" color="#1B2850">Login As</FormLabel>
-              <Select 
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                h="50px" 
-                borderRadius="xl"
-                bg="gray.50"
-                border="1px solid"
-                borderColor="gray.200"
-                fontSize="15px"
-                _focus={{ borderColor: '#FF9F43', bg: 'white', boxShadow: '0 0 0 1px #FF9F43' }}
-              >
-                <option value="admin">Main Admin (Super Admin)</option>
-                <option value="branch">Branch Panel (Branch Manager)</option>
-              </Select>
-            </FormControl>
-
-            <FormControl id="email">
-              <FormLabel fontSize="sm" fontWeight="600" color="#1B2850">Email Address</FormLabel>
+          <VStack spacing="4">
+            <FormControl id="email" isRequired>
+              <FormLabel fontSize="xs" mb="1" fontWeight="600" color="#222021">Email Address</FormLabel>
               <Input 
                 type="email" 
-                placeholder="admin@dreamspos.com" 
-                h="50px" 
+                placeholder="admin@gmail.com" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                h="45px" 
                 borderRadius="xl"
-                bg="gray.50"
+                bg="background"
                 border="1px solid"
                 borderColor="gray.200"
-                fontSize="15px"
-                _focus={{ borderColor: '#FF9F43', bg: 'white', boxShadow: '0 0 0 1px #FF9F43' }}
+                fontSize="14px"
+                _focus={{ borderColor: '#298AC6', bg: 'white', boxShadow: '0 0 0 1px #298AC6' }}
               />
             </FormControl>
 
-            <FormControl id="password">
-              <FormLabel fontSize="sm" fontWeight="600" color="#1B2850">Password</FormLabel>
+            <FormControl id="password" isRequired>
+              <FormLabel fontSize="xs" mb="1" fontWeight="600" color="#222021">Password</FormLabel>
               <InputGroup size="md">
                 <Input
                   pr="4.5rem"
                   type={show ? 'text' : 'password'}
                   placeholder="Enter your password"
-                  h="50px"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  h="45px"
                   borderRadius="xl"
-                  bg="gray.50"
+                  bg="background"
                   border="1px solid"
                   borderColor="gray.200"
-                  fontSize="15px"
-                  _focus={{ borderColor: '#FF9F43', bg: 'white', boxShadow: '0 0 0 1px #FF9F43' }}
+                  fontSize="14px"
+                  _focus={{ borderColor: '#298AC6', bg: 'white', boxShadow: '0 0 0 1px #298AC6' }}
                 />
                 <InputRightElement h="full" pr="2">
                   <IconButton
                     variant="ghost"
                     size="sm"
                     onClick={() => setShow(!show)}
-                    icon={show ? <EyeOff size={18} color="#637381" /> : <Eye size={18} color="#637381" />}
+                    icon={show ? <EyeOff size={16} color="#637381" /> : <Eye size={16} color="#637381" />}
                     aria-label={show ? 'Hide password' : 'Show password'}
-                    _hover={{ bg: 'transparent', color: '#1B2850' }}
+                    _hover={{ bg: 'transparent', color: '#222021' }}
                   />
                 </InputRightElement>
               </InputGroup>
@@ -128,14 +151,15 @@ const Login = () => {
             <Button 
               type="submit"
               w="full" 
-              bg="#FF9F43"
+              bg="#298AC6"
               color="white" 
-              h="50px" 
-              fontSize="16px" 
+              h="45px" 
+              fontSize="15px" 
               fontWeight="700"
               borderRadius="xl"
-              mt="4"
-              _hover={{ bg: '#FF8A1D', transform: 'translateY(-1px)', boxShadow: 'lg' }}
+              mt="2"
+              isLoading={loading}
+              _hover={{ bg: '#216E9E', transform: 'translateY(-1px)', boxShadow: 'lg' }}
               transition="all 0.2s"
             >
               Sign In

@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Bell, 
-  Settings, 
   ChevronDown, 
   LogOut,
   RefreshCw,
   Menu as MenuIcon,
   Clock as ClockIcon,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Settings
 } from 'lucide-react';
 import { 
   Box, 
@@ -30,16 +29,37 @@ import {
   AlertDialogContent,
   AlertDialogOverlay
 } from '@chakra-ui/react';
+import API from '../utils/api';
 
 const Navbar = ({ isCollapsed, onMobileOpen }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { isOpen: isLogoutOpen, onOpen: onLogoutOpen, onClose: onLogoutClose } = useDisclosure();
   const cancelRef = useRef();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    fetchProfile();
+    
+    // Listen for profile updates from Profile page
+    const handleProfileUpdate = () => fetchProfile();
+    window.addEventListener('profile_updated', handleProfileUpdate);
+    return () => window.removeEventListener('profile_updated', handleProfileUpdate);
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const { data } = await API.get('/users/profile');
+      setProfile(data);
+    } catch (error) {
+      console.error("Failed to fetch navbar profile", error);
+    }
+  };
 
   const handleLogout = () => {
     onLogoutClose();
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userInfo');
     navigate('/login');
   };
 
@@ -76,6 +96,15 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
     setTimeout(() => setIsRefreshing(false), 600);
   };
 
+  const getProfilePic = (pic) => {
+    if (!pic) return 'https://bit.ly/dan-abramov';
+    if (pic.startsWith('http')) return pic;
+    const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5555';
+    // Handle both old paths (with uploads/) and new paths (just filename)
+    const cleanPath = pic.startsWith('uploads/') ? pic : `uploads/${pic}`;
+    return `${API_URL}/${cleanPath}`;
+  };
+
   return (
     <Box
       h="70px"
@@ -102,7 +131,7 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
           />
           <HStack 
             spacing="3" 
-            bg="gray.50" 
+            bg="background" 
             px="4" 
             py="2" 
             borderRadius="xl" 
@@ -123,43 +152,30 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
         </HStack>
 
         <HStack spacing="3">
-
-          <HStack spacing="1">
-            <IconButton
-              aria-label="Refresh Data"
-              icon={<RefreshCw size={20} className={isRefreshing ? 'spin-animation' : ''} />}
-              variant="ghost"
-              color={isRefreshing ? "#FF9F43" : "#637381"}
-              onClick={handleRefresh}
-            />
-
-            <Box position="relative">
-              <IconButton
-                aria-label="Notifications"
-                icon={<Bell size={20} />}
-                variant="ghost"
-                color="#637381"
-              />
-            </Box>
-
-            <IconButton
-              aria-label="Settings"
-              icon={<Settings size={20} />}
-              variant="ghost"
-              color="#637381"
-            />
-          </HStack>
+          <IconButton
+            aria-label="Refresh Data"
+            icon={<RefreshCw size={20} className={isRefreshing ? 'spin-animation' : ''} />}
+            variant="ghost"
+            color={isRefreshing ? "#298AC6" : "#637381"}
+            onClick={handleRefresh}
+          />
 
           <Menu>
             <MenuButton>
               <HStack spacing="2" ml="2" cursor="pointer" p="1" borderRadius="lg" _hover={{ bg: 'gray.50' }}>
-                <Avatar size="sm" name="Admin User" src="https://bit.ly/dan-abramov" border="2px solid" borderColor="green.400" />
+                <Avatar 
+                  size="sm" 
+                  name={profile?.name || 'User'} 
+                  src={getProfilePic(profile?.profilePic)} 
+                  border="2px solid" 
+                  borderColor="green.400" 
+                />
                 <Box display={{ base: 'none', md: 'block' }} textAlign="left">
                   <Text fontSize="13px" fontWeight="700" color="secondary" lineHeight="shorter">
-                    {localStorage.getItem('userRole') === 'branch' ? 'Branch Manager' : 'Admin User'}
+                    {profile?.name || (localStorage.getItem('userRole') === 'branch' ? 'Branch Manager' : 'Admin User')}
                   </Text>
                   <Text fontSize="11px" color="gray.500">
-                    {localStorage.getItem('userRole') === 'branch' ? 'Westside Branch' : 'Super Admin'}
+                    {profile?.role === 'admin' ? 'Super Admin' : 'Store Manager'}
                   </Text>
                 </Box>
                 <ChevronDown size={14} color="gray" />
@@ -194,7 +210,7 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
               <Button ref={cancelRef} onClick={onLogoutClose} borderRadius="xl" variant="ghost">
                 Cancel
               </Button>
-              <Button colorScheme="brand" onClick={handleLogout} borderRadius="xl" px="6" boxShadow="0 4px 14px 0 rgba(255, 159, 67, 0.39)">
+              <Button colorScheme="brand" onClick={handleLogout} borderRadius="xl" px="6" boxShadow="0 4px 14px 0 rgba(41, 138, 198, 0.39)">
                 Yes, Logout
               </Button>
             </AlertDialogFooter>

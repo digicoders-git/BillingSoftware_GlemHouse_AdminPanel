@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  background-color: #F4F7FB;
+  background-color: #EDEDEF;
 }
 
 body {
@@ -13,7 +13,8 @@ body {
   font-family: 'Public Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #212B36;
+  color: #222021;
+  background-color: #EDEDEF;
 }
 
 /* Custom Scrollbar */
@@ -26,28 +27,28 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E0E0E0;
+  background: #D1D5DB;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #D0D0D0;
+  background: #298AC6;
 }
 
 .premium-card {
-  @apply bg-white rounded-xl shadow-[0px_4px_24px_rgba(149,157,165,0.1)] border-none transition-all duration-300;
+  @apply bg-white rounded-xl shadow-[0px_4px_24px_rgba(34,32,33,0.06)] border-none transition-all duration-300;
 }
 
 .btn-primary {
-  @apply bg-primary hover:bg-primary-hover text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200;
+  @apply bg-[#298AC6] hover:bg-[#216E9E] text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200;
 }
 
 .sidebar-link {
-  @apply flex items-center gap-3 px-4 py-3 rounded-lg text-[#637381] transition-all duration-200 hover:text-primary font-medium;
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg text-[#637381] transition-all duration-200 hover:text-[#298AC6] font-medium;
 }
 
 .sidebar-link.active {
-  @apply bg-[#FFF4E8] text-primary font-bold;
+  @apply bg-[#E9F3F9] text-[#298AC6] font-bold;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

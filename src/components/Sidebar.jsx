@@ -32,7 +32,6 @@ import {
   AlertDialogOverlay,
   Button
 } from '@chakra-ui/react';
-import logo from '../assets/logo.png';
 
 const SidebarItem = ({ icon, label, to, children, isCollapsed, onClick }) => {
   const location = useLocation();
@@ -40,8 +39,8 @@ const SidebarItem = ({ icon, label, to, children, isCollapsed, onClick }) => {
   const isChildActive = hasChildren ? children.some(c => location.pathname === c.to) : false;
   const { isOpen, onToggle } = useDisclosure({ defaultIsOpen: isChildActive });
   
-  const activeColor = '#FF9F43';
-  const activeBg = '#FFF4E8';
+  const activeColor = '#298AC6';
+  const activeBg = '#E9F3F9';
   const inactiveColor = '#637381';
 
   if (hasChildren) {
@@ -106,7 +105,7 @@ const SidebarItem = ({ icon, label, to, children, isCollapsed, onClick }) => {
                     >
                       <Box mr="3" display="flex" alignItems="center" justifyContent="center" w="10px">
                         {isActive ? (
-                          <Box w="8px" h="8px" borderRadius="full" border="2px solid #FF9F43" bg="#FF9F43" />
+                          <Box w="8px" h="8px" borderRadius="full" border="2px solid #298AC6" bg="#298AC6" />
                         ) : (
                           <Box w="6px" h="6px" borderRadius="full" bg="#A0AAB4" />
                         )}
@@ -213,14 +212,23 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       >
       <Flex p="5" pt="6" align="center" justify="space-between" mb="4" position="relative" flexShrink={0}>
-        <Flex align="center" justify="flex-start" w="full" pl="2" display={{ base: 'flex', lg: isCollapsed ? 'none' : 'flex' }}>
-          <Image 
-            src={logo} 
-            alt="DreamsPOS Logo" 
-            w="160px"
-            h="auto"
-            style={{ mixBlendMode: 'multiply' }}
-          />
+        <Flex align="center" justify="center" w="full" display={{ base: 'flex', lg: isCollapsed ? 'none' : 'flex' }}>
+          <Box 
+            bg="#222021" 
+            p="0" 
+            borderRadius="xl" 
+            w="full" 
+            display="flex" 
+            alignItems="center" 
+            justifyContent="center"
+          >
+            <Image 
+              src="/main.png" 
+              alt="DreamsPOS Logo" 
+              w="140px"
+              h="auto"
+            />
+          </Box>
         </Flex>
         <IconButton
           display={{ base: 'none', lg: 'flex' }}
@@ -229,8 +237,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           variant="solid"
           size="sm"
           color="white"
-          bg="#FF9F43"
-          _hover={{ bg: '#FF8A1D' }}
+          bg="#298AC6"
+          _hover={{ bg: '#216E9E' }}
           borderRadius="full"
           position="absolute"
           right="-15px"
@@ -246,7 +254,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
       <Box flex="1" overflowY="auto" className="scrollbar-hide" pb="6">
         <VStack align="stretch" py="2" spacing="1">
           {!isCollapsed && (
-            <Text px="6" py="2" fontSize="15px" fontWeight="700" color="#1B2850" mt="2">
+            <Text px="6" py="2" fontSize="15px" fontWeight="700" color="#222021" mt="2">
               Main
             </Text>
           )}
@@ -256,7 +264,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
-                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#1B2850">
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Inventory
                 </Text>
               )}
@@ -269,9 +277,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
 
               <SidebarItem icon={PackageSearch} label="Stock Dispatch" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Total Dispatch', to: '/total-dispatch-stock' },
-                  { label: 'Record Dispatch', to: '/record-dispatch' },
-                  { label: 'Dispatch Summary', to: '/dispatch-summary' },
+                  { label: 'Dispatch History', to: '/total-dispatch-stock' },
+                  { label: 'New Dispatch', to: '/record-dispatch' },
                 ]}
               </SidebarItem>
 
@@ -283,7 +290,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               </SidebarItem>
 
               {!isCollapsed && (
-                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#1B2850">
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Reports
                 </Text>
               )}
@@ -300,7 +307,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               <SidebarItem icon={LayoutDashboard} label="Branch Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
-                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#1B2850">
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Branch Inventory
                 </Text>
               )}
@@ -321,7 +328,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               </SidebarItem>
 
               {!isCollapsed && (
-                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#1B2850">
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Sales & Reports
                 </Text>
               )}
@@ -332,7 +339,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           )}
 
           {!isCollapsed && (
-            <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#1B2850">
+            <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
               Settings
             </Text>
           )}
@@ -371,7 +378,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               <Button ref={cancelRef} onClick={onLogoutClose} borderRadius="xl" variant="ghost">
                 Cancel
               </Button>
-              <Button colorScheme="brand" onClick={handleLogout} borderRadius="xl" px="6" boxShadow="0 4px 14px 0 rgba(255, 159, 67, 0.39)">
+              <Button colorScheme="brand" onClick={handleLogout} borderRadius="xl" px="6" boxShadow="0 4px 14px 0 rgba(41, 138, 198, 0.39)">
                 Yes, Logout
               </Button>
             </AlertDialogFooter>

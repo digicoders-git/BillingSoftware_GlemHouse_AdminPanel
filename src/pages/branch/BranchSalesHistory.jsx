@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -12,12 +12,14 @@ import {
   Tr, 
   Th, 
   Td, 
-  Badge,
   Icon,
   Input,
   InputGroup,
   InputLeftElement,
-  Grid
+  Grid,
+  Spinner,
+  useToast,
+  VStack
 } from '@chakra-ui/react';
 import { 
   Search, 
@@ -30,8 +32,104 @@ import {
   BarChart2
 } from 'lucide-react';
 import Layout from '../../components/Layout';
+import API from '../../utils/api';
+import { pdfTemplate } from '../../utils/pdfTemplate';
+import { downloadInvoiceAsJpg } from '../../utils/downloadInvoice';
 
 const BranchSalesHistory = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({ sales: [], stats: {} });
+  const [searchTerm, setSearchTerm] = useState('');
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
+  const fetchSales = async () => {
+    try {
+      const { data } = await API.get('/branch-sales');
+      setData(data);
+      setLoading(false);
+    } catch (error) {
+      toast({ title: "Error fetching sales history", status: "error" });
+      setLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (data.sales.length === 0) return;
+    
+    const headers = ['Invoice ID', 'Products', 'Customer Name', 'Qty Sold', 'Total Amount', 'Date', 'Time'];
+    const csvData = data.sales.map(s => [
+      s.invoiceId,
+      `"${s.products}"`,
+      s.customerName,
+      s.totalQty,
+      s.totalAmount,
+      s.date,
+      s.time
+    ]);
+    
+    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Sales_History_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: "Bhai, sales history has been downloaded as CSV.",
+      status: "success",
+    });
+  };
+
+  const handleDownloadInvoice = async (row) => {
+    // Reconstruct billData from the sale row
+    const billData = {
+      billNo: row.invoiceId,
+      clientName: row.customerName,
+      clientPhone: 'N/A', // If not available in row
+      clientAddress: 'AS PER RECORDS',
+      items: row.items || [],
+      subTotal: row.totalAmount, // Assuming no tax/discount was tracked separately in this specific history view
+      totalTax: 0,
+      totalAmount: row.totalAmount,
+      isGstEnabled: false, // Fallback if no specific GST record is found
+      createdAt: row.date
+    };
+    
+    const html = pdfTemplate(billData);
+    toast({ title: "Generating JPG...", status: "info", duration: 2000 });
+    try {
+      await downloadInvoiceAsJpg(html, `Invoice_${row.invoiceId}.jpg`);
+    } catch (error) {
+      toast({ title: "Failed to download", status: "error" });
+    }
+  };
+
+  const filteredSales = data.sales.filter(s => 
+    s.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.products.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner size="xl" color="brand.500" />
+        </Flex>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Box>
@@ -41,8 +139,7 @@ const BranchSalesHistory = () => {
             <Text fontSize="sm" color="gray.500">Track your sold stock and customer transactions</Text>
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <Button leftIcon={<Calendar size={18} />} variant="outline" borderRadius="xl" flex={1}>Filter by Date</Button>
-            <Button leftIcon={<Download size={18} />} colorScheme="brand" borderRadius="xl" flex={1}>Export Sales</Button>
+            <Button leftIcon={<Download size={18} />} colorScheme="brand" borderRadius="xl" flex={1} onClick={handleExport}>Export Sales</Button>
           </HStack>
         </Flex>
 
@@ -55,7 +152,7 @@ const BranchSalesHistory = () => {
                 </Box>
                 <Box>
                   <Text fontSize="xs" color="gray.500" fontWeight="700" textTransform="uppercase">Total Sold</Text>
-                  <Text fontSize="xl" fontWeight="800" color="secondary">156 Units</Text>
+                  <Text fontSize="xl" fontWeight="800" color="secondary">{data.stats.totalSold} Units</Text>
                 </Box>
               </Flex>
            </Box>
@@ -66,7 +163,7 @@ const BranchSalesHistory = () => {
                 </Box>
                 <Box>
                   <Text fontSize="xs" color="gray.500" fontWeight="700" textTransform="uppercase">Revenue</Text>
-                  <Text fontSize="xl" fontWeight="800" color="secondary">$4,250</Text>
+                  <Text fontSize="xl" fontWeight="800" color="secondary">₹{data.stats.revenue?.toLocaleString()}</Text>
                 </Box>
               </Flex>
            </Box>
@@ -77,7 +174,7 @@ const BranchSalesHistory = () => {
                 </Box>
                 <Box>
                   <Text fontSize="xs" color="gray.500" fontWeight="700" textTransform="uppercase">Invoices</Text>
-                  <Text fontSize="xl" fontWeight="800" color="secondary">24 Bills</Text>
+                  <Text fontSize="xl" fontWeight="800" color="secondary">{data.stats.invoiceCount} Bills</Text>
                  </Box>
               </Flex>
            </Box>
@@ -88,7 +185,7 @@ const BranchSalesHistory = () => {
                 </Box>
                 <Box>
                   <Text fontSize="xs" color="whiteAlpha.800" fontWeight="700" textTransform="uppercase">Avg Value</Text>
-                  <Text fontSize="xl" fontWeight="800">$177.08</Text>
+                  <Text fontSize="xl" fontWeight="800">₹{data.stats.avgValue}</Text>
                 </Box>
               </Flex>
            </Box>
@@ -103,66 +200,78 @@ const BranchSalesHistory = () => {
                 <InputLeftElement pointerEvents="none">
                   <Search size={18} color="#637381" />
                 </InputLeftElement>
-                <Input placeholder="Search invoice or product..." bg="gray.50" borderRadius="xl" border="none" _focus={{ bg: 'white', shadow: 'md' }} />
+                <Input 
+                  placeholder="Search invoice or product..." 
+                  bg="background" 
+                  borderRadius="xl" 
+                  border="none" 
+                  _focus={{ bg: 'white', shadow: 'md' }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </InputGroup>
             </Flex>
           </Box>
 
           <Box overflowX="auto">
             <Table variant="simple" minW="800px">
-              <Thead bg="gray.50">
+              <Thead bg="background">
                 <Tr>
                   <Th color="gray.500" border="none">Invoice ID</Th>
                   <Th color="gray.500" border="none">Product Details</Th>
                   <Th color="gray.500" border="none">Customer</Th>
                   <Th color="gray.500" border="none">Qty Sold</Th>
                   <Th color="gray.500" border="none">Total Amount</Th>
-                  <Th color="gray.500" border="none">Time</Th>
+                  <Th color="gray.500" border="none">Date & Time</Th>
+                  <Th color="gray.500" border="none" textAlign="right">Action</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {[
-                  { id: 'INV-101', product: 'iPhone 15 Pro', customer: 'John Doe', qty: 1, amount: '$999', time: '10:30 AM' },
-                  { id: 'INV-102', product: 'AirPods Pro 2', customer: 'Sarah Connor', qty: 2, amount: '$498', time: '11:15 AM' },
-                  { id: 'INV-103', product: 'MacBook Air M2', customer: 'Mike Ross', qty: 1, amount: '$1,299', time: '12:45 PM' },
-                  { id: 'INV-104', product: 'USB-C Cable', customer: 'Rachel Zane', qty: 3, amount: '$57', time: '02:00 PM' },
-                  { id: 'INV-105', product: 'iPhone 15 Pro', customer: 'Harvey Specter', qty: 1, amount: '$999', time: '03:30 PM' },
-                ].map((row, idx) => (
+                {filteredSales.length > 0 ? filteredSales.map((row, idx) => (
                   <Tr key={idx} _hover={{ bg: 'gray.50/50' }}>
                     <Td borderColor="gray.100">
-                      <Text fontWeight="700" color="brand.500" fontSize="sm">{row.id}</Text>
+                      <Text fontWeight="700" color="brand.500" fontSize="sm">{row.invoiceId}</Text>
                     </Td>
                     <Td borderColor="gray.100">
                       <HStack spacing="2">
-                        <Box p="1" bg="gray.50" borderRadius="md">
-                           <BarChart2 size={14} color="#FF9F43" />
+                        <Box p="1" bg="background" borderRadius="md">
+                           <BarChart2 size={14} color="#298AC6" />
                         </Box>
-                        <Text fontWeight="600" fontSize="sm">{row.product}</Text>
+                        <Text fontWeight="600" fontSize="sm">{row.products}</Text>
                       </HStack>
                     </Td>
                     <Td borderColor="gray.100">
                       <HStack spacing="2">
                         <Icon as={User} size={14} color="gray.400" />
-                        <Text fontSize="sm">{row.customer}</Text>
+                        <Text fontSize="sm">{row.customerName}</Text>
                       </HStack>
                     </Td>
-                    <Td borderColor="gray.100"><Text fontWeight="700">{row.qty} Units</Text></Td>
-                    <Td borderColor="gray.100"><Text fontWeight="800" color="secondary">{row.amount}</Text></Td>
-                    <Td borderColor="gray.100"><Text fontSize="xs" color="gray.500">{row.time}</Text></Td>
+                    <Td borderColor="gray.100"><Text fontWeight="700">{row.totalQty} Units</Text></Td>
+                    <Td borderColor="gray.100"><Text fontWeight="800" color="secondary">₹{row.totalAmount?.toLocaleString()}</Text></Td>
+                    <Td borderColor="gray.100">
+                      <VStack align="start" spacing="0">
+                        <Text fontSize="xs" fontWeight="700">{row.time}</Text>
+                        <Text fontSize="10px" color="gray.400">{row.date}</Text>
+                      </VStack>
+                    </Td>
+                    <Td borderColor="gray.100" textAlign="right">
+                      <Button 
+                        size="xs" 
+                        variant="outline" 
+                        colorScheme="brand" 
+                        leftIcon={<Download size={14} />}
+                        onClick={() => handleDownloadInvoice(row)}
+                      >
+                        Download
+                      </Button>
+                    </Td>
                   </Tr>
-                ))}
+                )) : (
+                  <Tr><Td colSpan="7" textAlign="center" py="10" color="gray.400">No sales records found</Td></Tr>
+                )}
               </Tbody>
             </Table>
           </Box>
-          <Flex p="4" justify="space-between" align="center" bg="gray.50/30" borderTop="1px solid" borderColor="gray.100">
-            <Text fontSize="xs" color="gray.500">Showing 5 of 24 entries</Text>
-            <HStack spacing="2">
-              <Button size="xs" variant="outline">Prev</Button>
-              <Button size="xs" colorScheme="brand">1</Button>
-              <Button size="xs" variant="outline">2</Button>
-              <Button size="xs" variant="outline">Next</Button>
-            </HStack>
-          </Flex>
         </Box>
       </Box>
     </Layout>

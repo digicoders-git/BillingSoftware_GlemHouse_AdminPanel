@@ -50,7 +50,7 @@ const Layout = ({ children }) => {
                 thickness="4px"
                 speed="0.65s"
                 emptyColor="gray.200"
-                color="#FF9F43"
+                color="#298AC6"
                 size="xl"
               />
             </Flex>

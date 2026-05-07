@@ -67,7 +67,7 @@ const GenerateCredentials = () => {
 
           <Box overflowX="auto">
             <Table variant="simple">
-              <Thead bg="gray.50">
+              <Thead bg="background">
                 <Tr>
                   <Th border="none">Branch Name</Th>
                   <Th border="none">Email / Username</Th>

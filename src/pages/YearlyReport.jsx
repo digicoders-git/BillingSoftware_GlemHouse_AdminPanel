@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -11,13 +11,13 @@ import {
   StatHelpText,
   StatArrow,
   HStack,
-  Button
+  Button,
+  Spinner,
+  useToast
 } from '@chakra-ui/react';
 import { 
-  FileText, 
   Download, 
-  Calendar,
-  TrendingUp
+  Calendar
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { 
@@ -29,43 +29,92 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-
-const data = [
-  { month: 'Jan', total: 4000 },
-  { month: 'Feb', total: 3000 },
-  { month: 'Mar', total: 5000 },
-  { month: 'Apr', total: 4500 },
-  { month: 'May', total: 6000 },
-  { month: 'Jun', total: 5500 },
-  { month: 'Jul', total: 7000 },
-  { month: 'Aug', total: 6500 },
-  { month: 'Sep', total: 8000 },
-  { month: 'Oct', total: 7500 },
-  { month: 'Nov', total: 9000 },
-  { month: 'Dec', total: 10000 },
-];
+import API from '../utils/api';
 
 const YearlyReport = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({ stats: {}, chartData: [], year: '' });
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchReport();
+  }, []);
+
+  const fetchReport = async () => {
+    try {
+      const { data } = await API.get('/reports/yearly');
+      setData(data);
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error fetching yearly report",
+        status: "error",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (data.chartData.length === 0) return;
+    
+    const headers = ['Month', 'Revenue'];
+    const csvData = data.chartData.map(row => [
+      row.name,
+      row.value
+    ]);
+    
+    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Yearly_Growth_Report_${data.year}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: "Bhai, yearly growth data has been downloaded as CSV.",
+      status: "success",
+    });
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner size="xl" color="brand.500" />
+        </Flex>
+      </Layout>
+    );
+  }
+
+  const statConfig = [
+    { label: 'Total Yearly Dispatches', value: data.stats.yearlyDispatches, trend: 'increase', percentage: '28%', color: 'brand' },
+    { label: 'Annual Revenue', value: `₹${((data.stats.yearlyRevenue || 0) / 1000).toFixed(1)}k`, trend: 'increase', percentage: '35%', color: 'green' },
+    { label: 'Growth Rate', value: data.stats.growthRate, trend: 'increase', percentage: '12%', color: 'blue' },
+  ];
+
   return (
     <Layout>
       <Box>
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="6" gap="4">
           <Box>
             <Heading size="md" color="secondary">Annual Growth Report</Heading>
-            <Text fontSize="sm" color="gray.500">Yearly overview for 2023</Text>
+            <Text fontSize="sm" color="gray.500">Yearly overview for {data.year}</Text>
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <Button size="sm" variant="outline" leftIcon={<Calendar size={16} />} flex={1}>2023</Button>
-            <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1}>Export</Button>
+            <Button size="sm" variant="outline" leftIcon={<Calendar size={16} />} flex={1}>{data.year}</Button>
+            <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1} onClick={handleExport}>Export</Button>
           </HStack>
         </Flex>
 
         <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap="6" mb="8">
-          {[
-            { label: 'Total Yearly Dispatches', value: '24,500', trend: 'increase', percentage: '28%', color: 'brand' },
-            { label: 'Annual Revenue', value: '$2.4M', trend: 'increase', percentage: '35%', color: 'green' },
-            { label: 'New Branches Added', value: '8', trend: 'increase', percentage: '12%', color: 'blue' },
-          ].map((stat, idx) => (
+          {statConfig.map((stat, idx) => (
             <Box key={idx} className="premium-card" p="6">
               <Stat>
                 <StatLabel color="gray.500" fontSize="xs" fontWeight="700">{stat.label}</StatLabel>
@@ -80,23 +129,23 @@ const YearlyReport = () => {
         </Grid>
 
         <Box className="premium-card" p="6">
-          <Heading size="sm" mb="6" color="secondary">Monthly Growth Trend</Heading>
+          <Heading size="sm" mb="6" color="secondary">Monthly Revenue Trend (₹)</Heading>
           <Box h="400px">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
+              <AreaChart data={data.chartData}>
                 <defs>
                   <linearGradient id="colorYear" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF9F43" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#FF9F43" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#298AC6" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#298AC6" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
-                <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip 
                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}
                 />
-                <Area type="monotone" dataKey="total" stroke="#FF9F43" strokeWidth={4} fillOpacity={1} fill="url(#colorYear)" />
+                <Area type="monotone" dataKey="value" stroke="#298AC6" strokeWidth={4} fillOpacity={1} fill="url(#colorYear)" />
               </AreaChart>
             </ResponsiveContainer>
           </Box>

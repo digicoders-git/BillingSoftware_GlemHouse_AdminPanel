@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -13,7 +13,6 @@ import {
   Select, 
   VStack,
   HStack,
-  Icon,
   Table,
   Thead,
   Tbody,
@@ -21,65 +20,77 @@ import {
   Th,
   Td,
   IconButton,
-  useToast
+  useToast,
+  Spinner
 } from '@chakra-ui/react';
 import { 
   Plus, 
   Trash2, 
   Save, 
-  Package, 
-  Truck,
-  Calendar,
-  Search,
   ArrowLeft
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useNavigate } from 'react-router-dom';
+import API from '../utils/api';
 
 const RecordDispatch = () => {
   const navigate = useNavigate();
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), name: 'iPhone 15 Pro', sku: 'APL-IP15-P', qty: 10, price: 999 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0 }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
     branch: '',
     date: new Date().toISOString().split('T')[0],
-    method: '',
+    method: 'Company Truck',
     reference: ''
   });
 
-  const availableProducts = [
-    { name: 'iPhone 15 Pro', sku: 'APL-IP15-P', price: 999 },
-    { name: 'MacBook Air M2', sku: 'APL-MBA-M2', price: 1299 },
-    { name: 'AirPods Pro 2', sku: 'APL-APP-2', price: 249 },
-    { name: 'Samsung Galaxy S24', sku: 'SAM-S24', price: 899 },
-    { name: 'Sony WH-1000XM5', sku: 'SNY-XM5', price: 349 },
-  ];
+  const [branches, setBranches] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [branchesRes, productsRes] = await Promise.all([
+        API.get('/branches'),
+        API.get('/products')
+      ]);
+      setBranches(branchesRes.data.branches);
+      setProducts(productsRes.data);
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error fetching data",
+        status: "error",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), name: '', sku: '', qty: 1, price: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0 }]);
   };
 
   const handleRemoveItem = (id) => {
     if (items.length > 1) {
       setItems(items.filter(item => item.id !== id));
-    } else {
-      toast({
-        title: "At least one item required",
-        status: "warning",
-        duration: 2000,
-      });
     }
   };
 
-  const handleProductChange = (id, productName) => {
-    const product = availableProducts.find(p => p.name === productName);
+  const handleProductChange = (id, productId) => {
+    const product = products.find(p => p._id === productId);
     setItems(items.map(item => 
       item.id === id 
-        ? { ...item, name: productName, sku: product?.sku || '', price: product?.price || 0 }
+        ? { ...item, product: productId, name: product?.name || '', sku: product?.sku || '', price: product?.price || 0 }
         : item
     ));
   };
@@ -93,28 +104,64 @@ const RecordDispatch = () => {
   const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
   const totalValue = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
 
-  const handleConfirmDispatch = () => {
+  const handleConfirmDispatch = async () => {
     if (!dispatchData.branch || !dispatchData.method) {
       toast({
         title: "Missing Information",
         description: "Please select branch and transport method.",
         status: "error",
         duration: 3000,
-        isClosable: true,
       });
       return;
     }
 
-    toast({
-      title: "Dispatch Confirmed!",
-      description: `Stock dispatched to ${dispatchData.branch} successfully.`,
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
-    
-    setTimeout(() => navigate('/total-dispatch-stock'), 2000);
+    if (items.some(item => !item.product)) {
+      toast({
+        title: "Invalid Items",
+        description: "Please select a product for all rows.",
+        status: "error",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await API.post('/dispatches', {
+        ...dispatchData,
+        items,
+        totalItems,
+        totalValue
+      });
+      
+      toast({
+        title: "Dispatch Successful",
+        description: "Stock has been dispatched to the branch.",
+        status: "success",
+        duration: 3000,
+      });
+      navigate('/total-dispatch-stock');
+    } catch (error) {
+      toast({
+        title: "Dispatch Failed",
+        description: error.response?.data?.message || "An error occurred",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner size="xl" color="brand.500" />
+        </Flex>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -138,31 +185,35 @@ const RecordDispatch = () => {
               </Heading>
               <VStack spacing="6" align="stretch">
                 <FormControl isRequired>
-                  <FormLabel fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Target Branch</FormLabel>
+                  <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase" letterSpacing="0.5px">Target Branch</FormLabel>
                   <Select 
                     placeholder="Choose branch" 
                     h="50px" 
                     borderRadius="xl" 
-                    bg="gray.50" 
-                    border="none" 
+                    bg="white" 
+                    border="1px solid"
+                    borderColor="gray.200" 
+                    _focus={{ borderColor: 'brand.500', boxShadow: 'none' }}
                     fontWeight="700"
+                    value={dispatchData.branch}
                     onChange={(e) => setDispatchData({...dispatchData, branch: e.target.value})}
                   >
-                    <option>Downtown Branch</option>
-                    <option>Westside Hub</option>
-                    <option>Central Plaza</option>
-                    <option>North Station</option>
+                    {branches.map(b => (
+                      <option key={b._id} value={b._id}>{b.name} ({b.branchId})</option>
+                    ))}
                   </Select>
                 </FormControl>
 
                 <FormControl isRequired>
-                  <FormLabel fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Dispatch Date</FormLabel>
+                  <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase" letterSpacing="0.5px">Dispatch Date</FormLabel>
                   <Input 
                     type="date" 
                     h="50px" 
                     borderRadius="xl" 
-                    bg="gray.50" 
-                    border="none" 
+                    bg="white" 
+                    border="1px solid"
+                    borderColor="gray.200" 
+                    _focus={{ borderColor: 'brand.500', boxShadow: 'none' }}
                     fontWeight="700"
                     value={dispatchData.date}
                     onChange={(e) => setDispatchData({...dispatchData, date: e.target.value})}
@@ -170,32 +221,37 @@ const RecordDispatch = () => {
                 </FormControl>
 
                 <FormControl isRequired>
-                  <FormLabel fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Transport Method</FormLabel>
+                  <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase" letterSpacing="0.5px">Transport Method</FormLabel>
                   <Select 
-                    placeholder="Select mode" 
                     h="50px" 
                     borderRadius="xl" 
-                    bg="gray.50" 
-                    border="none" 
+                    bg="white" 
+                    border="1px solid"
+                    borderColor="gray.200" 
+                    _focus={{ borderColor: 'brand.500', boxShadow: 'none' }}
                     fontWeight="700"
+                    value={dispatchData.method}
                     onChange={(e) => setDispatchData({...dispatchData, method: e.target.value})}
                   >
-                    <option>Company Truck (Fast)</option>
-                    <option>Standard Delivery</option>
-                    <option>Urgent Air Freight</option>
-                    <option>Third Party Logistics</option>
+                    <option value="Company Truck">Company Truck (Fast)</option>
+                    <option value="Standard Delivery">Standard Delivery</option>
+                    <option value="Urgent Air Freight">Urgent Air Freight</option>
+                    <option value="Third Party Logistics">Third Party Logistics</option>
                   </Select>
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Tracking Reference</FormLabel>
+                  <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase" letterSpacing="0.5px">Tracking Reference</FormLabel>
                   <Input 
                     placeholder="e.g. BATCH-2024-X" 
                     h="50px" 
                     borderRadius="xl" 
-                    bg="gray.50" 
-                    border="none" 
+                    bg="white" 
+                    border="1px solid"
+                    borderColor="gray.200" 
+                    _focus={{ borderColor: 'brand.500', boxShadow: 'none' }}
                     fontWeight="700"
+                    value={dispatchData.reference}
                     onChange={(e) => setDispatchData({...dispatchData, reference: e.target.value})}
                   />
                 </FormControl>
@@ -233,13 +289,18 @@ const RecordDispatch = () => {
                         <Td borderColor="gray.100" py="4">
                           <Select 
                             placeholder="Select product" 
-                            variant="unstyled" 
+                            size="sm"
+                            h="38px"
+                            borderRadius="lg"
+                            bg="white"
+                            border="1px solid"
+                            borderColor="gray.100"
                             fontWeight="700" 
-                            value={item.name}
+                            value={item.product}
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
-                            {availableProducts.map(p => (
-                              <option key={p.sku} value={p.name}>{p.name}</option>
+                            {products.map(p => (
+                              <option key={p._id} value={p._id}>{p.name}</option>
                             ))}
                           </Select>
                         </Td>
@@ -248,17 +309,19 @@ const RecordDispatch = () => {
                           <Input 
                             type="number" 
                             size="sm" 
+                            h="38px"
                             borderRadius="lg" 
-                            bg="gray.50" 
-                            border="none" 
+                            bg="white" 
+                            border="1px solid"
+                            borderColor="gray.100" 
                             fontWeight="800"
                             value={item.qty}
                             onChange={(e) => handleQtyChange(item.id, e.target.value)}
                           />
                         </Td>
-                        <Td borderColor="gray.100"><Text fontSize="sm" fontWeight="700">${item.price}</Text></Td>
+                        <Td borderColor="gray.100"><Text fontSize="sm" fontWeight="700">₹{item.price}</Text></Td>
                         <Td borderColor="gray.100" textAlign="right">
-                           <Text fontWeight="900" color="secondary">${(item.qty * item.price).toLocaleString()}</Text>
+                           <Text fontWeight="900" color="secondary">₹{(item.qty * item.price).toLocaleString()}</Text>
                         </Td>
                         <Td borderColor="gray.100">
                           <IconButton 
@@ -286,7 +349,7 @@ const RecordDispatch = () => {
                        </VStack>
                        <VStack align="start" spacing="0">
                           <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Consignment Value</Text>
-                          <Text fontSize="lg" fontWeight="900" color="brand.500">${totalValue.toLocaleString()}</Text>
+                          <Text fontSize="lg" fontWeight="900" color="brand.500">₹{totalValue.toLocaleString()}</Text>
                        </VStack>
                     </HStack>
                     <Button 
@@ -295,8 +358,9 @@ const RecordDispatch = () => {
                       px="10" 
                       h="55px" 
                       borderRadius="2xl" 
-                      shadow="0 10px 20px -5px rgba(255, 159, 67, 0.4)"
+                      shadow="0 10px 20px -5px rgba(41, 138, 198, 0.4)"
                       onClick={handleConfirmDispatch}
+                      isLoading={submitting}
                     >
                       Confirm & Dispatch
                     </Button>

@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import ManageBranches from './pages/ManageBranches';
 import CreateBranch from './pages/CreateBranch';
+import EditBranch from './pages/EditBranch';
 import DispatchStock from './pages/DispatchStock';
 import Profile from './pages/Profile';
 
@@ -25,6 +26,8 @@ import BranchSalesHistory from './pages/branch/BranchSalesHistory';
 import BranchPerformance from './pages/branch/BranchPerformance';
 import BranchReports from './pages/branch/BranchReports';
 import BranchAddProduct from './pages/branch/BranchAddProduct';
+import BranchEditProduct from './pages/branch/BranchEditProduct';
+import BranchViewProduct from './pages/branch/BranchViewProduct';
 import BranchProductWiseSales from './pages/branch/BranchProductWiseSales';
 
 
@@ -38,10 +41,11 @@ function App() {
         {/* Admin Routes */}
         <Route path="/" element={<Dashboard />} />
         <Route path="/create-branch" element={<CreateBranch />} />
+        <Route path="/edit-branch/:id" element={<EditBranch />} />
         <Route path="/manage-branches" element={<ManageBranches />} />
         <Route path="/total-dispatch-stock" element={<DispatchStock />} />
         <Route path="/record-dispatch" element={<RecordDispatch />} />
-        <Route path="/dispatch-summary" element={<DispatchSummary />} />
+        <Route path="/dispatch-summary/:id" element={<DispatchSummary />} />
         <Route path="/product-allocation" element={<ProductAllocation />} />
         <Route path="/product-movement" element={<ProductMovement />} />
         <Route path="/reports/daily" element={<DailyReport />} />
@@ -52,6 +56,8 @@ function App() {
         <Route path="/branch/dashboard" element={<BranchDashboard />} />
         <Route path="/branch/manage-products" element={<BranchManageProducts />} />
         <Route path="/branch/add-product" element={<BranchAddProduct />} />
+        <Route path="/branch/edit-product/:id" element={<BranchEditProduct />} />
+        <Route path="/branch/view-product/:id" element={<BranchViewProduct />} />
         <Route path="/branch/low-stock" element={<BranchManageProducts />} />
         <Route path="/branch/received-stock" element={<BranchReceivedStock />} />
         <Route path="/branch/inventory-log" element={<BranchInventoryLog />} />

@@ -19,7 +19,8 @@ import {
   Divider,
   Progress,
   Avatar,
-  AvatarGroup
+  AvatarGroup,
+  useToast
 } from '@chakra-ui/react';
 import { 
   Download, 
@@ -70,10 +71,38 @@ const categoryData = [
   { name: 'Others', value: 10 },
 ];
 
-const COLORS = ['#FF9F43', '#00CFE8', '#1B2850', '#28C76F'];
+const COLORS = ['#298AC6', '#00CFE8', '#222021', '#28C76F'];
 
 const BranchPerformance = () => {
   const [timeRange, setTimeRange] = useState('Weekly');
+  const toast = useToast();
+
+  const handleExport = () => {
+    const headers = ['Day', 'Revenue', 'Target'];
+    const csvData = data.map(row => [
+      row.name,
+      row.revenue,
+      row.target
+    ]);
+    
+    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Branch_Performance_Data_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: "Bhai, performance analytics has been downloaded as CSV.",
+      status: "success",
+    });
+  };
 
   return (
     <Layout>
@@ -90,7 +119,7 @@ const BranchPerformance = () => {
             <Text color="gray.500" fontWeight="500" ml="12">Detailed performance tracking for Westside Branch</Text>
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <HStack bg="gray.50" p="1" borderRadius="2xl" border="1px solid" borderColor="gray.100">
+            <HStack bg="background" p="1" borderRadius="2xl" border="1px solid" borderColor="gray.100">
                {['Daily', 'Weekly', 'Monthly'].map((range) => (
                   <Button 
                     key={range}
@@ -106,15 +135,15 @@ const BranchPerformance = () => {
                   </Button>
                ))}
             </HStack>
-            <Button leftIcon={<Download size={18} />} colorScheme="brand" borderRadius="2xl" shadow="lg" px="6">Export</Button>
+            <Button leftIcon={<Download size={18} />} colorScheme="brand" borderRadius="2xl" shadow="lg" px="6" onClick={handleExport}>Export</Button>
           </HStack>
         </Flex>
 
         {/* Unique Performance Stats */}
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} spacing="6" mb="10">
           {[
-            { label: 'Total Sales', value: '$128,450', trend: 'increase', percentage: '12.5%', icon: ShoppingBag, color: 'brand' },
-            { label: 'Avg Order Value', value: '$450.20', trend: 'increase', percentage: '5.2%', icon: Zap, color: 'blue' },
+            { label: 'Total Sales', value: '₹1,28,450', trend: 'increase', percentage: '12.5%', icon: ShoppingBag, color: 'brand' },
+            { label: 'Avg Order Value', value: '₹450.20', trend: 'increase', percentage: '5.2%', icon: Zap, color: 'blue' },
             { label: 'Customer Growth', value: '1,240', trend: 'increase', percentage: '8.4%', icon: Users, color: 'green' },
             { label: 'Conversion Rate', value: '64.2%', trend: 'decrease', percentage: '2.1%', icon: Target, color: 'orange' },
           ].map((stat, idx) => (
@@ -160,15 +189,15 @@ const BranchPerformance = () => {
                   <AreaChart data={data}>
                     <defs>
                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#FF9F43" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#FF9F43" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#298AC6" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#298AC6" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F0" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#A0AAB4', fontSize: 12, fontWeight: 700}} dy={15} />
                     <YAxis axisLine={false} tickLine={false} tick={{fill: '#A0AAB4', fontSize: 12, fontWeight: 700}} />
                     <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '15px' }} />
-                    <Area type="monotone" dataKey="revenue" stroke="#FF9F43" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
+                    <Area type="monotone" dataKey="revenue" stroke="#298AC6" strokeWidth={4} fillOpacity={1} fill="url(#colorRev)" />
                     <Line type="monotone" dataKey="target" stroke="#00CFE8" strokeWidth={3} strokeDasharray="5 5" dot={false} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -220,14 +249,14 @@ const BranchPerformance = () => {
               </Flex>
               <VStack align="stretch" spacing="5">
                  {[
-                   { name: 'iPhone 15 Pro', sales: 124, revenue: '$123,876', growth: '+15%', status: 'Best Seller' },
-                   { name: 'MacBook Air M2', sales: 86, revenue: '$111,714', growth: '+12%', status: 'Trending' },
-                   { name: 'AirPods Pro 2', sales: 245, revenue: '$61,005', growth: '+25%', status: 'High Demand' },
+                   { name: 'iPhone 15 Pro', sales: 124, revenue: '₹1,23,876', growth: '+15%', status: 'Best Seller' },
+                   { name: 'MacBook Air M2', sales: 86, revenue: '₹1,11,714', growth: '+12%', status: 'Trending' },
+                   { name: 'AirPods Pro 2', sales: 245, revenue: '₹61,005', growth: '+25%', status: 'High Demand' },
                  ].map((item, idx) => (
                     <Flex key={idx} align="center" justify="space-between" p="4" bg="gray.50/50" borderRadius="22px" border="1px solid" borderColor="gray.100" transition="all 0.2s" _hover={{ shadow: 'md', bg: 'white', borderColor: 'brand.100' }}>
                        <HStack spacing="4">
                           <Box p="3" bg="white" borderRadius="15px" shadow="sm">
-                             <ShoppingBag size={20} color="#FF9F43" />
+                             <ShoppingBag size={20} color="#298AC6" />
                           </Box>
                           <VStack align="start" spacing="0">
                              <Text fontWeight="900" color="secondary" fontSize="sm">{item.name}</Text>
@@ -269,7 +298,7 @@ const BranchPerformance = () => {
                  <Box w="full">
                     <Flex justify="space-between" mb="3">
                        <Text fontSize="sm" fontWeight="800">Branch Revenue Goal</Text>
-                       <Text fontSize="sm" fontWeight="800">$45,200 / $60k</Text>
+                       <Text fontSize="sm" fontWeight="800">₹45,200 / ₹60k</Text>
                     </Flex>
                     <Progress value={75} colorScheme="orange" bg="whiteAlpha.100" borderRadius="full" size="md" />
                  </Box>

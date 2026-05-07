@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -13,23 +13,94 @@ import {
   Badge, 
   HStack, 
   Button,
-  Icon,
+  Grid,
   Stat,
   StatLabel,
   StatNumber,
   StatHelpText,
-  StatArrow
+  StatArrow,
+  Spinner,
+  useToast
 } from '@chakra-ui/react';
 import { 
-  FileText, 
   Download, 
-  Printer, 
-  Calendar,
-  Filter
+  Printer
 } from 'lucide-react';
 import Layout from '../components/Layout';
+import API from '../utils/api';
 
 const DailyReport = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({ stats: {}, log: [] });
+  const toast = useToast();
+
+  useEffect(() => {
+    fetchReport();
+  }, []);
+
+  const fetchReport = async () => {
+    try {
+      const { data } = await API.get('/reports/daily');
+      setData(data);
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error fetching report",
+        status: "error",
+        duration: 3000,
+      });
+      setLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (data.log.length === 0) return;
+    
+    const headers = ['Time', 'Branch', 'Products', 'Qty', 'Status'];
+    const csvData = data.log.map(row => [
+      row.time,
+      row.branch,
+      `"${row.products}"`,
+      row.qty,
+      row.status
+    ]);
+    
+    const csvContent = [headers, ...csvData].map(e => e.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Daily_Dispatch_Report_${new Date().toLocaleDateString()}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Export Successful",
+      description: "Bhai, daily report has been downloaded as CSV.",
+      status: "success",
+    });
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner size="xl" color="brand.500" />
+        </Flex>
+      </Layout>
+    );
+  }
+
+  const statConfig = [
+    { label: 'Today\'s Dispatches', value: data.stats.todayDispatches, trend: 'increase', percentage: '12%', color: 'brand' },
+    { label: 'Today\'s Revenue', value: `₹${(data.stats.todayRevenue || 0).toLocaleString()}`, trend: 'increase', percentage: '8%', color: 'green' },
+    { label: 'Pending Deliveries', value: data.stats.pendingDeliveries, trend: 'decrease', percentage: '5%', color: 'orange' },
+    { label: 'Received Today', value: data.stats.receivedToday, trend: 'increase', percentage: '15%', color: 'blue' },
+  ];
+
   return (
     <Layout>
       <Box>
@@ -40,17 +111,12 @@ const DailyReport = () => {
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
             <Button size="sm" variant="outline" leftIcon={<Printer size={16} />} flex={1}>Print</Button>
-            <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1}>Download PDF</Button>
+            <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1} onClick={handleExport}>Export CSV</Button>
           </HStack>
         </Flex>
 
         <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="8">
-          {[
-            { label: 'Today\'s Dispatches', value: '142', trend: 'increase', percentage: '12%', color: 'brand' },
-            { label: 'Today\'s Revenue', value: '$12,450', trend: 'increase', percentage: '8%', color: 'green' },
-            { label: 'Pending Deliveries', value: '24', trend: 'decrease', percentage: '5%', color: 'orange' },
-            { label: 'Cancelled Today', value: '2', trend: 'decrease', percentage: '1%', color: 'red' },
-          ].map((stat, idx) => (
+          {statConfig.map((stat, idx) => (
             <Box key={idx} className="premium-card" p="5">
               <Stat>
                 <StatLabel color="gray.500" fontSize="xs" fontWeight="700">{stat.label}</StatLabel>
@@ -66,11 +132,11 @@ const DailyReport = () => {
 
         <Box className="premium-card">
           <Box p="6" borderBottom="1px solid" borderColor="gray.50">
-             <Heading size="sm" color="secondary">Dispatch Log</Heading>
+             <Heading size="sm" color="secondary">Daily Dispatch Log</Heading>
           </Box>
           <Box overflowX="auto">
             <Table variant="simple" minW="600px">
-              <Thead bg="gray.50">
+              <Thead bg="gray.50/50">
               <Tr>
                 <Th border="none">Time</Th>
                 <Th border="none">Branch</Th>
@@ -80,23 +146,21 @@ const DailyReport = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {[
-                { time: '09:30 AM', branch: 'Downtown', products: 'iPhone 15 x 10', qty: 10, status: 'Delivered' },
-                { time: '11:15 AM', branch: 'Westside', products: 'MacBook x 5', qty: 5, status: 'In Transit' },
-                { time: '02:45 PM', branch: 'Central', products: 'Headphones x 50', qty: 50, status: 'Pending' },
-              ].map((row, idx) => (
+              {data.log.length > 0 ? data.log.map((row, idx) => (
                 <Tr key={idx}>
                   <Td borderColor="gray.100"><Text fontSize="sm" fontWeight="600">{row.time}</Text></Td>
-                  <Td borderColor="gray.100"><Text fontSize="sm">{row.branch}</Text></Td>
-                  <Td borderColor="gray.100"><Text fontSize="sm">{row.products}</Text></Td>
+                  <Td borderColor="gray.100"><Text fontSize="sm" color="gray.600">{row.branch}</Text></Td>
+                  <Td borderColor="gray.100"><Text fontSize="xs" color="brand.500" fontWeight="700">{row.products}</Text></Td>
                   <Td borderColor="gray.100"><Text fontSize="sm" fontWeight="700">{row.qty}</Text></Td>
                   <Td borderColor="gray.100">
-                    <Badge colorScheme={row.status === 'Delivered' ? 'green' : 'blue'} borderRadius="full" px="2">
+                    <Badge colorScheme={row.status === 'Received' ? 'green' : row.status === 'Dispatched' ? 'blue' : 'orange'} borderRadius="full" px="2" variant="subtle" fontSize="9px">
                       {row.status}
                     </Badge>
                   </Td>
                 </Tr>
-              ))}
+              )) : (
+                <Tr><Td colSpan="5" textAlign="center" py="10" color="gray.400">No dispatches recorded today</Td></Tr>
+              )}
             </Tbody>
           </Table>
         </Box>
@@ -106,5 +170,4 @@ const DailyReport = () => {
   );
 };
 
-import { Grid } from '@chakra-ui/react';
 export default DailyReport;

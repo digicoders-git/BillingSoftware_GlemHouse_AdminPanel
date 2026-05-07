@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -15,16 +15,18 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   useToast,
+  Spinner,
   InputGroup,
   InputRightElement,
   IconButton
 } from '@chakra-ui/react';
 import { ChevronRight, Save, X, Eye, EyeOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import API from '../utils/api';
 
-const CreateBranch = () => {
+const EditBranch = () => {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     branchId: '',
     name: '',
@@ -32,14 +34,35 @@ const CreateBranch = () => {
     manager: '',
     contact: '',
     email: '',
-    password: ''
+    password: '',
+    status: ''
   });
-  const [loading, setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
   const toast = useToast();
+
+  useEffect(() => {
+    fetchBranchDetails();
+  }, [id]);
+
+  const fetchBranchDetails = async () => {
+    try {
+      const { data } = await API.get(`/branches/${id}`);
+      setFormData(data);
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch branch details',
+        status: 'error',
+        duration: 3000,
+      });
+      navigate('/manage-branches');
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,12 +70,12 @@ const CreateBranch = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
-      await API.post('/branches', formData);
+      await API.put(`/branches/${id}`, formData);
       toast({
         title: 'Success',
-        description: 'Branch created successfully',
+        description: 'Branch updated successfully',
         status: 'success',
         duration: 3000,
         position: 'top-right'
@@ -61,21 +84,31 @@ const CreateBranch = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Failed to create branch',
+        description: error.response?.data?.message || 'Failed to update branch',
         status: 'error',
         duration: 3000,
         position: 'top-right'
       });
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <Flex justify="center" align="center" h="70vh">
+          <Spinner color="brand.500" size="xl" />
+        </Flex>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <Box>
         <Flex justify="space-between" align="center" mb="6">
           <Box>
-            <Heading size="md" color="secondary">Create New Branch</Heading>
+            <Heading size="md" color="secondary">Edit Branch: {formData.name}</Heading>
             <Breadcrumb spacing="8px" separator={<ChevronRight size={14} color="gray" />} mt="1">
               <BreadcrumbItem>
                 <BreadcrumbLink href="/" color="gray.500" fontSize="sm">Dashboard</BreadcrumbLink>
@@ -84,7 +117,7 @@ const CreateBranch = () => {
                 <BreadcrumbLink href="/manage-branches" color="gray.500" fontSize="sm">Branches</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem isCurrentPage>
-                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Create Branch</BreadcrumbLink>
+                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Edit Branch</BreadcrumbLink>
               </BreadcrumbItem>
             </Breadcrumb>
           </Box>
@@ -105,7 +138,7 @@ const CreateBranch = () => {
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Branch Code / ID</FormLabel>
-                      <Input name="branchId" value={formData.branchId} onChange={handleChange} placeholder="e.g. BR-001" h="45px" borderRadius="lg" />
+                      <Input name="branchId" value={formData.branchId} isReadOnly bg="gray.50" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={2}>
@@ -136,25 +169,24 @@ const CreateBranch = () => {
               </Box>
 
               <Box>
-                <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Login Credentials</Heading>
-                <Text fontSize="xs" color="gray.500" mb="4">These credentials will be used by the branch manager to login.</Text>
+                <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Account Credentials</Heading>
                 <Grid templateColumns="repeat(2, 1fr)" gap="6">
                   <GridItem colSpan={{ base: 2, md: 1 }}>
-                    <FormControl isRequired>
+                    <FormControl>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Email Address</FormLabel>
-                      <Input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="branch@example.com" h="45px" borderRadius="lg" />
+                      <Input value={formData.email} isReadOnly bg="gray.50" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
-                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Password</FormLabel>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Login Password</FormLabel>
                       <InputGroup size="md">
                         <Input 
                           name="password" 
                           value={formData.password} 
                           onChange={handleChange} 
                           type={showPassword ? 'text' : 'password'} 
-                          placeholder="Enter password" 
+                          placeholder="Update password" 
                           h="45px" 
                           borderRadius="lg" 
                         />
@@ -182,9 +214,9 @@ const CreateBranch = () => {
                   colorScheme="brand" 
                   leftIcon={<Save size={18} />} 
                   px="10"
-                  isLoading={loading}
+                  isLoading={saving}
                 >
-                  Save Branch
+                  Update Branch
                 </Button>
               </Flex>
             </VStack>
@@ -195,4 +227,4 @@ const CreateBranch = () => {
   );
 };
 
-export default CreateBranch;
+export default EditBranch;
