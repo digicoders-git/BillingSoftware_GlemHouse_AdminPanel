@@ -226,7 +226,7 @@ const ProductAllocation = () => {
                         </Td>
                       </Tr>
                     )) : (
-                      <Tr><Td colSpan="4" textAlign="center" py="20" color="gray.400">No matching branches found</Td></Tr>
+                      <Tr><Td colSpan="4" textAlign="center" py="20" color="gray.400">No matching Branches found</Td></Tr>
                     )}
                   </Tbody>
                 </Table>

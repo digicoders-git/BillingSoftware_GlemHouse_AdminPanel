@@ -68,3 +68,31 @@ body {
 .spin-animation {
   animation: spin 0.6s linear infinite;
 }
+
+@media print {
+  nav, .no-print, header, .sidebar-container, .navbar-container {
+    display: none !important;
+  }
+  
+  body {
+    background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .premium-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  main, .chakra-container, #root > div > div:last-child {
+    margin-left: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

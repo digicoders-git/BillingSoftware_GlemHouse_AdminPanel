@@ -17,7 +17,8 @@ import {
 } from '@chakra-ui/react';
 import { 
   Download, 
-  Calendar
+  Calendar,
+  Printer
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { 
@@ -107,13 +108,13 @@ const YearlyReport = () => {
             <Heading size="md" color="secondary">Annual Growth Report</Heading>
             <Text fontSize="sm" color="gray.500">Yearly overview for {data.year}</Text>
           </Box>
-          <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <Button size="sm" variant="outline" leftIcon={<Calendar size={16} />} flex={1}>{data.year}</Button>
+          <HStack spacing="3" w={{ base: 'full', md: 'auto' }} className="no-print">
+            <Button size="sm" variant="outline" leftIcon={<Printer size={16} />} flex={1} onClick={() => window.print()}>Print</Button>
             <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1} onClick={handleExport}>Export</Button>
           </HStack>
         </Flex>
 
-        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap="6" mb="8">
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap="6" mb="8" className="no-print">
           {statConfig.map((stat, idx) => (
             <Box key={idx} className="premium-card" p="6">
               <Stat>

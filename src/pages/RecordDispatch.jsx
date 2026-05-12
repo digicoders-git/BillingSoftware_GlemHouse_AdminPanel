@@ -48,7 +48,7 @@ const RecordDispatch = () => {
     reference: ''
   });
 
-  const [branches, setBranches] = useState([]);
+  const [Branches, setBranches] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -59,11 +59,11 @@ const RecordDispatch = () => {
 
   const fetchData = async () => {
     try {
-      const [branchesRes, productsRes] = await Promise.all([
-        API.get('/branches'),
+      const [BranchesRes, productsRes] = await Promise.all([
+        API.get('/Branches'),
         API.get('/products')
       ]);
-      setBranches(branchesRes.data.branches);
+      setBranches(BranchesRes.data.Branches);
       setProducts(productsRes.data);
       setLoading(false);
     } catch (error) {
@@ -90,15 +90,36 @@ const RecordDispatch = () => {
     const product = products.find(p => p._id === productId);
     setItems(items.map(item => 
       item.id === id 
-        ? { ...item, product: productId, name: product?.name || '', sku: product?.sku || '', price: product?.price || 0 }
+        ? { 
+            ...item, 
+            product: productId, 
+            name: product?.name || '', 
+            sku: product?.sku || '', 
+            price: product?.price || 0,
+            maxStock: product?.stock || 0
+          }
         : item
     ));
   };
 
   const handleQtyChange = (id, qty) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, qty: parseInt(qty) || 0 } : item
-    ));
+    const q = parseInt(qty) || 0;
+    setItems(items.map(item => {
+      if (item.id === id) {
+        if (q > item.maxStock) {
+          toast({
+            title: "Out of Stock",
+            description: `Only ${item.maxStock} units available in Main Warehouse.`,
+            status: "warning",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+        const validQty = Math.min(q, item.maxStock);
+        return { ...item, qty: validQty };
+      }
+      return item;
+    }));
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
@@ -127,7 +148,7 @@ const RecordDispatch = () => {
 
     setSubmitting(true);
     try {
-      await API.post('/dispatches', {
+      const response = await API.post('/dispatches', {
         ...dispatchData,
         items,
         totalItems,
@@ -140,7 +161,7 @@ const RecordDispatch = () => {
         status: "success",
         duration: 3000,
       });
-      navigate('/total-dispatch-stock');
+      navigate(`/dispatch-summary/${response.data._id}`);
     } catch (error) {
       toast({
         title: "Dispatch Failed",
@@ -198,7 +219,7 @@ const RecordDispatch = () => {
                     value={dispatchData.branch}
                     onChange={(e) => setDispatchData({...dispatchData, branch: e.target.value})}
                   >
-                    {branches.map(b => (
+                    {Branches.map(b => (
                       <option key={b._id} value={b._id}>{b.name} ({b.branchId})</option>
                     ))}
                   </Select>
@@ -300,7 +321,7 @@ const RecordDispatch = () => {
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
                             {products.map(p => (
-                              <option key={p._id} value={p._id}>{p.name}</option>
+                              <option key={p._id} value={p._id}>{p.name} ({p.sku}) — Stock: {p.stock}</option>
                             ))}
                           </Select>
                         </Td>

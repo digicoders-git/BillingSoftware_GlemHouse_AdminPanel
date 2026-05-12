@@ -31,7 +31,7 @@ import {
 import Layout from '../components/Layout';
 
 const GenerateCredentials = () => {
-  const branches = [
+  const Branches = [
     { id: 'BR001', name: 'Downtown Branch', email: 'downtown@dreamspos.com', status: 'Active', lastGenerated: '2023-10-20' },
     { id: 'BR002', name: 'Westside Hub', email: 'westside@dreamspos.com', status: 'Inactive', lastGenerated: '2023-09-15' },
     { id: 'BR003', name: 'Central Plaza', email: 'central@dreamspos.com', status: 'Active', lastGenerated: '2023-10-22' },
@@ -77,7 +77,7 @@ const GenerateCredentials = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {branches.map((branch) => (
+                {Branches.map((branch) => (
                   <Tr key={branch.id} _hover={{ bg: 'gray.50/50' }}>
                     <Td borderColor="gray.100">
                       <Text fontWeight="600" color="secondary" fontSize="sm">{branch.name}</Text>

@@ -103,19 +103,27 @@ const DailyReport = () => {
 
   return (
     <Layout>
-      <Box>
+      <Box sx={{
+        '@media print': {
+          '.no-print': { display: 'none' },
+          'nav': { display: 'none' },
+          'header': { display: 'none' },
+          '.premium-card': { boxShadow: 'none', border: 'none', p: 0 },
+          'body': { bg: 'white' }
+        }
+      }}>
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="6" gap="4">
           <Box>
             <Heading size="md" color="secondary">Daily Dispatch Report</Heading>
             <Text fontSize="sm" color="gray.500">Summary of all dispatches for today: {new Date().toLocaleDateString()}</Text>
           </Box>
-          <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <Button size="sm" variant="outline" leftIcon={<Printer size={16} />} flex={1}>Print</Button>
+          <HStack spacing="3" w={{ base: 'full', md: 'auto' }} className="no-print">
+            <Button size="sm" variant="outline" leftIcon={<Printer size={16} />} flex={1} onClick={() => window.print()}>Print</Button>
             <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1} onClick={handleExport}>Export CSV</Button>
           </HStack>
         </Flex>
 
-        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="8">
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="8" className="no-print">
           {statConfig.map((stat, idx) => (
             <Box key={idx} className="premium-card" p="5">
               <Stat>

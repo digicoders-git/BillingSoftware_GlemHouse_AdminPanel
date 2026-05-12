@@ -175,7 +175,9 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
                     {profile?.name || (localStorage.getItem('userRole') === 'branch' ? 'Branch Manager' : 'Admin User')}
                   </Text>
                   <Text fontSize="11px" color="gray.500">
-                    {profile?.role === 'admin' ? 'Super Admin' : 'Store Manager'}
+                    {profile?.role === 'admin' ? 'Super Admin' : 
+                     profile?.role === 'sales' ? 'Sales Partner' : 
+                     'Store Manager'}
                   </Text>
                 </Box>
                 <ChevronDown size={14} color="gray" />

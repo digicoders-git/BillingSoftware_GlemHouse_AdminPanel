@@ -33,6 +33,7 @@ const EditBranch = () => {
     location: '',
     manager: '',
     contact: '',
+    gstin: '',
     email: '',
     password: '',
     status: ''
@@ -50,7 +51,7 @@ const EditBranch = () => {
 
   const fetchBranchDetails = async () => {
     try {
-      const { data } = await API.get(`/branches/${id}`);
+      const { data } = await API.get(`/Branches/${id}`);
       setFormData(data);
       setLoading(false);
     } catch (error) {
@@ -60,7 +61,7 @@ const EditBranch = () => {
         status: 'error',
         duration: 3000,
       });
-      navigate('/manage-branches');
+      navigate('/manage-Branches');
     }
   };
 
@@ -72,7 +73,7 @@ const EditBranch = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await API.put(`/branches/${id}`, formData);
+      await API.put(`/Branches/${id}`, formData);
       toast({
         title: 'Success',
         description: 'Branch updated successfully',
@@ -80,7 +81,7 @@ const EditBranch = () => {
         duration: 3000,
         position: 'top-right'
       });
-      navigate('/manage-branches');
+      navigate('/manage-Branches');
     } catch (error) {
       toast({
         title: 'Error',
@@ -114,7 +115,7 @@ const EditBranch = () => {
                 <BreadcrumbLink href="/" color="gray.500" fontSize="sm">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/manage-branches" color="gray.500" fontSize="sm">Branches</BreadcrumbLink>
+                <BreadcrumbLink href="/manage-Branches" color="gray.500" fontSize="sm">Branches</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem isCurrentPage>
                 <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Edit Branch</BreadcrumbLink>
@@ -165,6 +166,12 @@ const EditBranch = () => {
                       <Input name="contact" value={formData.contact} onChange={handleChange} placeholder="Phone number" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">GSTIN (Optional)</FormLabel>
+                      <Input name="gstin" value={formData.gstin} onChange={handleChange} placeholder="e.g. 09XXXXX" h="45px" borderRadius="lg" />
+                    </FormControl>
+                  </GridItem>
                 </Grid>
               </Box>
 
@@ -206,7 +213,7 @@ const EditBranch = () => {
               </Box>
 
               <Flex justify="end" gap="3" pt="6" borderTop="1px solid" borderColor="gray.100">
-                <Button variant="outline" colorScheme="gray" leftIcon={<X size={18} />} px="8" onClick={() => navigate('/manage-branches')}>
+                <Button variant="outline" colorScheme="gray" leftIcon={<X size={18} />} px="8" onClick={() => navigate('/manage-Branches')}>
                   Cancel
                 </Button>
                 <Button 

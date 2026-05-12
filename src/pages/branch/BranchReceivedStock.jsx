@@ -19,21 +19,24 @@ import {
   VStack
 } from '@chakra-ui/react';
 import { 
-  CheckCircle, 
-  Clock, 
   ArrowDownLeft,
   Package,
-  Download
+  Download,
+  Eye,
+  CheckCircle,
+  Clock
 } from 'lucide-react';
 import Layout from '../../components/Layout';
 import API from '../../utils/api';
 import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 const BranchReceivedStock = () => {
   const [loading, setLoading] = useState(true);
   const [dispatches, setDispatches] = useState([]);
   const [updatingId, setUpdatingId] = useState(null);
   const toast = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDispatches();
@@ -125,7 +128,7 @@ const BranchReceivedStock = () => {
             <Text fontSize="sm" color="gray.500">Track shipments received from the main warehouse</Text>
           </Box>
           <HStack spacing="3">
-            <Button variant="ghost" colorScheme="brand" onClick={() => window.location.href = '/branch/manage-products'}>
+            <Button variant="ghost" colorScheme="brand" onClick={() => navigate('/branch/manage-products')}>
               View Inventory
             </Button>
             <Button leftIcon={<Download size={18} />} variant="outline" borderRadius="xl" onClick={handleExport}>
@@ -144,7 +147,7 @@ const BranchReceivedStock = () => {
                   <Th color="gray.500" border="none">Quantity</Th>
                   <Th color="gray.500" border="none">Dispatched Date</Th>
                   <Th color="gray.500" border="none">Status</Th>
-                  <Th color="gray.500" border="none">Action</Th>
+                  <Th color="gray.500" border="none" textAlign="right">Action</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -190,15 +193,27 @@ const BranchReceivedStock = () => {
                         </Badge>
                       </Td>
                       <Td borderColor="gray.100">
-                        <Button 
-                          size="xs" 
-                          colorScheme="brand" 
-                          isDisabled={row.status === 'Received'}
-                          isLoading={updatingId === row._id}
-                          onClick={() => handleVerifyStock(row._id)}
-                        >
-                          {row.status === 'Received' ? 'Verified' : 'Verify Stock'}
-                        </Button>
+                        <HStack justify="end" spacing="2">
+                          <Button 
+                            size="xs" 
+                            leftIcon={<Eye size={12} />}
+                            variant="outline"
+                            colorScheme="blue"
+                            onClick={() => navigate(`/branch/dispatch-summary/${row._id}`)}
+                          >
+                            Invoice
+                          </Button>
+                          <Button 
+                            size="xs" 
+                            colorScheme="brand" 
+                            isDisabled={row.status === 'Received'}
+                            isLoading={updatingId === row._id}
+                            onClick={() => handleVerifyStock(row._id)}
+                            leftIcon={row.status === 'Received' ? <CheckCircle size={12} /> : undefined}
+                          >
+                            {row.status === 'Received' ? 'Verified' : 'Verify Stock'}
+                          </Button>
+                        </HStack>
                       </Td>
                     </Tr>
                   ))

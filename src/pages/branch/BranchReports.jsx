@@ -144,20 +144,28 @@ const BranchReports = () => {
 
   return (
     <Layout>
-      <Box pb="10">
+      <Box pb="10" sx={{
+        '@media print': {
+          '.no-print': { display: 'none' },
+          'nav': { display: 'none' },
+          'header': { display: 'none' },
+          '.premium-card': { boxShadow: 'none', border: 'none', p: 0 },
+          'body': { bg: 'white' }
+        }
+      }}>
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="8" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="800">Advanced Analytics</Heading>
             <Text fontSize="sm" color="gray.500" fontWeight="500">Generate and export comprehensive branch reports</Text>
           </Box>
-          <HStack spacing="3">
+          <HStack spacing="3" className="no-print">
             <Button leftIcon={<FileDown size={18} />} colorScheme="green" variant="outline" borderRadius="xl" onClick={downloadCSV} isDisabled={data.length === 0}>CSV</Button>
-            <Button leftIcon={<Printer size={18} />} colorScheme="brand" borderRadius="xl" px="8" onClick={downloadPDF} isDisabled={data.length === 0}>Export PDF</Button>
+            <Button leftIcon={<Printer size={18} />} colorScheme="brand" borderRadius="xl" px="8" onClick={() => window.print()} isDisabled={data.length === 0}>Print Data</Button>
           </HStack>
         </Flex>
 
         {/* Filter Panel */}
-        <Box className="premium-card" p="6" mb="8">
+        <Box className="premium-card no-print" p="6" mb="8">
            <Grid templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }} gap="6" align="end">
               <FormControl>
                 <FormLabel fontSize="xs" fontWeight="700" color="gray.500">REPORT TYPE</FormLabel>
@@ -184,7 +192,7 @@ const BranchReports = () => {
 
         {/* Stats Summary */}
         {data.length > 0 && (
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="6" mb="8">
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="6" mb="8" className="no-print">
             <Box className="premium-card" p="6" bg="brand.50" border="1px solid" borderColor="brand.100">
                <Stat>
                   <StatLabel color="brand.600" fontWeight="700">TOTAL REVENUE</StatLabel>

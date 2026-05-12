@@ -51,7 +51,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogContent,
-  AlertDialogOverlay
+  AlertDialogOverlay,
+  Textarea,
+  Image
 } from '@chakra-ui/react';
 import { 
   Search, 
@@ -82,12 +84,15 @@ const BranchManageProducts = () => {
   const toast = useToast();
   const isLowStockView = location.pathname.includes('low-stock');
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const cancelRef = useRef();
+  const fileInputRef = useRef();
   
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [inventory, setInventory] = useState([]);
   const [stats, setStats] = useState({});
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -96,6 +101,17 @@ const BranchManageProducts = () => {
   const [adjustAction, setAdjustAction] = useState('add');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+
+  const [formData, setFormData] = useState({
+    name: '',
+    sku: '',
+    price: '',
+    stock: '',
+    category: '',
+    description: '',
+    minLevel: 5,
+    image: ''
+  });
 
   useEffect(() => {
     fetchInventory();
@@ -114,6 +130,58 @@ const BranchManageProducts = () => {
         duration: 3000,
       });
       setLoading(false);
+    }
+  };
+
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formDataObj = new FormData();
+    formDataObj.append('image', file);
+    setUploading(true);
+
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      const { data } = await API.post('/upload', formDataObj, config);
+      setFormData(prev => ({ ...prev, image: `/uploads/${data}` }));
+      setUploading(false);
+      toast({ title: "Image uploaded", status: "success" });
+    } catch (error) {
+      console.error(error);
+      setUploading(false);
+      toast({ title: "Upload failed", status: "error" });
+    }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    try {
+      await API.post('/products', formData);
+      toast({ title: "Product added successfully", status: "success" });
+      onAddClose();
+      fetchInventory();
+      setFormData({
+        name: '',
+        sku: '',
+        price: '',
+        stock: '',
+        category: '',
+        description: '',
+        minLevel: 5,
+        image: ''
+      });
+    } catch (error) {
+      toast({ 
+        title: "Failed to add product", 
+        description: error.response?.data?.message || "Check your input", 
+        status: "error" 
+      });
     }
   };
 
@@ -265,6 +333,9 @@ const BranchManageProducts = () => {
               <>
                 <Button leftIcon={<History size={16} />} variant="outline" borderRadius="xl" size="sm" onClick={() => navigate('/branch/inventory-log')}>
                   Inventory Log
+                </Button>
+                <Button leftIcon={<Plus size={16} />} colorScheme="brand" variant="outline" borderRadius="xl" size="sm" onClick={onAddOpen}>
+                  Add New Product
                 </Button>
                 <Button leftIcon={<Plus size={16} />} colorScheme="brand" borderRadius="xl" shadow="sm" px="6" size="sm" onClick={() => navigate('/branch/received-stock')}>
                   Receive Stock
@@ -595,6 +666,163 @@ const BranchManageProducts = () => {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+
+      {/* Add Product Modal */}
+      <Modal isOpen={isAddOpen} onClose={onAddClose} size="xl" isCentered>
+        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+        <form onSubmit={handleAddProduct}>
+          <ModalContent borderRadius="2xl" shadow="2xl">
+            <ModalHeader borderBottom="1px solid" borderColor="gray.100" py="6">
+               <HStack spacing="3">
+                  <Box p="2" bg="brand.50" borderRadius="xl" color="brand.500">
+                    <Package size={20} />
+                  </Box>
+                  <VStack align="start" spacing="0">
+                    <Text fontSize="sm" fontWeight="800" color="brand.500">BRANCH STOCK</Text>
+                    <Heading size="md" color="secondary">Add New Product</Heading>
+                  </VStack>
+               </HStack>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody py="8">
+              <VStack spacing="5" align="stretch">
+                 <SimpleGrid columns={2} spacing="5">
+                    <FormControl isRequired>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Product Name</FormLabel>
+                       <Input 
+                        placeholder="e.g. iPhone 15 Pro" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                       />
+                    </FormControl>
+                    <FormControl isRequired>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">SKU / Model ID</FormLabel>
+                       <Input 
+                        placeholder="e.g. APL-IP15P" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.sku}
+                        onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                       />
+                    </FormControl>
+                 </SimpleGrid>
+
+                 <SimpleGrid columns={3} spacing="5">
+                    <FormControl isRequired>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Price (₹)</FormLabel>
+                       <Input 
+                        type="number" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                       />
+                    </FormControl>
+                    <FormControl isRequired>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Initial Stock</FormLabel>
+                       <Input 
+                        type="number" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.stock}
+                        onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                       />
+                    </FormControl>
+                    <FormControl isRequired>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Min. Stock Level</FormLabel>
+                       <Input 
+                        type="number" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.minLevel}
+                        onChange={(e) => setFormData({...formData, minLevel: e.target.value})}
+                       />
+                    </FormControl>
+                 </SimpleGrid>
+
+                 <FormControl>
+                    <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Category</FormLabel>
+                    <Input 
+                      placeholder="e.g. Electronics, Furniture" 
+                      h="45px" 
+                      borderRadius="xl" 
+                      fontWeight="700" 
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    />
+                 </FormControl>
+
+                 <FormControl>
+                    <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Product Image</FormLabel>
+                    <HStack spacing="4">
+                       <Box 
+                        w="80px" 
+                        h="80px" 
+                        borderRadius="xl" 
+                        bg="gray.50" 
+                        border="2px dashed" 
+                        borderColor="gray.200"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        overflow="hidden"
+                       >
+                          {formData.image ? (
+                             <Image src={`http://localhost:5555${formData.image}`} alt="Preview" objectFit="cover" w="full" h="full" />
+                          ) : (
+                             <Icon as={Package} size={24} color="gray" />
+                          )}
+                       </Box>
+                       <VStack align="start" spacing="2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            borderRadius="lg" 
+                            leftIcon={<Plus size={14} />}
+                            onClick={() => fileInputRef.current.click()}
+                            isLoading={uploading}
+                          >
+                            Choose File
+                          </Button>
+                          <Text fontSize="10px" color="gray.400">Supported: JPG, PNG, WEBP</Text>
+                          <Input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            display="none" 
+                            onChange={uploadFileHandler}
+                          />
+                       </VStack>
+                    </HStack>
+                 </FormControl>
+
+                 <FormControl>
+                    <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Description</FormLabel>
+                    <Textarea 
+                      placeholder="Product details, specs, etc..." 
+                      borderRadius="xl" 
+                      fontWeight="500" 
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    />
+                 </FormControl>
+              </VStack>
+            </ModalBody>
+            <ModalFooter bg="gray.50/50" borderTop="1px solid" borderColor="gray.100" py="6" borderBottomRadius="2xl">
+              <Button variant="ghost" mr={3} onClick={onAddClose} borderRadius="xl">Cancel</Button>
+              <Button type="submit" colorScheme="brand" borderRadius="xl" px="8" shadow="lg" isLoading={updating}>
+                Save Product
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </form>
+      </Modal>
     </Layout>
   );
 };

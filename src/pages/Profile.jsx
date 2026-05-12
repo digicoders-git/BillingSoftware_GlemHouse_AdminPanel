@@ -222,7 +222,10 @@ const Profile = () => {
                 </Box>
                 <Heading size="md" color="secondary" fontWeight="800">{profile.name}</Heading>
                 <Text color="gray.500" fontSize="sm" fontWeight="600" mb="4">
-                   {profile.role === 'admin' ? 'System Administrator' : `${branchInfo?.name || 'Branch'} Manager`}
+                   {profile.role === 'admin' ? 'System Administrator' : 
+                    profile.role === 'sales' ? 'Sales Representative' : 
+                    profile.role === 'distributor' ? 'Authorized Distributor' :
+                    `${branchInfo?.name || 'Branch'} Manager`}
                 </Text>
                 
                 <HStack justify="center" spacing="2" mb="2">
@@ -241,7 +244,12 @@ const Profile = () => {
                     <Icon as={ShieldCheck} color="brand.500" size={18} />
                     <Box>
                       <Text fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Designation</Text>
-                      <Text fontSize="sm" fontWeight="700" color="secondary">{profile.role === 'admin' ? 'Master Admin' : 'Branch Manager'}</Text>
+                      <Text fontSize="sm" fontWeight="700" color="secondary">
+                        {profile.role === 'admin' ? 'Master Admin' : 
+                         profile.role === 'sales' ? 'Sales Partner' : 
+                         profile.role === 'distributor' ? 'Distribution Partner' :
+                         'Branch Manager'}
+                      </Text>
                     </Box>
                   </HStack>
                   <HStack spacing="4">

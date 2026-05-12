@@ -71,7 +71,7 @@ import Layout from '../components/Layout';
 import API from '../utils/api';
 
 const ManageBranches = () => {
-  const [branches, setBranches] = useState([]);
+  const [Branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -82,6 +82,10 @@ const ManageBranches = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [statusId, setStatusId] = useState(null);
   const [viewBranch, setViewBranch] = useState(null);
+  const [branchInventory, setBranchInventory] = useState([]);
+  const [branchDispatches, setBranchDispatches] = useState([]);
+  const [fetchingBranchData, setFetchingBranchData] = useState(false);
+  const [activeTab, setActiveTab] = useState('info');
   
   const { isOpen: isDelOpen, onOpen: onDelOpen, onClose: onDelClose } = useDisclosure();
   const { isOpen: isStatusOpen, onOpen: onStatusOpen, onClose: onStatusClose } = useDisclosure();
@@ -100,15 +104,15 @@ const ManageBranches = () => {
   const fetchBranches = async () => {
     setLoading(true);
     try {
-      const { data } = await API.get(`/branches?keyword=${search}&pageNumber=${page}&status=${statusFilter}`);
-      setBranches(data.branches);
+      const { data } = await API.get(`/Branches?keyword=${search}&pageNumber=${page}&status=${statusFilter}`);
+      setBranches(data.Branches);
       setTotalPages(data.pages);
       setTotal(data.total);
       setLoading(false);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch branches',
+        description: 'Failed to fetch Branches',
         status: 'error',
         duration: 3000,
       });
@@ -116,9 +120,25 @@ const ManageBranches = () => {
     }
   };
 
+  const fetchBranchData = async (branchId) => {
+    setFetchingBranchData(true);
+    try {
+      const [invRes, dispRes] = await Promise.all([
+        API.get(`/branch-inventory?branchId=${branchId}`),
+        API.get(`/dispatches?branchId=${branchId}`)
+      ]);
+      setBranchInventory(invRes.data.inventory || []);
+      setBranchDispatches(dispRes.data.dispatches || []);
+    } catch (error) {
+      toast({ title: "Bhai, error loading branch data", status: "error" });
+    } finally {
+      setFetchingBranchData(false);
+    }
+  };
+
   const handleDelete = async () => {
     try {
-      await API.delete(`/branches/${deleteId}`);
+      await API.delete(`/Branches/${deleteId}`);
       toast({
         title: 'Success',
         description: 'Branch deleted successfully',
@@ -139,7 +159,7 @@ const ManageBranches = () => {
 
   const handleStatusToggle = async () => {
     try {
-      await API.patch(`/branches/${statusId}/status`);
+      await API.patch(`/Branches/${statusId}/status`);
       toast({
         title: 'Success',
         description: 'Branch status updated',
@@ -170,10 +190,10 @@ const ManageBranches = () => {
   };
 
   const handleExport = () => {
-    if (branches.length === 0) return;
+    if (Branches.length === 0) return;
     
     const headers = ['Branch ID', 'Name', 'Location', 'Manager', 'Contact', 'Email', 'Status'];
-    const csvData = branches.map(b => [
+    const csvData = Branches.map(b => [
       b.branchId,
       b.name,
       `"${b.location}"`,
@@ -207,8 +227,8 @@ const ManageBranches = () => {
       <Box pb="10">
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
-            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Branches</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="400">View and manage all branch locations within your network</Text>
+            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Deepo</Heading>
+            <Text fontSize="sm" color="gray.500" fontWeight="400">View and manage all deepo locations within your network</Text>
           </Box>
           <Button 
             leftIcon={<Plus size={16} />} 
@@ -218,7 +238,7 @@ const ManageBranches = () => {
             shadow="sm"
             onClick={() => navigate('/create-branch')}
           >
-            Add New Branch
+            Add New Deepo
           </Button>
         </Flex>
 
@@ -226,7 +246,7 @@ const ManageBranches = () => {
           <Box p="6" borderBottom="1px solid" borderColor="gray.50" bg="gray.50/20">
             <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'stretch', md: 'center' }} gap="4">
               <HStack spacing="3">
-                 <Heading size="xs" color="secondary" fontWeight="700">Branch Directory</Heading>
+                 <Heading size="xs" color="secondary" fontWeight="700">Deepo Directory</Heading>
               </HStack>
               <HStack spacing="3">
                 <InputGroup size="sm" maxW={{ base: 'full', md: '250px' }}>
@@ -234,7 +254,7 @@ const ManageBranches = () => {
                     <Search color="gray" size={16} />
                   </InputLeftElement>
                   <Input 
-                    placeholder="Search branches..." 
+                    placeholder="Search Deepo..." 
                     borderRadius="lg" 
                     bg="white" 
                     value={search}
@@ -254,7 +274,7 @@ const ManageBranches = () => {
                     Filter: {statusFilter}
                   </MenuButton>
                   <MenuList borderRadius="xl" shadow="xl" border="none" p="1">
-                    <MenuItem fontSize="sm" fontWeight="600" onClick={() => setStatusFilter('All')}>All Branches</MenuItem>
+                    <MenuItem fontSize="sm" fontWeight="600" onClick={() => setStatusFilter('All')}>All Deepo</MenuItem>
                     <MenuDivider />
                     <MenuItem fontSize="sm" fontWeight="600" color="green.500" onClick={() => setStatusFilter('Active')}>Active Only</MenuItem>
                     <MenuItem fontSize="sm" fontWeight="600" color="red.500" onClick={() => setStatusFilter('Inactive')}>Inactive Only</MenuItem>
@@ -284,8 +304,8 @@ const ManageBranches = () => {
               <Table variant="simple">
                 <Thead bg="gray.50/50">
                   <Tr>
-                    <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Branch ID</Th>
-                    <Th color="gray.400" border="none" py="4" fontSize="10px">Branch Name</Th>
+                    <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Deepo ID</Th>
+                    <Th color="gray.400" border="none" py="4" fontSize="10px">Deepo Name</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Manager</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Contact</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Password</Th>
@@ -294,7 +314,7 @@ const ManageBranches = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {branches.length > 0 ? branches.map((branch) => (
+                  {Branches.length > 0 ? Branches.map((branch) => (
                     <Tr key={branch._id} _hover={{ bg: 'gray.50/30' }} transition="all 0.2s">
                       <Td borderColor="gray.100" py="4" px="8">
                         <Text fontWeight="700" color="brand.500" fontSize="xs">{branch.branchId}</Text>
@@ -347,7 +367,12 @@ const ManageBranches = () => {
                             variant="ghost" 
                             color="gray.400" 
                             borderRadius="full"
-                            onClick={() => { setViewBranch(branch); onViewOpen(); }}
+                            onClick={() => { 
+                              setViewBranch(branch); 
+                              fetchBranchData(branch._id);
+                              setActiveTab('info');
+                              onViewOpen(); 
+                            }}
                           />
                           <IconButton 
                             aria-label="Edit" 
@@ -372,7 +397,7 @@ const ManageBranches = () => {
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="7" textAlign="center" py="10" color="gray.500">No branches found</Td>
+                      <Td colSpan="7" textAlign="center" py="10" color="gray.500">No Deepo found</Td>
                     </Tr>
                   )}
                 </Tbody>
@@ -381,7 +406,7 @@ const ManageBranches = () => {
           </Box>
           <Box p="4" bg="gray.50/20" borderTop="1px solid" borderColor="gray.100">
              <Flex justify="space-between" align="center">
-                <Text fontSize="10px" color="gray.400" fontWeight="600">Showing {branches.length} of {total} branches</Text>
+                <Text fontSize="10px" color="gray.400" fontWeight="600">Showing {Branches.length} of {total} Deepo</Text>
                 <HStack spacing="2">
                    <Button size="xs" variant="outline" fontSize="10px" h="24px" onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}>Previous</Button>
                    <Text fontSize="xs" fontWeight="700">{page}</Text>
@@ -396,7 +421,7 @@ const ManageBranches = () => {
       <Modal isOpen={isViewOpen} onClose={onViewClose} size="lg">
         <ModalOverlay backdropFilter="blur(4px)" />
         <ModalContent borderRadius="2xl">
-          <ModalHeader color="secondary" fontWeight="800">Branch Details</ModalHeader>
+          <ModalHeader color="secondary" fontWeight="800">Deepo Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb="6">
             {viewBranch && (
@@ -408,47 +433,109 @@ const ManageBranches = () => {
                     <Text fontSize="sm" color="brand.500" fontWeight="700">{viewBranch.branchId}</Text>
                   </Box>
                 </Flex>
+
+                <HStack spacing="2" borderBottom="1px solid" borderColor="gray.100" pb="2">
+                   <Button size="xs" variant={activeTab === 'info' ? 'solid' : 'ghost'} colorScheme="brand" onClick={() => setActiveTab('info')}>General Info</Button>
+                   <Button size="xs" variant={activeTab === 'inventory' ? 'solid' : 'ghost'} colorScheme="brand" onClick={() => setActiveTab('inventory')}>Current Stock</Button>
+                   <Button size="xs" variant={activeTab === 'dispatches' ? 'solid' : 'ghost'} colorScheme="brand" onClick={() => setActiveTab('dispatches')}>Dispatch History</Button>
+                </HStack>
                 
-                <Grid templateColumns="repeat(2, 1fr)" gap="4">
-                  <GridItem>
-                    <HStack color="gray.500" mb="1">
-                      <User size={14} />
-                      <Text fontSize="xs" fontWeight="700">Manager</Text>
-                    </HStack>
-                    <Text fontSize="sm" fontWeight="600">{viewBranch.manager}</Text>
-                  </GridItem>
-                  <GridItem>
-                    <HStack color="gray.500" mb="1">
-                      <Phone size={14} />
-                      <Text fontSize="xs" fontWeight="700">Contact</Text>
-                    </HStack>
-                    <Text fontSize="sm" fontWeight="600">{viewBranch.contact}</Text>
-                  </GridItem>
-                  <GridItem colSpan={2}>
-                    <HStack color="gray.500" mb="1">
-                      <Mail size={14} />
-                      <Text fontSize="xs" fontWeight="700">Email Address</Text>
-                    </HStack>
-                    <Text fontSize="sm" fontWeight="600">{viewBranch.email}</Text>
-                  </GridItem>
-                  <GridItem colSpan={2}>
-                    <HStack color="gray.500" mb="1">
-                      <Lock size={14} />
-                      <Text fontSize="xs" fontWeight="700">Account Password</Text>
-                    </HStack>
-                    <HStack>
-                      <Text fontSize="sm" fontWeight="800" color="brand.600">{viewBranch.password}</Text>
-                      <IconButton size="xs" variant="ghost" icon={<Copy size={12} />} onClick={() => copyToClipboard(viewBranch.password)} />
-                    </HStack>
-                  </GridItem>
-                  <GridItem colSpan={2}>
-                    <HStack color="gray.500" mb="1">
-                      <MapPin size={14} />
-                      <Text fontSize="xs" fontWeight="700">Location / Address</Text>
-                    </HStack>
-                    <Text fontSize="sm" fontWeight="600">{viewBranch.location}</Text>
-                  </GridItem>
-                </Grid>
+                {fetchingBranchData ? (
+                   <Flex py="10" justify="center"><Spinner size="sm" /></Flex>
+                ) : (
+                   <>
+                      {activeTab === 'info' && (
+                         <Grid templateColumns="repeat(2, 1fr)" gap="4">
+                           <GridItem>
+                             <HStack color="gray.500" mb="1">
+                               <User size={14} />
+                               <Text fontSize="xs" fontWeight="700">Manager</Text>
+                             </HStack>
+                             <Text fontSize="sm" fontWeight="600">{viewBranch.manager}</Text>
+                           </GridItem>
+                           <GridItem>
+                             <HStack color="gray.500" mb="1">
+                               <Phone size={14} />
+                               <Text fontSize="xs" fontWeight="700">Contact</Text>
+                             </HStack>
+                             <Text fontSize="sm" fontWeight="600">{viewBranch.contact}</Text>
+                           </GridItem>
+                           <GridItem colSpan={2}>
+                             <HStack color="gray.500" mb="1">
+                               <Mail size={14} />
+                               <Text fontSize="xs" fontWeight="700">Email Address</Text>
+                             </HStack>
+                             <Text fontSize="sm" fontWeight="600">{viewBranch.email}</Text>
+                           </GridItem>
+                           <GridItem colSpan={2}>
+                             <HStack color="gray.500" mb="1">
+                               <Lock size={14} />
+                               <Text fontSize="xs" fontWeight="700">Account Password</Text>
+                             </HStack>
+                             <HStack>
+                               <Text fontSize="sm" fontWeight="800" color="brand.600">{viewBranch.password}</Text>
+                               <IconButton size="xs" variant="ghost" icon={<Copy size={12} />} onClick={() => copyToClipboard(viewBranch.password)} />
+                             </HStack>
+                           </GridItem>
+                           <GridItem colSpan={2}>
+                             <HStack color="gray.500" mb="1">
+                               <MapPin size={14} />
+                               <Text fontSize="xs" fontWeight="700">Location / Address</Text>
+                             </HStack>
+                             <Text fontSize="sm" fontWeight="600">{viewBranch.location}</Text>
+                           </GridItem>
+                         </Grid>
+                      )}
+
+                      {activeTab === 'inventory' && (
+                         <Box maxH="300px" overflowY="auto">
+                            <Table size="sm" variant="simple">
+                               <Thead bg="gray.50">
+                                  <Tr>
+                                     <Th fontSize="10px">Product</Th>
+                                     <Th fontSize="10px">Stock</Th>
+                                     <Th fontSize="10px">Status</Th>
+                                  </Tr>
+                               </Thead>
+                               <Tbody>
+                                  {branchInventory.length > 0 ? branchInventory.map((item, idx) => (
+                                     <Tr key={idx}>
+                                        <Td><Text fontWeight="700" fontSize="xs">{item.name}</Text></Td>
+                                        <Td><Text fontWeight="800" color="brand.500" fontSize="xs">{item.stock} Units</Text></Td>
+                                        <Td><Badge colorScheme={item.stock > 10 ? 'green' : 'orange'} fontSize="9px">{item.status}</Badge></Td>
+                                     </Tr>
+                                  )) : <Tr><Td colSpan="3" textAlign="center" py="4">No stock in this deepo</Td></Tr>}
+                               </Tbody>
+                            </Table>
+                         </Box>
+                      )}
+
+                      {activeTab === 'dispatches' && (
+                         <Box maxH="300px" overflowY="auto">
+                            <Table size="sm" variant="simple">
+                               <Thead bg="gray.50">
+                                  <Tr>
+                                     <Th fontSize="10px">Invoice</Th>
+                                     <Th fontSize="10px">Date</Th>
+                                     <Th fontSize="10px">Items</Th>
+                                     <Th fontSize="10px">Status</Th>
+                                  </Tr>
+                               </Thead>
+                               <Tbody>
+                                  {branchDispatches.length > 0 ? branchDispatches.map((disp, idx) => (
+                                     <Tr key={idx}>
+                                        <Td><Text fontWeight="700" fontSize="xs">{disp.invoiceNo}</Text></Td>
+                                        <Td><Text fontSize="xs">{new Date(disp.date).toLocaleDateString()}</Text></Td>
+                                        <Td><Text fontWeight="700" fontSize="xs">{disp.totalItems}</Text></Td>
+                                        <Td><Badge size="sm" colorScheme={disp.status === 'Received' ? 'green' : 'orange'} fontSize="9px">{disp.status}</Badge></Td>
+                                     </Tr>
+                                  )) : <Tr><Td colSpan="4" textAlign="center" py="4">No dispatch history</Td></Tr>}
+                               </Tbody>
+                            </Table>
+                         </Box>
+                      )}
+                   </>
+                )}
                 
                 <Divider />
                 
@@ -479,11 +566,11 @@ const ManageBranches = () => {
         <AlertDialogOverlay>
           <AlertDialogContent borderRadius="xl">
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Branch
+              Delete Deepo
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure? You can't undo this action afterwards. This will also delete the branch manager's login account.
+              Are you sure? You can't undo this action afterwards. This will also delete the deepo manager's login account.
             </AlertDialogBody>
 
             <AlertDialogFooter>
@@ -511,8 +598,8 @@ const ManageBranches = () => {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure you want to change the status of this branch? 
-              Inactive branches will not be able to login to their panel.
+              Are you sure you want to change the status of this deepo? 
+              Inactive Deepos will not be able to login to their panel.
             </AlertDialogBody>
 
             <AlertDialogFooter>

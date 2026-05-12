@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react'; // Optimized imports
 import { 
   Box, 
   Flex, 
@@ -7,44 +7,38 @@ import {
   Button, 
   HStack, 
   VStack, 
-  Icon, 
   Badge, 
-  Divider, 
-  Grid, 
-  GridItem,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Avatar,
-  Spinner,
-  useToast
-} from '@chakra-ui/react';
+  Avatar, 
+  Spinner, 
+  useToast, 
+  Tag} from '@chakra-ui/react';
 import { 
   ArrowLeft, 
   Printer, 
-  Download, 
-  Calendar, 
-  Truck, 
-  CheckCircle,
-  MapPin,
-  User,
-  Phone,
-  Mail
+  Download
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useNavigate, useParams } from 'react-router-dom';
 import API from '../utils/api';
+import { useReactToPrint } from 'react-to-print';
+import { numberToWords } from '../utils/pdfTemplate';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const DispatchSummary = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const toast = useToast();
+  const printRef = useRef();
   
   const [dispatch, setDispatch] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Invoice_${dispatch?.invoiceNo || 'Dispatch'}`,
+  });
 
   useEffect(() => {
     fetchDispatchDetails();
@@ -65,12 +59,41 @@ const DispatchSummary = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Received': return 'green';
-      case 'Dispatched': return 'blue';
-      case 'Pending': return 'orange';
-      default: return 'gray';
+  const handleDownloadPDF = async () => {
+    if (!printRef.current) return;
+    
+    setIsGeneratingPDF(true);
+    try {
+      const element = printRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff"
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${dispatch.invoiceNo}.pdf`);
+      
+      toast({
+        title: "PDF Downloaded",
+        status: "success",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error("PDF Generation Error:", error);
+      toast({
+        title: "PDF Download Failed",
+        status: "error",
+        duration: 3000,
+      });
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -84,6 +107,8 @@ const DispatchSummary = () => {
     );
   }
 
+  const amountInWords = numberToWords(dispatch.totalAmount || dispatch.totalValue || 0);
+
   return (
     <Layout>
       <Box pb="10">
@@ -94,130 +119,227 @@ const DispatchSummary = () => {
                <Text fontSize="sm" fontWeight="700">Back to List</Text>
             </HStack>
             <HStack spacing="4">
-              <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">Dispatch Summary</Heading>
-              <Badge colorScheme={getStatusColor(dispatch.status)} borderRadius="full" px="3" py="1" variant="subtle" fontSize="10px" fontWeight="800">
+              <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">
+                Invoice Summary
+              </Heading>
+              <Badge colorScheme={dispatch.status === 'Received' ? 'green' : 'blue'} borderRadius="full" px="3" py="1" variant="subtle" fontSize="10px" fontWeight="800">
                 {dispatch.status}
               </Badge>
             </HStack>
-            <Text color="gray.500" fontWeight="500" mt="1">Transaction Ref: {dispatch.reference || `DSP-${dispatch._id.slice(-6).toUpperCase()}`}</Text>
           </Box>
           <HStack spacing="3">
-            <Button leftIcon={<Printer size={16} />} variant="outline" borderRadius="xl">Print Summary</Button>
-            <Button leftIcon={<Download size={16} />} colorScheme="brand" borderRadius="xl">Export Invoice</Button>
+            <Button 
+                leftIcon={<Printer size={16} />} 
+                variant="outline" 
+                borderRadius="xl"
+                onClick={() => handlePrint()}
+            >
+                Print Invoice
+            </Button>
+            <Button 
+                leftIcon={<Download size={16} />} 
+                colorScheme="brand" 
+                borderRadius="xl"
+                onClick={handleDownloadPDF}
+                isLoading={isGeneratingPDF}
+                loadingText="Generating..."
+            >
+                Download PDF
+            </Button>
           </HStack>
         </Flex>
 
-        <Grid templateColumns={{ base: "1fr", lg: "repeat(3, 1fr)" }} gap="8">
-          <GridItem colSpan={{ base: 3, lg: 2 }}>
-             <Box className="premium-card" p="0" overflow="hidden">
-                <Box p="8" borderBottom="1px solid" borderColor="gray.50">
-                   <Heading size="sm" color="secondary" mb="6">Consignment Items</Heading>
-                   <Table variant="simple">
-                      <Thead bg="gray.50/50">
-                         <Tr>
-                            <Th color="gray.400" border="none" py="4">Product Name</Th>
-                            <Th color="gray.400" border="none" py="4">SKU Code</Th>
-                            <Th color="gray.400" border="none" py="4">Unit Price</Th>
-                            <Th color="gray.400" border="none" py="4">Quantity</Th>
-                            <Th color="gray.400" border="none" py="4" textAlign="right">Subtotal</Th>
-                         </Tr>
-                      </Thead>
-                      <Tbody>
-                         {dispatch.items.map((item, idx) => (
-                            <Tr key={idx}>
-                               <Td borderColor="gray.100" py="4">
-                                  <Text fontWeight="700" color="secondary" fontSize="xs">{item.name}</Text>
-                               </Td>
-                               <Td borderColor="gray.100"><Text fontSize="10px" color="brand.500" fontWeight="800">{item.sku}</Text></Td>
-                               <Td borderColor="gray.100"><Text fontSize="xs" color="gray.600">₹{item.price}</Text></Td>
-                               <Td borderColor="gray.100"><Text fontSize="xs" fontWeight="800" color="secondary">{item.qty}</Text></Td>
-                               <Td borderColor="gray.100" textAlign="right"><Text fontWeight="900" color="secondary">₹{(item.qty * item.price).toLocaleString()}</Text></Td>
-                            </Tr>
-                         ))}
-                      </Tbody>
-                   </Table>
-                </Box>
-                <Box p="8" bg="gray.50/30">
-                   <Flex justify="end">
-                      <VStack align="end" spacing="4" w="300px">
-                         <Flex justify="space-between" w="full">
-                            <Text fontSize="xs" fontWeight="700" color="gray.400">TOTAL UNITS</Text>
-                            <Text fontSize="sm" fontWeight="800" color="secondary">{dispatch.totalItems}</Text>
-                         </Flex>
-                         <Divider />
-                         <Flex justify="space-between" w="full">
-                            <Text fontSize="sm" fontWeight="800" color="secondary">GRAND TOTAL</Text>
-                            <Text fontSize="xl" fontWeight="900" color="brand.500">₹{dispatch.totalValue.toLocaleString()}</Text>
-                         </Flex>
-                      </VStack>
-                   </Flex>
-                </Box>
-             </Box>
-          </GridItem>
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          bg="gray.100" 
+          p={{ base: 2, md: 10 }} 
+          borderRadius="3xl"
+        >
+          {/* INVOICE REPLICA START - MATCHING pdfTemplate.js */}
+          <Box 
+            ref={printRef}
+            bg="white"
+            w="800px"
+            minH="1000px"
+            border="2px solid #000"
+            color="#000"
+            fontFamily="'Arial', sans-serif"
+            position="relative"
+            sx={{
+              "@media print": {
+                boxShadow: "none",
+                border: "2px solid #000 !important",
+                m: "0",
+                p: "0",
+                width: "100% !important",
+                height: "auto",
+                WebkitPrintColorAdjust: "exact",
+                printColorAdjust: "exact",
+              },
+              "& *": { boxSizing: "border-box" }
+            }}
+          >
+            {/* Watermark Logic from pdfTemplate.js */}
+            <Box 
+              position="absolute" 
+              top="35%" 
+              left="10%" 
+              width="80%" 
+              opacity="0.1" 
+              transform="rotate(-30deg)" 
+              zIndex="0" 
+              pointerEvents="none" 
+              textAlign="center"
+              sx={{
+                 "@media print": {
+                    opacity: "0.12 !important",
+                    display: "block !important"
+                 }
+              }}
+            >
+               <img src="/main.png" alt="" style={{ width: '70%', height: 'auto', margin: '0 auto' }} />
+            </Box>
 
-          <GridItem colSpan={{ base: 3, lg: 1 }}>
-             <VStack spacing="8" align="stretch">
-                <Box className="premium-card" p="8">
-                   <Heading size="xs" color="gray.400" textTransform="uppercase" letterSpacing="1px" mb="6">Recipient Details</Heading>
-                   <VStack align="start" spacing="5">
-                      <HStack spacing="4">
-                         <Avatar size="md" name={dispatch.branch?.name} bg="secondary" color="white" />
-                         <Box>
-                            <Text fontWeight="800" color="secondary" fontSize="md">{dispatch.branch?.name}</Text>
-                            <Text fontSize="xs" color="brand.500" fontWeight="700">{dispatch.branch?.branchId}</Text>
-                         </Box>
-                      </HStack>
-                      <Divider />
-                      <VStack align="start" spacing="3" w="full">
-                         <HStack color="gray.600">
-                            <Icon as={User} size={14} />
-                            <Text fontSize="xs" fontWeight="600">{dispatch.branch?.manager}</Text>
-                         </HStack>
-                         <HStack color="gray.600">
-                            <Icon as={Phone} size={14} />
-                            <Text fontSize="xs" fontWeight="600">{dispatch.branch?.contact}</Text>
-                         </HStack>
-                         <HStack color="gray.600">
-                            <Icon as={Mail} size={14} />
-                            <Text fontSize="xs" fontWeight="600">{dispatch.branch?.email}</Text>
-                         </HStack>
-                         <HStack color="gray.600" align="start">
-                            <Icon as={MapPin} size={14} mt="1" />
-                            <Text fontSize="xs" fontWeight="600">{dispatch.branch?.location}</Text>
-                         </HStack>
-                      </VStack>
-                   </VStack>
-                </Box>
+            {/* Top Pan */}
+            <Flex justify="space-between" borderBottom="2px solid #000" p="8px 15px" fontWeight="950" fontSize="13px" position="relative" zIndex="1" bg="white">
+              <Text>GSTIN: 09AAACG1234H1Z5</Text>
+              <Text>{dispatch.billingType === 'With GST' ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION'}</Text>
+            </Flex>
 
-                <Box className="premium-card" p="8">
-                   <Heading size="xs" color="gray.400" textTransform="uppercase" letterSpacing="1px" mb="6">Shipping Information</Heading>
-                   <VStack align="stretch" spacing="4">
-                      <Box>
-                         <Text fontSize="10px" fontWeight="800" color="gray.400" mb="1">TRANSPORT METHOD</Text>
-                         <HStack color="secondary">
-                            <Truck size={16} />
-                            <Text fontSize="sm" fontWeight="700">{dispatch.method}</Text>
-                         </HStack>
-                      </Box>
-                      <Box>
-                         <Text fontSize="10px" fontWeight="800" color="gray.400" mb="1">DISPATCH DATE</Text>
-                         <HStack color="secondary">
-                            <Calendar size={16} />
-                            <Text fontSize="sm" fontWeight="700">{new Date(dispatch.date).toDateString()}</Text>
-                         </HStack>
-                      </Box>
-                      <Box>
-                         <Text fontSize="10px" fontWeight="800" color="gray.400" mb="1">LAST UPDATED</Text>
-                         <HStack color="secondary">
-                            <CheckCircle size={16} />
-                            <Text fontSize="sm" fontWeight="700">{new Date(dispatch.updatedAt).toLocaleString()}</Text>
-                         </HStack>
-                      </Box>
-                   </VStack>
-                </Box>
-             </VStack>
-          </GridItem>
-        </Grid>
+            {/* Header */}
+            <VStack spacing="0" p="15px 15px" borderBottom="2px solid #000" textAlign="center" position="relative" zIndex="1" bg="white">
+               <Text fontSize="32px" fontWeight="950" letterSpacing="2px" mb="1" mt="1" lineHeight="1">GLEM HOUSE</Text>
+               <VStack spacing="0" fontSize="10px" fontWeight="700">
+                 <Text>PREMIUM KITCHEN APPLIANCES & ELECTRONICS</Text>
+                 <Text>LUCKNOW, UTTAR PRADESH</Text>
+                 <Text>SUPPORT: contact@glemhouse.com</Text>
+               </VStack>
+            </VStack>
+
+            {/* Info Section */}
+            <Flex borderBottom="2px solid #000" minH="120px" position="relative" zIndex="1" bg="white">
+              <Box w="60%" borderRight="2px solid #000" p="12px 15px">
+                <Text fontWeight="950" textDecoration="underline" textAlign="center" mb="12px" fontSize="14px" textTransform="uppercase">Detail of Receiver / Consignee</Text>
+                <VStack align="start" spacing="2" fontWeight="900" fontSize="13px">
+                  <HStack spacing="2">
+                    <Text w="90px">Name :</Text>
+                    <Text>{(dispatch.receiverBranch?.name || dispatch.receiverSalesRep?.name || dispatch.receiverDistributor?.name || 'N/A').toUpperCase()}</Text>
+                  </HStack>
+                  <HStack spacing="2">
+                    <Text w="90px">Contact :</Text>
+                    <Text>{dispatch.receiverBranch?.contact || dispatch.receiverSalesRep?.contact || dispatch.receiverDistributor?.contact || 'N/A'}</Text>
+                  </HStack>
+                  <HStack spacing="2" align="start">
+                    <Text w="90px">Address :</Text>
+                    <Text>{(dispatch.receiverBranch?.location || dispatch.receiverSalesRep?.location || dispatch.receiverDistributor?.location || 'AS PER RECORDS').toUpperCase()}</Text>
+                  </HStack>
+                  <HStack spacing="2">
+                    <Text w="90px">ID :</Text>
+                    <Text>{dispatch.receiverBranch?.branchId || dispatch.receiverSalesRep?.salesId || dispatch.receiverDistributor?.distributorId || 'N/A'}</Text>
+                  </HStack>
+                </VStack>
+              </Box>
+              <Box w="40%" p="12px 15px" fontWeight="800">
+                <VStack align="start" spacing="2" mt="15px" fontSize="13px">
+                  <HStack><Text w="95px">Invoice No. :</Text><Text fontSize="14px" fontWeight="950">{dispatch.invoiceNo || 'N/A'}</Text></HStack>
+                  <HStack><Text w="95px">Date :</Text><Text>{new Date(dispatch.date).toLocaleDateString('en-GB')}</Text></HStack>
+                  <HStack><Text w="95px">Tracking ID :</Text><Text fontSize="11px">{dispatch.trackingCode}</Text></HStack>
+                </VStack>
+              </Box>
+            </Flex>
+
+            {/* Main Table */}
+            <Box position="relative" zIndex="1" bg="white">
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                <thead>
+                  <tr style={{ background: '#f0f0f0', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '8%', fontWeight: '950', fontSize: '13px' }}>S. NO.</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '45%', fontWeight: '950', fontSize: '13px' }}>Description</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>Unit</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>Qty.</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '12%', fontWeight: '950', fontSize: '13px' }}>Rate</th>
+                    <th style={{ borderBottom: '2px solid #000', padding: '12px 8px', width: '15%', fontWeight: '950', fontSize: '13px' }}>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dispatch.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{idx + 1}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', fontWeight: '900' }}>{item.name}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>NOS</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '950' }}>{item.qty}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900' }}>₹{(item.price || 0).toLocaleString('en-IN')}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '950' }}>₹{((item.qty || 0) * (item.price || 0)).toLocaleString('en-IN')}</td>
+                    </tr>
+                  ))}
+                  {/* Filler rows */}
+                  {[...Array(Math.max(0, 5 - dispatch.items.length))].map((_, i) => (
+                    <tr key={`empty-${i}`} style={{ height: '30px' }}>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000' }}></td>
+                    </tr>
+                  ))}
+                  {/* Spacer for bottom items */}
+                  <tr style={{ height: '40px' }}>
+                    <td style={{ borderRight: '2px solid #000' }}></td>
+                    <td style={{ borderRight: '2px solid #000' }}></td>
+                    <td style={{ borderRight: '2px solid #000' }}></td>
+                    <td style={{ borderRight: '2px solid #000' }}></td>
+                    <td style={{ borderRight: '2px solid #000' }}></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </Box>
+
+            {/* Totals Section */}
+            <Box position="relative" zIndex="1" bg="white">
+               <Flex justify="flex-end" borderTop="2px solid #000">
+                  <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>SUBTOTAL</Box>
+                  <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
+                    ₹{(dispatch.taxableAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
+                  </Box>
+               </Flex>
+               {dispatch.billingType === 'With GST' && (
+                 <Flex justify="flex-end">
+                    <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TAX ({dispatch.gstRate}%)</Box>
+                    <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
+                       ₹{(dispatch.gstAmount || 0).toLocaleString('en-IN')}
+                    </Box>
+                 </Flex>
+               )}
+               <Flex justify="flex-end">
+                  <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>GRAND TOTAL</Box>
+                  <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
+                    ₹{(dispatch.totalAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
+                  </Box>
+               </Flex>
+            </Box>
+
+            {/* Amount in words */}
+            <Box borderBottom="2px solid #000" p="12px 15px" fontWeight="950" textTransform="uppercase" fontSize="13px" position="relative" zIndex="1" bg="white">
+               Total Amount (in words) : RUPEES {amountInWords}
+            </Box>
+
+            {/* Footer Section */}
+            <Flex justify="space-between" align="flex-end" p="15px 15px 20px 15px" mt="auto" position="relative" zIndex="1" bg="white">
+               <Box fontSize="10px" fontWeight="800">
+                  E. & O. E.<br />
+                  Subject to Lucknow Jurisdiction.
+               </Box>
+               <Box textAlign="right" fontWeight="900">
+                  <Text fontSize="11px" mb="1">For <strong>GLEM HOUSE</strong></Text>
+                  <Box h="50px" />
+                  <Text fontSize="12px" borderTop="2.5px solid #000" pt="6px" display="inline-block" minW="200px" textAlign="center">Authorized Signatory</Text>
+               </Box>
+            </Flex>
+          </Box>
+        </Box>
       </Box>
     </Layout>
   );

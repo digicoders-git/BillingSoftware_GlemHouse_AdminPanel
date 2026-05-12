@@ -18,7 +18,8 @@ import {
 } from '@chakra-ui/react';
 import { 
   Download, 
-  Calendar
+  Calendar,
+  Printer
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { 
@@ -109,13 +110,13 @@ const MonthlyReport = () => {
             <Heading size="md" color="secondary">Monthly Performance Report</Heading>
             <Text fontSize="sm" color="gray.500">Analytics for {data.monthName}</Text>
           </Box>
-          <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
-            <Button size="sm" variant="outline" leftIcon={<Calendar size={16} />} flex={1}>Select Month</Button>
+          <HStack spacing="3" w={{ base: 'full', md: 'auto' }} className="no-print">
+            <Button size="sm" variant="outline" leftIcon={<Printer size={16} />} flex={1} onClick={() => window.print()}>Print</Button>
             <Button size="sm" colorScheme="brand" leftIcon={<Download size={16} />} flex={1} onClick={handleExport}>Export</Button>
           </HStack>
         </Flex>
 
-        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="8">
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="8" className="no-print">
           {statConfig.map((stat, idx) => (
             <Box key={idx} className="premium-card" p="5">
               <Stat>

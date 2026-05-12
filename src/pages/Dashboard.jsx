@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Grid, 
@@ -12,7 +12,13 @@ import {
   VStack,
   Button,
   Spinner,
-  useToast
+  useToast,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td
 } from '@chakra-ui/react';
 import { 
   TrendingUp, 
@@ -22,8 +28,11 @@ import {
   Building,
   Package,
   Truck,
-  Activity,
-  Calendar
+  Calendar,
+  Users,
+  ArrowRightLeft,
+  LayoutGrid,
+  AlertTriangle
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -128,7 +137,7 @@ const Dashboard = () => {
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Master Control Dashboard</Heading>
              <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
-                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats.totalBranches} Branches</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats.todaySales} New Sales</Text> recorded today
+                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Deepo</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Sales</Text> recorded today
              </Text>
           </Box>
           <Box bg="white" p="2" borderRadius="xl" shadow="sm" border="1px solid" borderColor="gray.100">
@@ -139,47 +148,102 @@ const Dashboard = () => {
           </Box>
         </Flex>
 
-        {/* Top Colored Stats */}
-        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" }} gap="6" mb="10">
+        {/* Top Colored Stats - Row 1: Stock & Movement */}
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap="6" mb="6">
           <ColoredStatCard 
-            title="Total Network Revenue" 
-            value={data.stats.totalRevenue >= 1000 
-              ? `₹${(data.stats.totalRevenue / 1000).toFixed(1)}k` 
-              : `₹${data.stats.totalRevenue.toLocaleString()}`} 
+            title="Total Main Stock" 
+            value={(data.stats?.mainStock || 0) >= 1000 
+              ? `${((data.stats?.mainStock || 0) / 1000).toFixed(1)}k Units` 
+              : `${data.stats?.mainStock || 0} Units`} 
+            icon={Package} 
+            trend="up" 
+            trendValue="In Warehouse"
+            color="brand" 
+            onClick={() => navigate('/admin/inventory')}
+          />
+          <ColoredStatCard 
+            title="Total Out Products" 
+            value={(data.stats?.totalUnitsDispatched || 0) >= 1000 
+              ? `${((data.stats?.totalUnitsDispatched || 0) / 1000).toFixed(1)}k Units` 
+              : `${data.stats?.totalUnitsDispatched || 0} Units`} 
+            icon={ArrowRightLeft} 
+            trend="up" 
+            trendValue={`${data.stats?.activeTransfers || 0} Pending`}
+            color="orange" 
+            onClick={() => navigate('/admin/inventory-logs')}
+          />
+          <ColoredStatCard 
+            title="Network Revenue" 
+            value={(data.stats?.totalRevenue || 0) >= 100000 
+              ? `₹${((data.stats?.totalRevenue || 0) / 100000).toFixed(1)}L` 
+              : `₹${(data.stats?.totalRevenue || 0).toLocaleString()}`} 
             icon={TrendingUp} 
             trend="up" 
-            trendValue="Active"
+            trendValue={`${data.stats?.totalSalesCount || 0} Sales`}
             color="green" 
             onClick={() => navigate('/reports/daily')}
           />
+        </Grid>
+
+        {/* Top Colored Stats - Row 2: Entities */}
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap="6" mb="10">
           <ColoredStatCard 
-            title="Total Retail Sales" 
-            value={`${data.stats.totalSalesCount} Invoices`} 
-            icon={Activity} 
+            title="Total Deepo" 
+            value={`${data.stats?.totalBranches || 0} Locations`} 
+            icon={Building} 
             trend="up" 
-            trendValue={`${data.stats.todaySales} New`}
-            color="brand" 
-            onClick={() => navigate('/reports/daily')}
+            trendValue="Active"
+            color="blue" 
+            onClick={() => navigate('/manage-branches')}
           />
           <ColoredStatCard 
-            title="Stock Units Dispatched" 
-            value={data.stats.totalUnitsDispatched >= 1000 
-              ? `${(data.stats.totalUnitsDispatched / 1000).toFixed(1)}k Units` 
-              : `${data.stats.totalUnitsDispatched} Units`} 
-            icon={Package} 
+            title="Total Sales Team" 
+            value={`${data.stats?.totalSalesReps || 0} Members`} 
+            icon={Users} 
             trend="up" 
-            trendValue="Network"
-            color="secondary" 
-            onClick={() => navigate('/total-dispatch-stock')}
+            trendValue="Field Staff"
+            color="purple" 
+            onClick={() => navigate('/manage-sales')}
           />
           <ColoredStatCard 
-            title="Pending Transfers" 
-            value={`${data.stats.activeTransfers} Loads`} 
+            title="Total Distributors" 
+            value={`${data.stats?.totalDistributors || 0} Partners`} 
             icon={Truck} 
             trend="up" 
-            trendValue="In Transit"
-            color="blue" 
-            onClick={() => navigate('/product-movement')}
+            trendValue="Logistics"
+            color="teal" 
+            onClick={() => navigate('/manage-distributors')}
+          />
+        </Grid>
+
+        {/* Top Colored Stats - Row 3: Catalog Stats */}
+        <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap="6" mb="10">
+          <ColoredStatCard 
+            title="Product Varieties" 
+            value={`${data.stats?.totalProductTypes || 0} Types`} 
+            icon={Package} 
+            trend="up" 
+            trendValue="Unique Items"
+            color="orange" 
+            onClick={() => navigate('/admin/products')}
+          />
+          <ColoredStatCard 
+            title="Product Categories" 
+            value={`${data.stats?.totalCategories || 0} Categories`} 
+            icon={LayoutGrid} 
+            trend="up" 
+            trendValue="Classification"
+            color="pink" 
+            onClick={() => navigate('/admin/products')}
+          />
+          <ColoredStatCard 
+            title="Low Stock Warning" 
+            value={`${data.stats?.mainStock <= 10 ? 'CRITICAL' : 'STABLE'}`} 
+            icon={AlertTriangle} 
+            trend={data.stats?.mainStock <= 10 ? 'down' : 'up'} 
+            trendValue="Warehouse"
+            color={data.stats?.mainStock <= 10 ? 'red' : 'green'} 
+            onClick={() => navigate('/admin/inventory')}
           />
         </Grid>
 
@@ -251,6 +315,52 @@ const Dashboard = () => {
             </Box>
           </GridItem>
         </Grid>
+        {/* Low Stock Alerts Section */}
+        {data.stats?.lowStockItems?.length > 0 && (
+          <Box className="premium-card" p="6" mt="8" borderColor="orange.200" bg="orange.50/10">
+            <Flex justify="space-between" align="center" mb="6">
+              <HStack spacing="3">
+                <Box bg="orange.100" p="2.5" borderRadius="xl" color="orange.600">
+                  <AlertTriangle size={22} />
+                </Box>
+                <VStack align="start" spacing="0">
+                  <Heading size="md" color="secondary" fontWeight="800">Low Stock Inventory Alerts</Heading>
+                  <Text fontSize="xs" color="gray.500" fontWeight="500">Critical items that need replenishment in Main Warehouse</Text>
+                </VStack>
+              </HStack>
+              <Button size="sm" colorScheme="orange" variant="ghost" rightIcon={<ArrowUpRight size={14} />} onClick={() => navigate('/admin/inventory')}>
+                Manage Inventory
+              </Button>
+            </Flex>
+
+            <Box overflowX="auto">
+               <Table variant="simple" size="sm">
+                  <Thead>
+                     <Tr>
+                        <Th color="gray.400" fontSize="10px" borderBottomWidth="1px">Product Name</Th>
+                        <Th color="gray.400" fontSize="10px" borderBottomWidth="1px">Category</Th>
+                        <Th color="gray.400" fontSize="10px" borderBottomWidth="1px">Current Stock</Th>
+                        <Th color="gray.400" fontSize="10px" borderBottomWidth="1px">Min Level</Th>
+                        <Th color="gray.400" fontSize="10px" borderBottomWidth="1px" textAlign="right">Status</Th>
+                     </Tr>
+                  </Thead>
+                  <Tbody>
+                     {data.stats.lowStockItems.map((item, idx) => (
+                        <Tr key={idx} _hover={{ bg: 'white' }}>
+                           <Td py="4"><Text fontWeight="700" color="secondary">{item.name}</Text></Td>
+                           <Td py="4"><Badge colorScheme="gray" variant="subtle" borderRadius="md" px="2">{item.category || 'N/A'}</Badge></Td>
+                           <Td py="4"><Text fontWeight="800" color="orange.600">{item.stock} Units</Text></Td>
+                           <Td py="4"><Text fontWeight="600" color="gray.500">{item.minLevel}</Text></Td>
+                           <Td py="4" textAlign="right">
+                              <Badge colorScheme="red" variant="solid" fontSize="9px" borderRadius="full" px="3">REPLENISH</Badge>
+                           </Td>
+                        </Tr>
+                     ))}
+                  </Tbody>
+               </Table>
+            </Box>
+          </Box>
+        )}
       </Box>
     </Layout>
   );

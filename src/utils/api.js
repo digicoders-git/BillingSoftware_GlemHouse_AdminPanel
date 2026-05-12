@@ -18,12 +18,18 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token and user info
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
-      // Force redirect to login
-      window.location.href = '/login';
+      // Don't redirect if we're already on the login page or trying to login
+      const isLoginRequest = error.config.url.includes('/auth/login');
+      const isLoginPage = window.location.pathname === '/login';
+
+      if (!isLoginRequest && !isLoginPage) {
+        // Clear token and user info
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Force redirect to login
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

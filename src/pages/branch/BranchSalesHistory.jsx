@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -19,12 +19,13 @@ import {
   Grid,
   Spinner,
   useToast,
-  VStack
+  VStack,
+  Avatar,
+  Select
 } from '@chakra-ui/react';
 import { 
   Search, 
   Download, 
-  Calendar, 
   Receipt,
   User,
   ShoppingBag,
@@ -40,6 +41,7 @@ const BranchSalesHistory = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ sales: [], stats: {} });
   const [searchTerm, setSearchTerm] = useState('');
+  const [sellerTypeFilter, setSellerTypeFilter] = useState('');
   const toast = useToast();
 
   useEffect(() => {
@@ -60,9 +62,11 @@ const BranchSalesHistory = () => {
   const handleExport = () => {
     if (data.sales.length === 0) return;
     
-    const headers = ['Invoice ID', 'Products', 'Customer Name', 'Qty Sold', 'Total Amount', 'Date', 'Time'];
+    const headers = ['Invoice ID', 'Seller Type', 'Seller Name', 'Products', 'Customer Name', 'Qty Sold', 'Total Amount', 'Date', 'Time'];
     const csvData = data.sales.map(s => [
       s.invoiceId,
+      s.sellerType || 'N/A',
+      s.seller,
       `"${s.products}"`,
       s.customerName,
       s.totalQty,
@@ -95,13 +99,14 @@ const BranchSalesHistory = () => {
     const billData = {
       billNo: row.invoiceId,
       clientName: row.customerName,
-      clientPhone: 'N/A', // If not available in row
+      clientPhone: row.customerPhone || 'N/A',
       clientAddress: 'AS PER RECORDS',
       items: row.items || [],
-      subTotal: row.totalAmount, // Assuming no tax/discount was tracked separately in this specific history view
-      totalTax: 0,
+      subTotal: row.taxableAmount || row.totalAmount,
+      totalTax: row.gstAmount || 0,
+      taxPercentage: row.gstRate || 0,
       totalAmount: row.totalAmount,
-      isGstEnabled: false, // Fallback if no specific GST record is found
+      isGstEnabled: row.billingType === 'With GST',
       createdAt: row.date
     };
     
@@ -114,11 +119,16 @@ const BranchSalesHistory = () => {
     }
   };
 
-  const filteredSales = data.sales.filter(s => 
-    s.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.products.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSales = data.sales.filter(s => {
+    const matchesSearch = s.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          s.products.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // We need to make sure the backend returns sellerType or we check s.sellerType
+    const matchesType = !sellerTypeFilter || s.sellerType === sellerTypeFilter;
+    
+    return matchesSearch && matchesType;
+  });
 
   if (loading) {
     return (
@@ -196,20 +206,37 @@ const BranchSalesHistory = () => {
           <Box p="4" borderBottom="1px solid" borderColor="gray.50">
             <Flex direction={{ base: 'column', sm: 'row' }} gap="4" justify="space-between">
               <Heading size="sm" color="secondary">Product-wise Sales Log</Heading>
-              <InputGroup maxW={{ base: 'full', sm: '300px' }}>
-                <InputLeftElement pointerEvents="none">
-                  <Search size={18} color="#637381" />
-                </InputLeftElement>
-                <Input 
-                  placeholder="Search invoice or product..." 
-                  bg="background" 
-                  borderRadius="xl" 
-                  border="none" 
-                  _focus={{ bg: 'white', shadow: 'md' }}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </InputGroup>
+              <HStack spacing="3" w={{ base: 'full', sm: 'auto' }}>
+                 <Select 
+                    variant="filled" 
+                    bg="background" 
+                    borderRadius="xl" 
+                    size="sm" 
+                    w="150px" 
+                    fontWeight="700"
+                    placeholder="All Sellers"
+                    value={sellerTypeFilter}
+                    onChange={(e) => setSellerTypeFilter(e.target.value)}
+                 >
+                    <option value="Branch">Branches</option>
+                    <option value="SalesRep">Sales Reps</option>
+                    <option value="Distributor">Distributors</option>
+                 </Select>
+                 <InputGroup maxW={{ base: 'full', sm: '300px' }}>
+                    <InputLeftElement pointerEvents="none">
+                      <Search size={18} color="#637381" />
+                    </InputLeftElement>
+                    <Input 
+                      placeholder="Search invoice or customer..." 
+                      bg="background" 
+                      borderRadius="xl" 
+                      border="none" 
+                      _focus={{ bg: 'white', shadow: 'md' }}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                 </InputGroup>
+              </HStack>
             </Flex>
           </Box>
 
@@ -218,6 +245,7 @@ const BranchSalesHistory = () => {
               <Thead bg="background">
                 <Tr>
                   <Th color="gray.500" border="none">Invoice ID</Th>
+                  <Th color="gray.500" border="none">Seller</Th>
                   <Th color="gray.500" border="none">Product Details</Th>
                   <Th color="gray.500" border="none">Customer</Th>
                   <Th color="gray.500" border="none">Qty Sold</Th>
@@ -231,6 +259,12 @@ const BranchSalesHistory = () => {
                   <Tr key={idx} _hover={{ bg: 'gray.50/50' }}>
                     <Td borderColor="gray.100">
                       <Text fontWeight="700" color="brand.500" fontSize="sm">{row.invoiceId}</Text>
+                    </Td>
+                    <Td borderColor="gray.100">
+                      <HStack spacing="2">
+                        <Avatar size="xs" name={row.seller} bg="gray.100" color="gray.600" />
+                        <Text fontWeight="700" fontSize="xs">{row.seller}</Text>
+                      </HStack>
                     </Td>
                     <Td borderColor="gray.100">
                       <HStack spacing="2">

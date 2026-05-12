@@ -47,8 +47,14 @@ const Login = () => {
 
       if (data.role === 'admin') {
         navigate('/');
-      } else {
+      } else if (data.role === 'branch') {
         navigate('/branch/dashboard');
+      } else if (data.role === 'sales') {
+        navigate('/sales/dashboard');
+      } else if (data.role === 'distributor') {
+        navigate('/distributor/dashboard');
+      } else {
+        navigate('/');
       }
     } catch (error) {
       toast({

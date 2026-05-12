@@ -280,7 +280,7 @@ const BranchPerformance = () => {
               <VStack align="start" spacing="6" position="relative" zIndex="1">
                  <Box>
                     <Heading size="md" fontWeight="900" mb="2">Store Performance Score</Heading>
-                    <Text fontSize="sm" opacity="0.7">Your store is performing <Text as="span" fontWeight="900" color="brand.400">Better than 85%</Text> of other branches.</Text>
+                    <Text fontSize="sm" opacity="0.7">Your store is performing <Text as="span" fontWeight="900" color="brand.400">Better than 85%</Text> of other Branches.</Text>
                  </Box>
                  
                  <HStack spacing="10" w="full">

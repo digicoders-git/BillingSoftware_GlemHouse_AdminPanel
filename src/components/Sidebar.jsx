@@ -12,8 +12,15 @@ import {
   FileText,
   ChevronsLeft,
   ChevronsRight,
+  Package,
   Receipt,
-  ArrowRightLeft} from 'lucide-react';
+  Users,
+  Truck,
+  ArrowRightLeft,
+  ArrowUpRight,
+  Download,
+  Briefcase
+} from 'lucide-react';
 import { 
   Box, 
   VStack, 
@@ -255,96 +262,184 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
         <VStack align="stretch" py="2" spacing="1">
           {!isCollapsed && (
             <Text px="6" py="2" fontSize="15px" fontWeight="700" color="#222021" mt="2">
-              Main
+              Main Panel
             </Text>
           )}
           
-          {userRole === 'admin' ? (
+          {/* ADMIN SIDEBAR */}
+          {userRole === 'admin' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="Dashboard" to="/" isCollapsed={isCollapsed} />
+               <SidebarItem icon={LayoutDashboard} label="Admin Overview" to="/" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-                  Inventory
+                  Team Management
                 </Text>
               )}
-              <SidebarItem icon={Store} label="Branches" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Store} label="Deepo (Branches)" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Manage Branches', to: '/manage-branches' },
-                  { label: 'Create Branch', to: '/create-branch' },
+                  { label: 'Deepo List', to: '/manage-branches' },
+                  { label: 'Create New Deepo', to: '/create-branch' },
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={PackageSearch} label="Stock Dispatch" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Users} label="Sales Team" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Dispatch History', to: '/total-dispatch-stock' },
-                  { label: 'New Dispatch', to: '/record-dispatch' },
+                  { label: 'Sales Members', to: '/manage-sales' },
+                  { label: 'Add Sales Person', to: '/create-sales' },
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={TrendingUp} label="Product Tracking" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Briefcase} label="Partners (Dist)" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Product Allocation', to: '/product-allocation' },
-                  { label: 'Product Movement', to: '/product-movement' },
+                  { label: 'Distributor List', to: '/manage-distributors' },
+                  { label: 'Add New Partner', to: '/create-distributor' },
                 ]}
               </SidebarItem>
 
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-                  Reports
+                  Inventory & Billing
                 </Text>
               )}
-              <SidebarItem icon={FileText} label="Reports" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Package} label="Warehouse Stock" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Daily Report', to: '/reports/daily' },
-                  { label: 'Monthly Report', to: '/reports/monthly' },
-                  { label: 'Yearly Report', to: '/reports/yearly' },
+                  { label: 'Stock Summary', to: '/admin/inventory' },
+                  { label: 'Product Catalog', to: '/admin/products' },
+                  { label: 'Stock History', to: '/admin/inventory-logs' },
+                ]}
+              </SidebarItem>
+
+              <SidebarItem icon={Receipt} label="Consignment Logic" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Dispatch with GST', to: '/billing/gst' },
+                  { label: 'Dispatch without GST', to: '/billing/non-gst' },
+                  { label: 'All Dispatches History', to: '/total-dispatch-stock' },
+                  { label: 'All Sales Records', to: '/admin/all-sales' },
+                ]}
+              </SidebarItem>
+
+              {!isCollapsed && (
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
+                  System Reports
+                </Text>
+              )}
+              <SidebarItem icon={FileText} label="Reports Hub" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Daily Summary', to: '/reports/daily' },
+                  { label: 'Monthly Summary', to: '/reports/monthly' },
+                  { label: 'Yearly Summary', to: '/reports/yearly' },
                 ]}
               </SidebarItem>
             </>
-          ) : (
+          )}
+
+          {/* BRANCH SIDEBAR */}
+          {userRole === 'branch' && (
             <>
               <SidebarItem icon={LayoutDashboard} label="Branch Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-                  Branch Inventory
+                  Stock Management
                 </Text>
               )}
-              <SidebarItem icon={Store} label="Products" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Package} label="Branch Inventory" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Manage Products', to: '/branch/manage-products' },
-                  { label: 'Add Product', to: '/branch/add-product' },
+                  { label: 'Manage Stock', to: '/branch/manage-products' },
+                  { label: 'Incoming Shipments', to: '/branch/received-stock' },
                   { label: 'Low Stock Alerts', to: '/branch/low-stock' },
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={ArrowRightLeft} label="Records" isCollapsed={isCollapsed}>
+              <SidebarItem icon={ArrowUpRight} label="Dispatch to Sales" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Received Stock', to: '/branch/received-stock' },
-                  { label: 'Inventory Records', to: '/branch/inventory-log' },
-                  { label: 'Sales Records', to: '/branch/sales-history' },
+                  { label: 'Dispatch with GST', to: '/branch/dispatch-to-sales-gst' },
+                  { label: 'Dispatch (Non-GST)', to: '/branch/dispatch-to-sales' },
+                  { label: 'Dispatch History', to: '/total-dispatch-stock' },
                 ]}
               </SidebarItem>
 
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-                  Sales & Reports
+                  Sales & Billing
                 </Text>
               )}
-              <SidebarItem icon={Receipt} label="New Invoice" isCollapsed={isCollapsed} to="/branch/new-invoice" />
-              <SidebarItem icon={TrendingUp} label="Product Sales Tracking" isCollapsed={isCollapsed} to="/branch/product-sales" />
-              <SidebarItem icon={FileText} label="Reports" isCollapsed={isCollapsed} to="/branch/reports" />
+              <SidebarItem icon={TrendingUp} label="Sales Analytics" to="/branch/product-sales" isCollapsed={isCollapsed} />
+              <SidebarItem icon={FileText} label="Branch Reports" to="/branch/reports" isCollapsed={isCollapsed} />
+            </>
+          )}
+
+          {/* SALES REP SIDEBAR */}
+          {userRole === 'sales' && (
+            <>
+              <SidebarItem icon={LayoutDashboard} label="Sales Dashboard" to="/sales/dashboard" isCollapsed={isCollapsed} />
+              
+              {!isCollapsed && (
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
+                  Inventory & Stock
+                </Text>
+              )}
+              <SidebarItem icon={Package} label="My Inventory" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'My Shelf', to: '/sales/manage-products' },
+                  { label: 'Stock In (Incoming)', to: '/sales/received-stock' },
+                  { label: 'Stock History', to: '/sales/inventory-log' },
+                ]}
+              </SidebarItem>
+              
+              <SidebarItem icon={ArrowUpRight} label="Dispatch Distributor" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Dispatch with GST', to: '/sales/dispatch-to-distributor-gst' },
+                  { label: 'Dispatch (Non-GST)', to: '/sales/dispatch-to-distributor' },
+                  { label: 'Dispatch History', to: '/total-dispatch-stock' },
+                ]}
+              </SidebarItem>
+              <SidebarItem icon={FileText} label="My Reports" to="/sales/reports" isCollapsed={isCollapsed} />
+            </>
+          )}
+
+          {/* DISTRIBUTOR SIDEBAR */}
+          {userRole === 'distributor' && (
+            <>
+              <SidebarItem icon={LayoutDashboard} label="Partner Dashboard" to="/distributor/dashboard" isCollapsed={isCollapsed} />
+              
+              {!isCollapsed && (
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
+                  Inventory & Stock
+                </Text>
+              )}
+              <SidebarItem icon={Package} label="My Warehouse" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Stock Summary', to: '/distributor/manage-products' },
+                  { label: 'Incoming Shipments', to: '/distributor/received-stock' },
+                  { label: 'Stock History', to: '/distributor/inventory-log' },
+                ]}
+              </SidebarItem>
+              
+              {!isCollapsed && (
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
+                  Sales & Records
+                </Text>
+              )}
+              <SidebarItem icon={Receipt} label="Partner Sales" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'New Sale (GST)', to: '/distributor/new-invoice-gst' },
+                  { label: 'New Sale (Non-GST)', to: '/distributor/new-invoice' },
+                  { label: 'Sales History', to: '/distributor/history' },
+                ]}
+              </SidebarItem>
+              <SidebarItem icon={FileText} label="Partner Reports" to="/distributor/reports" isCollapsed={isCollapsed} />
             </>
           )}
 
           {!isCollapsed && (
             <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-              Settings
+              My Account
             </Text>
           )}
           <SidebarItem icon={UserCircle} label="Profile" to="/profile" isCollapsed={isCollapsed} />
-          <SidebarItem icon={Key} label="Change Password" to="/change-password" isCollapsed={isCollapsed} />
+          <SidebarItem icon={Key} label="Security" to="/change-password" isCollapsed={isCollapsed} />
         </VStack>
       </Box>
       <Box mt="auto" borderTop="1px solid" borderColor="gray.100" py="4" px="0">

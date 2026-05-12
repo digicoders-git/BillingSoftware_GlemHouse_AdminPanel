@@ -115,10 +115,10 @@ const DispatchStock = () => {
     try {
       // Create invoice data structure compatible with pdfTemplate
       const invoiceData = {
-        invoiceNumber: `DSP-${dsp._id.slice(-6).toUpperCase()}`,
+        invoiceNumber: dsp.invoiceNo || `DSP-${dsp._id.slice(-6).toUpperCase()}`,
         date: new Date(dsp.date).toLocaleDateString(),
-        customerName: dsp.branch?.name || 'Branch',
-        customerPhone: dsp.branch?.branchId || '',
+        customerName: dsp.receiverBranch?.name || dsp.receiverSalesRep?.name || 'Receiver',
+        customerPhone: dsp.receiverBranch?.branchId || dsp.receiverSalesRep?.salesId || '',
         paymentMethod: dsp.method,
         items: dsp.items.map(item => ({
           name: item.name,
@@ -126,10 +126,11 @@ const DispatchStock = () => {
           price: item.price,
           total: item.qty * item.price
         })),
-        subtotal: dsp.totalValue,
-        tax: 0,
+        subtotal: dsp.taxableAmount || dsp.totalAmount,
+        tax: dsp.gstAmount || 0,
         discount: 0,
-        totalAmount: dsp.totalValue
+        totalAmount: dsp.totalAmount,
+        isGstEnabled: dsp.billingType === 'With GST'
       };
 
       const html = pdfTemplate(invoiceData);
@@ -153,13 +154,14 @@ const DispatchStock = () => {
   const handleExport = () => {
     if (dispatches.length === 0) return;
     
-    const headers = ['Dispatch ID', 'Branch', 'Method', 'Items', 'Value', 'Date', 'Status'];
+    const headers = ['Dispatch ID', 'From', 'To', 'Method', 'Items', 'Value', 'Date', 'Status'];
     const csvData = dispatches.map(d => [
       `DSP-${d._id.slice(-6).toUpperCase()}`,
-      d.branch?.name || 'N/A',
+      d.senderType === 'Admin' ? 'Admin' : (d.senderBranch?.name || 'Branch'),
+      d.receiverBranch?.name || d.receiverSalesRep?.name || 'Unknown',
       d.method,
       d.totalItems,
-      d.totalValue,
+      d.totalAmount,
       new Date(d.date).toLocaleDateString(),
       d.status
     ]);
@@ -214,7 +216,7 @@ const DispatchStock = () => {
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Total Dispatch Stock</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="400">Track and monitor all product dispatches across branches</Text>
+            <Text fontSize="sm" color="gray.500" fontWeight="400">Track and monitor all product dispatches across Branches</Text>
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
             <IconButton 
@@ -227,7 +229,37 @@ const DispatchStock = () => {
               isLoading={loading}
             />
             <Button leftIcon={<Printer size={16} />} variant="outline" borderRadius="xl" size="sm" color="gray.600">Print</Button>
-            <Button leftIcon={<Package size={16} />} colorScheme="brand" borderRadius="xl" shadow="sm" size="sm" onClick={() => navigate('/record-dispatch')}>New Dispatch</Button>
+            <Menu>
+              <MenuButton 
+                as={Button} 
+                leftIcon={<Package size={16} />} 
+                rightIcon={<ChevronDown size={14} />}
+                colorScheme="brand" 
+                borderRadius="xl" 
+                shadow="sm" 
+                size="sm"
+              >
+                New Dispatch
+              </MenuButton>
+              <MenuList borderRadius="xl" shadow="2xl" border="none" p="1">
+                <MenuItem 
+                  icon={<ArrowUpRight size={14} />} 
+                  fontSize="xs" 
+                  fontWeight="700"
+                  onClick={() => navigate('/billing/gst')}
+                >
+                  Dispatch with GST
+                </MenuItem>
+                <MenuItem 
+                  icon={<Package size={14} />} 
+                  fontSize="xs" 
+                  fontWeight="700"
+                  onClick={() => navigate('/billing/non-gst')}
+                >
+                  Dispatch without GST
+                </MenuItem>
+              </MenuList>
+            </Menu>
           </HStack>
         </Flex>
 
@@ -302,7 +334,7 @@ const DispatchStock = () => {
                 <Thead bg="gray.50/50">
                   <Tr>
                     <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Dispatch ID</Th>
-                    <Th color="gray.400" border="none" py="4" fontSize="10px">Branch</Th>
+                    <Th color="gray.400" border="none" py="4" fontSize="10px">Route (From → To)</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Method</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Items / Value</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Date</Th>
@@ -317,16 +349,26 @@ const DispatchStock = () => {
                         <Text fontWeight="700" color="brand.500" fontSize="xs">DSP-{dsp._id.slice(-4).toUpperCase()}</Text>
                       </Td>
                       <Td borderColor="gray.100">
-                        <HStack spacing="2">
-                          <Avatar size="xs" name={dsp.branch?.name} bg="secondary" color="white" />
-                          <Text fontSize="xs" fontWeight="700" color="secondary">{dsp.branch?.name}</Text>
-                        </HStack>
+                        <VStack align="start" spacing="0">
+                          <HStack spacing="2">
+                            <Badge colorScheme="gray" fontSize="9px" variant="outline">FROM</Badge>
+                            <Text fontSize="xs" fontWeight="700" color="gray.600">
+                              {dsp.senderType === 'Admin' ? 'Main Warehouse (Admin)' : (dsp.senderBranch?.name || dsp.senderSalesRep?.name || 'Unknown Source')}
+                            </Text>
+                          </HStack>
+                          <HStack spacing="2" mt="1">
+                            <Badge colorScheme="brand" fontSize="9px">TO</Badge>
+                            <Text fontSize="xs" fontWeight="800" color="secondary">
+                              {dsp.receiverBranch?.name || dsp.receiverSalesRep?.name || dsp.receiverDistributor?.name || 'Unknown Destination'}
+                            </Text>
+                          </HStack>
+                        </VStack>
                       </Td>
                       <Td borderColor="gray.100"><Text fontSize="xs" color="gray.600" fontWeight="600">{dsp.method}</Text></Td>
                       <Td borderColor="gray.100">
                         <VStack align="start" spacing="0">
                           <Text fontSize="xs" fontWeight="800" color="secondary">{dsp.totalItems} Units</Text>
-                          <Text fontSize="10px" color="gray.400">₹{dsp.totalValue.toLocaleString()}</Text>
+                          <Text fontSize="10px" color="gray.400">₹{(dsp.totalAmount || 0).toLocaleString()}</Text>
                         </VStack>
                       </Td>
                       <Td borderColor="gray.100">
