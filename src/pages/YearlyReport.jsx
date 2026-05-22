@@ -79,7 +79,7 @@ const YearlyReport = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, yearly growth data has been downloaded as CSV.",
+      description: "Yearly growth data has been downloaded as CSV.",
       status: "success",
     });
   };

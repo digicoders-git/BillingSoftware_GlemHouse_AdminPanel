@@ -80,7 +80,7 @@ const SalesRepReceivedStock = () => {
       await API.patch(`/dispatches/${id}/status`, { status: 'Received' });
       toast({
         title: "Stock Received",
-        description: "Bhai, product has been added to your shelf inventory successfully.",
+        description: "The product has been successfully added to your shelf inventory.",
         status: "success",
       });
       fetchDispatches();

@@ -133,7 +133,7 @@ const DeepoBilling = ({ isGst }) => {
     if (!dispatchData.receiverId) {
       toast({
         title: "Missing Information",
-        description: "Please select a Deepo.",
+        description: "Please select a Depot.",
         status: "error",
         duration: 3000,
       });
@@ -203,9 +203,9 @@ const DeepoBilling = ({ isGst }) => {
                <Text fontSize="sm" fontWeight="700">Back</Text>
             </HStack>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">
-                Deepo Billing {isGst ? '(With GST)' : '(Without GST)'}
+                Depot Billing {isGst ? '(With GST)' : '(Without GST)'}
             </Heading>
-            <Text color="gray.500" fontWeight="500">Create official invoice and dispatch record for Deepo</Text>
+            <Text color="gray.500" fontWeight="500">Create official invoice and dispatch record for Depot</Text>
           </Box>
           <HStack spacing="3">
              <Button leftIcon={<Printer size={18} />} variant="outline" borderRadius="xl">Save as Draft</Button>
@@ -220,13 +220,13 @@ const DeepoBilling = ({ isGst }) => {
             <VStack spacing="6" align="stretch">
                 <Box className="premium-card" p="6">
                     <Heading size="xs" mb="6" color="secondary" borderBottom="1px solid" borderColor="gray.100" pb="3">
-                        <HStack><Truck size={14} /><Text>Deepo Details</Text></HStack>
+                        <HStack><Truck size={14} /><Text>Depot Details</Text></HStack>
                     </Heading>
                     <VStack spacing="5" align="stretch">
                         <FormControl isRequired>
-                            <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Target Deepo</FormLabel>
+                            <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Target Depot</FormLabel>
                             <Select 
-                                placeholder="Choose Deepo" 
+                                placeholder="Choose Depot" 
                                 h="45px" 
                                 borderRadius="lg" 
                                 fontWeight="700"

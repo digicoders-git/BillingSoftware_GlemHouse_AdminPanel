@@ -76,16 +76,16 @@ const CreateBranch = () => {
       <Box>
         <Flex justify="space-between" align="center" mb="6">
           <Box>
-            <Heading size="md" color="secondary">Create New Deepo</Heading>
+            <Heading size="md" color="secondary">Create New Depot</Heading>
             <Breadcrumb spacing="8px" separator={<ChevronRight size={14} color="gray" />} mt="1">
               <BreadcrumbItem>
                 <BreadcrumbLink href="/" color="gray.500" fontSize="sm">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/manage-branches" color="gray.500" fontSize="sm">Deepo</BreadcrumbLink>
+                <BreadcrumbLink href="/manage-branches" color="gray.500" fontSize="sm">Depot</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem isCurrentPage>
-                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Create Deepo</BreadcrumbLink>
+                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Create Depot</BreadcrumbLink>
               </BreadcrumbItem>
             </Breadcrumb>
           </Box>
@@ -95,17 +95,17 @@ const CreateBranch = () => {
           <form onSubmit={handleSubmit}>
             <VStack spacing="8" align="stretch">
               <Box>
-                <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Deepo Details</Heading>
+                <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Depot Details</Heading>
                 <Grid templateColumns="repeat(2, 1fr)" gap="6">
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Branch Name</FormLabel>
-                      <Input name="name" value={formData.name} onChange={handleChange} placeholder="Enter deepo name" h="45px" borderRadius="lg" />
+                      <Input name="name" value={formData.name} onChange={handleChange} placeholder="Enter depot name" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
-                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Deepo Code / ID</FormLabel>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Depot Code / ID</FormLabel>
                       <Input name="branchId" value={formData.branchId} onChange={handleChange} placeholder="e.g. BR-001" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
@@ -123,7 +123,7 @@ const CreateBranch = () => {
                 <Grid templateColumns="repeat(2, 1fr)" gap="6">
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
-                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Deepo Manager Name</FormLabel>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Depot Manager Name</FormLabel>
                       <Input name="manager" value={formData.manager} onChange={handleChange} placeholder="Full name" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
@@ -144,7 +144,7 @@ const CreateBranch = () => {
 
               <Box>
                 <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Login Credentials</Heading>
-                <Text fontSize="xs" color="gray.500" mb="4">These credentials will be used by the deepo manager to login.</Text>
+                <Text fontSize="xs" color="gray.500" mb="4">These credentials will be used by the depot manager to login.</Text>
                 <Grid templateColumns="repeat(2, 1fr)" gap="6">
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
@@ -191,7 +191,7 @@ const CreateBranch = () => {
                   px="10"
                   isLoading={loading}
                 >
-                  Save Deepo
+                  Save Depot
                 </Button>
               </Flex>
             </VStack>

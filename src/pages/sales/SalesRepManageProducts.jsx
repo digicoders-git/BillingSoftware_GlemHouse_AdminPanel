@@ -386,7 +386,7 @@ const SalesRepManageProducts = () => {
           <AlertDialogContent borderRadius="2xl">
             <AlertDialogHeader fontSize="lg" fontWeight="900">Remove from Shelf?</AlertDialogHeader>
             <AlertDialogBody>
-               Bhai, kya aap sach mein <b>{productToDelete?.name}</b> ko apni shelf se hatana chahte hain?
+               Are you sure you want to remove <b>{productToDelete?.name}</b> from your shelf?
             </AlertDialogBody>
             <AlertDialogFooter gap="3">
               <Button ref={cancelRef} onClick={onDeleteClose} variant="ghost">Cancel</Button>

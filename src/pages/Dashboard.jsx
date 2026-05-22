@@ -137,7 +137,7 @@ const Dashboard = () => {
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Master Control Dashboard</Heading>
              <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
-                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Deepo</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Sales</Text> recorded today
+                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Depot(s)</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Sales</Text> recorded today
              </Text>
           </Box>
           <Box bg="white" p="2" borderRadius="xl" shadow="sm" border="1px solid" borderColor="gray.100">
@@ -188,7 +188,7 @@ const Dashboard = () => {
         {/* Top Colored Stats - Row 2: Entities */}
         <Grid templateColumns={{ base: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap="6" mb="10">
           <ColoredStatCard 
-            title="Total Deepo" 
+            title="Total Depot" 
             value={`${data.stats?.totalBranches || 0} Locations`} 
             icon={Building} 
             trend="up" 

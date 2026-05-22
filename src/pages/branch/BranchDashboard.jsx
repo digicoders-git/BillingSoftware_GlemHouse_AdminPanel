@@ -91,7 +91,7 @@ const BranchDashboard = () => {
       const criticalCount = (dashData.stats.lowStockCount || 0) + (dashData.stats.outOfStockCount || 0);
       if (criticalCount > 0) {
         toast({
-          title: "Bhai, Stock Alert!",
+          title: "Stock Alert!",
           description: `${criticalCount} products critically low. Check Inventory.`,
           status: "warning",
           duration: 3000,
@@ -140,7 +140,7 @@ const BranchDashboard = () => {
             <Text fontSize="sm" mt="1" opacity="0.9" fontWeight="500">
                {data.stats.lowStockCount > 0 
                  ? `Action required: ${data.stats.lowStockCount} items need restocking.` 
-                 : `Bhai, everything is looking great today. You've earned ₹${data.stats.todayRevenue?.toLocaleString()} so far.`}
+                 : `Everything is looking great today. You've earned ₹${data.stats.todayRevenue?.toLocaleString()} so far.`}
             </Text>
           </Box>
           

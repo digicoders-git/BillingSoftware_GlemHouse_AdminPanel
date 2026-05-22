@@ -79,7 +79,7 @@ const DailyReport = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, daily report has been downloaded as CSV.",
+      description: "Daily report has been downloaded as CSV.",
       status: "success",
     });
   };

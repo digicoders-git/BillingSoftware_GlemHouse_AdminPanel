@@ -99,7 +99,7 @@ const BranchPerformance = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, performance analytics has been downloaded as CSV.",
+      description: "Performance analytics has been downloaded as CSV.",
       status: "success",
     });
   };
@@ -309,7 +309,7 @@ const BranchPerformance = () => {
                           <Zap size={16} color="white" />
                        </Box>
                        <VStack align="start" spacing="1">
-                          <Text fontSize="sm" fontWeight="800">Quick Tip for Bhai!</Text>
+                          <Text fontSize="sm" fontWeight="800">Performance Insight</Text>
                           <Text fontSize="xs" opacity="0.7" lineHeight="tall">Westside Branch is seeing high demand for Mobile Accessories on weekends. Restock now to capture extra sales!</Text>
                        </VStack>
                     </HStack>

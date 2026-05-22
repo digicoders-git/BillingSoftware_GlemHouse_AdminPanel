@@ -130,7 +130,7 @@ const ManageBranches = () => {
       setBranchInventory(invRes.data.inventory || []);
       setBranchDispatches(dispRes.data.dispatches || []);
     } catch (error) {
-      toast({ title: "Bhai, error loading branch data", status: "error" });
+      toast({ title: "Error loading branch data", status: "error" });
     } finally {
       setFetchingBranchData(false);
     }
@@ -217,7 +217,7 @@ const ManageBranches = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, branch directory has been downloaded as CSV.",
+      description: "Branch directory has been downloaded as CSV.",
       status: "success",
     });
   };
@@ -227,8 +227,8 @@ const ManageBranches = () => {
       <Box pb="10">
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
-            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Deepo</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="400">View and manage all deepo locations within your network</Text>
+            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Depot</Heading>
+            <Text fontSize="sm" color="gray.500" fontWeight="400">View and manage all depot locations within your network</Text>
           </Box>
           <Button 
             leftIcon={<Plus size={16} />} 
@@ -238,7 +238,7 @@ const ManageBranches = () => {
             shadow="sm"
             onClick={() => navigate('/create-branch')}
           >
-            Add New Deepo
+            Add New Depot
           </Button>
         </Flex>
 
@@ -246,7 +246,7 @@ const ManageBranches = () => {
           <Box p="6" borderBottom="1px solid" borderColor="gray.50" bg="gray.50/20">
             <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'stretch', md: 'center' }} gap="4">
               <HStack spacing="3">
-                 <Heading size="xs" color="secondary" fontWeight="700">Deepo Directory</Heading>
+                 <Heading size="xs" color="secondary" fontWeight="700">Depot Directory</Heading>
               </HStack>
               <HStack spacing="3">
                 <InputGroup size="sm" maxW={{ base: 'full', md: '250px' }}>
@@ -254,7 +254,7 @@ const ManageBranches = () => {
                     <Search color="gray" size={16} />
                   </InputLeftElement>
                   <Input 
-                    placeholder="Search Deepo..." 
+                    placeholder="Search Depot..." 
                     borderRadius="lg" 
                     bg="white" 
                     value={search}
@@ -274,7 +274,7 @@ const ManageBranches = () => {
                     Filter: {statusFilter}
                   </MenuButton>
                   <MenuList borderRadius="xl" shadow="xl" border="none" p="1">
-                    <MenuItem fontSize="sm" fontWeight="600" onClick={() => setStatusFilter('All')}>All Deepo</MenuItem>
+                    <MenuItem fontSize="sm" fontWeight="600" onClick={() => setStatusFilter('All')}>All Depot</MenuItem>
                     <MenuDivider />
                     <MenuItem fontSize="sm" fontWeight="600" color="green.500" onClick={() => setStatusFilter('Active')}>Active Only</MenuItem>
                     <MenuItem fontSize="sm" fontWeight="600" color="red.500" onClick={() => setStatusFilter('Inactive')}>Inactive Only</MenuItem>
@@ -304,8 +304,8 @@ const ManageBranches = () => {
               <Table variant="simple">
                 <Thead bg="gray.50/50">
                   <Tr>
-                    <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Deepo ID</Th>
-                    <Th color="gray.400" border="none" py="4" fontSize="10px">Deepo Name</Th>
+                    <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Depot ID</Th>
+                    <Th color="gray.400" border="none" py="4" fontSize="10px">Depot Name</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Manager</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Contact</Th>
                     <Th color="gray.400" border="none" py="4" fontSize="10px">Password</Th>
@@ -397,7 +397,7 @@ const ManageBranches = () => {
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="7" textAlign="center" py="10" color="gray.500">No Deepo found</Td>
+                      <Td colSpan="7" textAlign="center" py="10" color="gray.500">No Depot found</Td>
                     </Tr>
                   )}
                 </Tbody>
@@ -406,7 +406,7 @@ const ManageBranches = () => {
           </Box>
           <Box p="4" bg="gray.50/20" borderTop="1px solid" borderColor="gray.100">
              <Flex justify="space-between" align="center">
-                <Text fontSize="10px" color="gray.400" fontWeight="600">Showing {Branches.length} of {total} Deepo</Text>
+                <Text fontSize="10px" color="gray.400" fontWeight="600">Showing {Branches.length} of {total} Depot</Text>
                 <HStack spacing="2">
                    <Button size="xs" variant="outline" fontSize="10px" h="24px" onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}>Previous</Button>
                    <Text fontSize="xs" fontWeight="700">{page}</Text>
@@ -421,7 +421,7 @@ const ManageBranches = () => {
       <Modal isOpen={isViewOpen} onClose={onViewClose} size="lg">
         <ModalOverlay backdropFilter="blur(4px)" />
         <ModalContent borderRadius="2xl">
-          <ModalHeader color="secondary" fontWeight="800">Deepo Details</ModalHeader>
+          <ModalHeader color="secondary" fontWeight="800">Depot Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb="6">
             {viewBranch && (
@@ -504,7 +504,7 @@ const ManageBranches = () => {
                                         <Td><Text fontWeight="800" color="brand.500" fontSize="xs">{item.stock} Units</Text></Td>
                                         <Td><Badge colorScheme={item.stock > 10 ? 'green' : 'orange'} fontSize="9px">{item.status}</Badge></Td>
                                      </Tr>
-                                  )) : <Tr><Td colSpan="3" textAlign="center" py="4">No stock in this deepo</Td></Tr>}
+                                  )) : <Tr><Td colSpan="3" textAlign="center" py="4">No stock in this depot</Td></Tr>}
                                </Tbody>
                             </Table>
                          </Box>
@@ -566,11 +566,11 @@ const ManageBranches = () => {
         <AlertDialogOverlay>
           <AlertDialogContent borderRadius="xl">
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Deepo
+              Delete Depot
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure? You can't undo this action afterwards. This will also delete the deepo manager's login account.
+              Are you sure? You can't undo this action afterwards. This will also delete the depot manager's login account.
             </AlertDialogBody>
 
             <AlertDialogFooter>
@@ -598,8 +598,8 @@ const ManageBranches = () => {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure you want to change the status of this deepo? 
-              Inactive Deepos will not be able to login to their panel.
+              Are you sure you want to change the status of this depot? 
+              Inactive Depots will not be able to login to their panel.
             </AlertDialogBody>
 
             <AlertDialogFooter>

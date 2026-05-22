@@ -197,7 +197,7 @@ const BranchEditProduct = () => {
                     ) : <><Icon as={Plus} size={30} color="gray.400" mb="2" /><Text fontSize="xs" fontWeight="700">Change Image</Text></>}
                   </Box>
                 </Box>
-                <Box w="full" p="5" bg="brand.50" borderRadius="xl"><Text fontSize="12px" color="gray.600">Bhai, changes save karne ke baad inventory update ho jayegi.</Text></Box>
+                <Box w="full" p="5" bg="brand.50" borderRadius="xl"><Text fontSize="12px" color="gray.600">Inventory levels will be updated immediately once changes are successfully saved.</Text></Box>
               </VStack>
             </Box>
           </GridItem>

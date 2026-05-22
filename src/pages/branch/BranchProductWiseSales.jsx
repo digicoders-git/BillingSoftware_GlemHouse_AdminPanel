@@ -255,7 +255,7 @@ const BranchProductWiseSales = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, filtered product sales report has been downloaded.",
+      description: "Filtered product sales report has been downloaded.",
       status: "success",
     });
   };

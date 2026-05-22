@@ -92,7 +92,7 @@ const AdminInventoryLogs = () => {
               <Select size="sm" borderRadius="md" value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)}>
                   <option value="All">All Locations</option>
                   <option value="Warehouse">Warehouse</option>
-                  <option value="Deepo">All Deepos (Branches)</option>
+                  <option value="Deepo">All Depots (Branches)</option>
                   <option value="Sales">All Sales Partners</option>
               </Select>
            </FormControl>

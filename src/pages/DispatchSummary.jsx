@@ -203,17 +203,17 @@ const DispatchSummary = () => {
 
             {/* Top Pan */}
             <Flex justify="space-between" borderBottom="2px solid #000" p="8px 15px" fontWeight="950" fontSize="13px" position="relative" zIndex="1" bg="white">
-              <Text>GSTIN: 09AAACG1234H1Z5</Text>
+              <Text></Text>
               <Text>{dispatch.billingType === 'With GST' ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION'}</Text>
             </Flex>
 
             {/* Header */}
             <VStack spacing="0" p="15px 15px" borderBottom="2px solid #000" textAlign="center" position="relative" zIndex="1" bg="white">
-               <Text fontSize="32px" fontWeight="950" letterSpacing="2px" mb="1" mt="1" lineHeight="1">GLEM HOUSE</Text>
-               <VStack spacing="0" fontSize="10px" fontWeight="700">
-                 <Text>PREMIUM KITCHEN APPLIANCES & ELECTRONICS</Text>
-                 <Text>LUCKNOW, UTTAR PRADESH</Text>
-                 <Text>SUPPORT: contact@glemhouse.com</Text>
+               <Text fontSize="32px" fontWeight="950" letterSpacing="2px" mb="1" mt="1" lineHeight="1">GLEM HOUSE CONSUMER CARE PVT LTD</Text>
+               <VStack spacing="1" fontSize="13px" fontWeight="700">
+                 <Text>Address: 1/093,New A, Jiyamau, Hazratganj, Lucknow (Uttar Pradesh)-226001</Text>
+                 <Text>Gst no: 09AAACG1234H1Z5</Text>
+                 <Text>Email Id: contact@glemhouse.com</Text>
                </VStack>
             </VStack>
 
@@ -226,13 +226,13 @@ const DispatchSummary = () => {
                     <Text w="90px">Name :</Text>
                     <Text>{(dispatch.receiverBranch?.name || dispatch.receiverSalesRep?.name || dispatch.receiverDistributor?.name || 'N/A').toUpperCase()}</Text>
                   </HStack>
-                  <HStack spacing="2">
-                    <Text w="90px">Contact :</Text>
-                    <Text>{dispatch.receiverBranch?.contact || dispatch.receiverSalesRep?.contact || dispatch.receiverDistributor?.contact || 'N/A'}</Text>
-                  </HStack>
                   <HStack spacing="2" align="start">
                     <Text w="90px">Address :</Text>
                     <Text>{(dispatch.receiverBranch?.location || dispatch.receiverSalesRep?.location || dispatch.receiverDistributor?.location || 'AS PER RECORDS').toUpperCase()}</Text>
+                  </HStack>
+                  <HStack spacing="2">
+                    <Text w="90px">Contact :</Text>
+                    <Text>{dispatch.receiverBranch?.contact || dispatch.receiverSalesRep?.contact || dispatch.receiverDistributor?.contact || 'N/A'}</Text>
                   </HStack>
                   <HStack spacing="2">
                     <Text w="90px">ID :</Text>
@@ -244,7 +244,6 @@ const DispatchSummary = () => {
                 <VStack align="start" spacing="2" mt="15px" fontSize="13px">
                   <HStack><Text w="95px">Invoice No. :</Text><Text fontSize="14px" fontWeight="950">{dispatch.invoiceNo || 'N/A'}</Text></HStack>
                   <HStack><Text w="95px">Date :</Text><Text>{new Date(dispatch.date).toLocaleDateString('en-GB')}</Text></HStack>
-                  <HStack><Text w="95px">Tracking ID :</Text><Text fontSize="11px">{dispatch.trackingCode}</Text></HStack>
                 </VStack>
               </Box>
             </Flex>
@@ -256,10 +255,10 @@ const DispatchSummary = () => {
                   <tr style={{ background: '#f0f0f0', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                     <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '8%', fontWeight: '950', fontSize: '13px' }}>S. NO.</th>
                     <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '45%', fontWeight: '950', fontSize: '13px' }}>Description</th>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>Unit</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>HSN Code</th>
                     <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>Qty.</th>
                     <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '12%', fontWeight: '950', fontSize: '13px' }}>Rate</th>
-                    <th style={{ borderBottom: '2px solid #000', padding: '12px 8px', width: '15%', fontWeight: '950', fontSize: '13px' }}>Total</th>
+                    <th style={{ borderBottom: '2px solid #000', padding: '12px 8px', width: '15%', fontWeight: '950', fontSize: '13px' }}>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -267,7 +266,7 @@ const DispatchSummary = () => {
                     <tr key={idx}>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{idx + 1}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', fontWeight: '900' }}>{item.name}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>NOS</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.hsn || '8516'}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '950' }}>{item.qty}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900' }}>₹{(item.price || 0).toLocaleString('en-IN')}</td>
                       <td style={{ borderBottom: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '950' }}>₹{((item.qty || 0) * (item.price || 0)).toLocaleString('en-IN')}</td>
@@ -333,7 +332,7 @@ const DispatchSummary = () => {
                   Subject to Lucknow Jurisdiction.
                </Box>
                <Box textAlign="right" fontWeight="900">
-                  <Text fontSize="11px" mb="1">For <strong>GLEM HOUSE</strong></Text>
+                  <Text fontSize="11px" mb="1">For <strong>GLEM HOUSE CONSUMER CARE PVT LTD</strong></Text>
                   <Box h="50px" />
                   <Text fontSize="12px" borderTop="2.5px solid #000" pt="6px" display="inline-block" minW="200px" textAlign="center">Authorized Signatory</Text>
                </Box>

@@ -104,7 +104,7 @@ const BranchReceivedStock = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, received stock history has been downloaded as CSV.",
+      description: "Received stock history has been downloaded as CSV.",
       status: "success",
     });
   };

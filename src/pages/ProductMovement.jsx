@@ -70,7 +70,7 @@ const ProductMovement = () => {
       if (isRefresh) {
         toast({
           title: "Feed Refreshed",
-          description: "Bhai, product movement data has been updated.",
+          description: "Product movement data has been updated.",
           status: "success",
           duration: 2000,
         });
@@ -115,7 +115,7 @@ const ProductMovement = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, product movement history has been downloaded as CSV.",
+      description: "Product movement history has been downloaded as CSV.",
       status: "success",
     });
   };

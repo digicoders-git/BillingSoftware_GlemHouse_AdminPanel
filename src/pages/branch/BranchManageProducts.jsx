@@ -276,7 +276,7 @@ const BranchManageProducts = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, inventory data has been downloaded as CSV.",
+      description: "Inventory data has been downloaded as CSV.",
       status: "success",
     });
   };
@@ -641,11 +641,11 @@ const BranchManageProducts = () => {
             </AlertDialogHeader>
 
             <AlertDialogBody color="gray.600">
-              Bhai, kya aap sach mein{' '}
+              Are you sure you want to remove{' '}
               <Text as="span" fontWeight="700" color="secondary">
                 "{productToDelete?.name}"
               </Text>{' '}
-              ko inventory se hatana chahte hain? Ye action wapas nahi liya ja sakta.
+              from the inventory? This action cannot be undone.
             </AlertDialogBody>
 
             <AlertDialogFooter gap="3">

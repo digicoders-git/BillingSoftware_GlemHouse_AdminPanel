@@ -80,7 +80,7 @@ const MonthlyReport = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, monthly performance data has been downloaded as CSV.",
+      description: "Monthly performance data has been downloaded as CSV.",
       status: "success",
     });
   };

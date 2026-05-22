@@ -89,8 +89,8 @@ const AdminInventory = () => {
       setProducts(productsRes.data);
     } catch (error) {
       toast({
-        title: 'Bhai, sync error!',
-        description: error.response?.data?.message || 'Inventory data nahi mil raha.',
+        title: 'Sync Error',
+        description: error.response?.data?.message || 'Failed to retrieve inventory data.',
         status: 'error',
         duration: 3000,
         position: 'top-right'
@@ -410,7 +410,7 @@ const AdminInventory = () => {
                            <Td colSpan="6" textAlign="center" py="20">
                               <VStack spacing="3">
                                  <Icon as={Search} color="gray.300" fontSize="30px" />
-                                 <Text color="gray.400" fontWeight="700" fontSize="xs">Bhai, koi record nahi mila.</Text>
+                                 <Text color="gray.400" fontWeight="700" fontSize="xs">No records found.</Text>
                                  <Button size="xs" variant="link" onClick={() => {setSearchTerm(''); setFilterStatus('All');}}>Reset Filters</Button>
                               </VStack>
                            </Td>

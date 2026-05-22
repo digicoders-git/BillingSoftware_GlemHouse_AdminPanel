@@ -134,7 +134,7 @@ const Profile = () => {
       window.dispatchEvent(new Event('profile_updated'));
       toast({
         title: 'Image Uploaded',
-        description: 'Bhai, profile image has been saved permanently.',
+        description: 'Profile image has been saved permanently.',
         status: 'success',
         duration: 2000,
       });

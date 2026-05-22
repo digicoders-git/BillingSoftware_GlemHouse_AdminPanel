@@ -180,7 +180,7 @@ const DispatchStock = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, dispatch history has been downloaded as CSV.",
+      description: "Dispatch history has been downloaded as CSV.",
       status: "success",
     });
   };

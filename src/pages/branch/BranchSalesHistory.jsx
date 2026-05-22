@@ -89,7 +89,7 @@ const BranchSalesHistory = () => {
     
     toast({
       title: "Export Successful",
-      description: "Bhai, sales history has been downloaded as CSV.",
+      description: "Sales history has been downloaded as CSV.",
       status: "success",
     });
   };

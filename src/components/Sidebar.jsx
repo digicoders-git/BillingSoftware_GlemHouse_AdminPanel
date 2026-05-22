@@ -276,10 +276,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                   Team Management
                 </Text>
               )}
-              <SidebarItem icon={Store} label="Deepo (Branches)" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Store} label="Depot (Branches)" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Deepo List', to: '/manage-branches' },
-                  { label: 'Create New Deepo', to: '/create-branch' },
+                  { label: 'Depot List', to: '/manage-branches' },
+                  { label: 'Create New Depot', to: '/create-branch' },
                 ]}
               </SidebarItem>
 
@@ -466,7 +466,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
             </AlertDialogHeader>
 
             <AlertDialogBody color="gray.600">
-              Bhai, are you sure you want to logout? You will need to sign in again to access the panel.
+              Are you sure you want to logout? You will need to sign in again to access the panel.
             </AlertDialogBody>
 
             <AlertDialogFooter gap="3">

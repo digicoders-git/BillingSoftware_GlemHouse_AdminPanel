@@ -177,7 +177,7 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Bhai, are you sure you want to delete this product? It will be removed from all inventories.')) {
+    if (window.confirm('Are you sure you want to delete this product? It will be removed from all inventories.')) {
       try {
         await API.delete(`/products/${id}`);
         toast({ title: "Product deleted", status: "success" });

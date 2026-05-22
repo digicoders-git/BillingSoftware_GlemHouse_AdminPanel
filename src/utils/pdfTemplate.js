@@ -52,7 +52,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             
             .header { text-align: center; border-bottom: 2px solid #000; padding: 15px; background: #fff; }
             .comp-name { font-size: 32px; font-weight: 950; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; margin-top: 5px; }
-            .comp-addr { font-size: 11px; font-weight: 600; line-height: 1.6; }
+            .comp-addr { font-size: 14px; font-weight: 600; line-height: 1.5; }
             
             .info-section { display: flex; border-bottom: 2px solid #000; min-height: 130px; }
             .left-box { width: 60%; border-right: 2px solid #000; padding: 12px 15px; box-sizing: border-box; }
@@ -90,17 +90,17 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
         <div class="wrapper">
             ${watermarkHtml}
             <div class="top-pan">
-                <span>GSTIN: 09AAACG1234H1Z5</span>
+                <span></span>
                 <span>${invoiceTitle}</span>
             </div>
             
             <div class="header">
                 ${headerLogoHtml}
-                <div class="comp-name">GLEM HOUSE</div>
+                <div class="comp-name">GLEM HOUSE CONSUMER CARE PVT LTD</div>
                 <div class="comp-addr">
-                    PREMIUM KITCHEN APPLIANCES & ELECTRONICS<br>
-                    LUCKNOW, UTTAR PRADESH<br>
-                    SUPPORT: contact@glemhouse.com
+                    Address: 1/093,New A, Jiyamau, Hazratganj, Lucknow (Uttar Pradesh)-226001<br>
+                    Gst no: 09AAACG1234H1Z5<br>
+                    Email Id: contact@glemhouse.com
                 </div>
             </div>
 
@@ -108,9 +108,9 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                 <div class="left-box">
                     <span class="box-title">Detail of Receiver / Consignee</span>
                     <div class="data-row">Name : <span class="line-fill">${(clientName || 'CUSTOMER').toUpperCase()}</span></div>
-                    <div class="data-row">Contact : <span class="line-fill">${clientPhone || 'N/A'}</span></div>
                     <div class="data-row">Address : <span class="line-fill">${clientAddress || 'AS PER RECORDS'}</span></div>
-                    <div class="data-row">GSTIN NO. : <span class="line-fill">${clientGSTIN || 'N/A'}</span></div>
+                    <div class="data-row">Contact : <span class="line-fill">${clientPhone || 'N/A'}</span></div>
+                    <div class="data-row">ID : <span class="line-fill">${clientGSTIN || 'N/A'}</span></div>
                 </div>
                 <div class="right-box">
                     <div class="data-row" style="margin-top:20px;">Invoice No. : <strong>${billNo || 'N/A'}</strong></div>
@@ -123,10 +123,10 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                     <tr>
                         <th style="width: 8%;">S. NO.</th>
                         <th style="width: 45%;">Description</th>
-                        <th style="width: 10%;">Unit</th>
+                        <th style="width: 10%;">HSN Code</th>
                         <th style="width: 10%;">Qty.</th>
                         <th style="width: 12%;">Rate</th>
-                        <th style="width: 15%;">Total</th>
+                        <th style="width: 15%;">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,7 +134,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                         <tr>
                             <td style="text-align: center;">${idx + 1}</td>
                             <td>${item.name || item.description || 'Product'}</td>
-                            <td style="text-align: center;">NOS</td>
+                            <td style="text-align: center;">${item.hsn || '8516'}</td>
                             <td style="text-align: center;">${item.qty || 0}</td>
                             <td style="text-align: right;">₹${Number(item.price || item.rate || 0).toLocaleString('en-IN')}</td>
                             <td style="text-align: right; font-weight: bold;">₹${Number(item.total || ((item.qty || 0) * (item.price || item.rate || 0))).toLocaleString('en-IN')}</td>
@@ -160,7 +160,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             <div class="sign-section">
                 <div style="font-size: 10px;">E. & O. E.<br>Subject to Jurisdiction.</div>
                 <div class="auth-side">
-                    <div>For <strong>GLEM HOUSE</strong></div>
+                    <div>For <strong>GLEM HOUSE CONSUMER CARE PVT LTD</strong></div>
                     <div style="margin-top: 50px; border-top: 1px solid #000; padding-top: 5px;">Authorized Signatory</div>
                 </div>
             </div>

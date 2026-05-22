@@ -322,7 +322,7 @@ const BranchAddProduct = () => {
                     )}
                   </Box>
                 </Box>
-                <Box w="full" p="5" bg="brand.50" borderRadius="xl"><Text fontSize="12px" color="gray.600">Product ki photo upload karna zaroori hai bhai, isse inventory pehchanne me aasan hogi.</Text></Box>
+                <Box w="full" p="5" bg="brand.50" borderRadius="xl"><Text fontSize="12px" color="gray.600">Uploading a product photo is highly recommended to make inventory identification easier.</Text></Box>
               </VStack>
             </Box>
           </GridItem>

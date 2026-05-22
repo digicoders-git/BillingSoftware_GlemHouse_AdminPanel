@@ -205,7 +205,7 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
             </AlertDialogHeader>
 
             <AlertDialogBody color="gray.600">
-              Bhai, are you sure you want to logout? You will need to sign in again to access the panel.
+              Are you sure you want to logout? You will need to sign in again to access the panel.
             </AlertDialogBody>
 
             <AlertDialogFooter gap="3">
