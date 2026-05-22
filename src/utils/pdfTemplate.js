@@ -89,10 +89,6 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
         <div class="invoice-container" style="padding: 40px; background: #fff; width: fit-content; margin: 0 auto;">
         <div class="wrapper">
             ${watermarkHtml}
-            <div class="top-pan">
-                <span></span>
-                <span>${invoiceTitle}</span>
-            </div>
             
             <div class="header">
                 ${headerLogoHtml}

@@ -201,11 +201,7 @@ const DispatchSummary = () => {
                <img src="/main.png" alt="" style={{ width: '70%', height: 'auto', margin: '0 auto' }} />
             </Box>
 
-            {/* Top Pan */}
-            <Flex justify="space-between" borderBottom="2px solid #000" p="8px 15px" fontWeight="950" fontSize="13px" position="relative" zIndex="1" bg="white">
-              <Text></Text>
-              <Text>{dispatch.billingType === 'With GST' ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION'}</Text>
-            </Flex>
+
 
             {/* Header */}
             <VStack spacing="0" p="15px 15px" borderBottom="2px solid #000" textAlign="center" position="relative" zIndex="1" bg="white">
