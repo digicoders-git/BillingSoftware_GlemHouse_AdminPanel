@@ -92,7 +92,7 @@ const BranchViewProduct = () => {
               <SimpleGrid columns={2} spacing="4">
                 <Box p="4" bg="brand.50" borderRadius="xl">
                    <Text fontSize="10px" color="brand.500" fontWeight="800">PRICE</Text>
-                   <Text fontSize="lg" fontWeight="800" color="secondary">${product.price}</Text>
+                   <Text fontSize="lg" fontWeight="800" color="secondary">₹{Number(product.price).toLocaleString()}</Text>
                 </Box>
                 <Box p="4" bg="green.50" borderRadius="xl">
                    <Text fontSize="10px" color="green.500" fontWeight="800">STOCK</Text>

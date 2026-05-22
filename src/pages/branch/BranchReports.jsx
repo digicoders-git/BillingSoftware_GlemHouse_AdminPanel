@@ -97,13 +97,17 @@ const BranchReports = () => {
     if (data.length === 0) return;
 
     const doc = new jsPDF();
+    const userRole = localStorage.getItem('userRole') || 'branch';
+    let roleText = 'Branch';
+    if (userRole === 'sales') roleText = 'Sales Rep';
+    if (userRole === 'distributor') roleText = 'Partner';
     
     // Add Header
-    doc.setFontSize(20);
+    doc.setFontSize(16);
     doc.setTextColor(41, 138, 198); // Brand color
-    doc.text("Glem House - Branch Report", 14, 22);
+    doc.text(`GLEM HOUSE CONSUMER CARE PVT LTD - ${roleText} Report`, 14, 22);
     
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setTextColor(100);
     doc.text(`Report Type: ${reportType.toUpperCase()}`, 14, 32);
     doc.text(`Period: ${startDate} to ${endDate}`, 14, 38);
@@ -196,7 +200,7 @@ const BranchReports = () => {
             <Box className="premium-card" p="6" bg="brand.50" border="1px solid" borderColor="brand.100">
                <Stat>
                   <StatLabel color="brand.600" fontWeight="700">TOTAL REVENUE</StatLabel>
-                  <StatNumber color="secondary" fontSize="3xl" fontWeight="800">${totalVal.toLocaleString()}</StatNumber>
+                  <StatNumber color="secondary" fontSize="3xl" fontWeight="800">₹{totalVal.toLocaleString()}</StatNumber>
                   <StatHelpText color="brand.500" fontWeight="600">Selected Period</StatHelpText>
                </Stat>
             </Box>
@@ -211,7 +215,7 @@ const BranchReports = () => {
                <Stat>
                   <StatLabel color="gray.500" fontWeight="700">AVG VALUE</StatLabel>
                   <StatNumber color="secondary" fontSize="3xl" fontWeight="800">
-                    ${(totalVal / (data.length || 1)).toFixed(2)}
+                    ₹{(totalVal / (data.length || 1)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </StatNumber>
                   <StatHelpText fontWeight="600">Per Record Average</StatHelpText>
                </Stat>
@@ -239,11 +243,14 @@ const BranchReports = () => {
                   ) : data.length > 0 ? (
                     data.slice(0, 50).map((row, idx) => (
                       <Tr key={idx} _hover={{ bg: 'gray.50/50' }}>
-                        {Object.values(row).map((val, i) => (
-                          <Td key={i} py="4" fontWeight="600" color="secondary" fontSize="xs">
-                            {typeof val === 'number' && val > 100 ? `$${val.toLocaleString()}` : val}
-                          </Td>
-                        ))}
+                        {Object.entries(row).map(([key, val], i) => {
+                          const isCurrency = ['Amount', 'Total Sales', 'Revenue'].includes(key);
+                          return (
+                            <Td key={i} py="4" fontWeight="600" color="secondary" fontSize="xs">
+                              {isCurrency ? `₹${Number(val).toLocaleString()}` : val}
+                            </Td>
+                          );
+                        })}
                       </Tr>
                     ))
                   ) : (
