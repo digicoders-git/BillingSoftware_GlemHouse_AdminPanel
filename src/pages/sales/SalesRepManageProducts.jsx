@@ -130,7 +130,7 @@ const SalesRepManageProducts = () => {
       await API.put(`/branch-inventory/${selectedProduct._id}/adjust`, {
         action: adjustAction,
         quantity: adjustQty,
-        reason: 'Sales Partner Manual Adjustment'
+        reason: 'Super Stocklist Partner Manual Adjustment'
       });
       toast({ title: "Stock updated", status: "success" });
       onClose();
@@ -183,7 +183,7 @@ const SalesRepManageProducts = () => {
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">My Digital Shelf</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="500">Inventory currently available in your possession for sales</Text>
+            <Text fontSize="sm" color="gray.500" fontWeight="500">Inventory currently available in your possession for Super Stocklist</Text>
           </Box>
           <HStack spacing="3">
              <Button 
@@ -400,3 +400,4 @@ const SalesRepManageProducts = () => {
 };
 
 export default SalesRepManageProducts;
+

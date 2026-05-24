@@ -125,7 +125,7 @@ const BranchProductWiseSales = () => {
         end = now.clone().endOf('day');
         break;
       default:
-        start = moment(0); // All time
+        start = moment(0);
         end = now.clone().endOf('day');
     }
 
@@ -134,19 +134,17 @@ const BranchProductWiseSales = () => {
       return saleDate.isBetween(start, end, null, '[]');
     });
 
-    // Calculate product-wise stats for filtered range
     const productMap = {};
     filteredSales.forEach(s => {
       s.items.forEach(item => {
         if (!productMap[item.name]) {
-          productMap[item.name] = { name: item.name, sales: 0, revenue: 0, growth: 0, status: 'Stable' };
+          productMap[item.name] = { name: item.name, sold: 0, revenue: 0, growth: 0, status: 'Stable' };
         }
-        productMap[item.name].sales += item.qty;
+        productMap[item.name].sold += item.qty;
         productMap[item.name].revenue += item.total || (item.qty * item.price);
       });
     });
 
-    // Calculate growth (comparing current filtered period with previous equal period)
     const duration = end.diff(start, 'days') + 1;
     const prevStart = start.clone().subtract(duration, 'days');
     const prevEnd = start.clone().subtract(1, 'seconds');
@@ -163,9 +161,9 @@ const BranchProductWiseSales = () => {
     const finalProductWise = Object.values(productMap).map(p => {
       const prevQty = prevProductMap[p.name] || 0;
       if (prevQty > 0) {
-        p.growth = Math.round(((p.sales - prevQty) / prevQty) * 100);
+        p.growth = Math.round(((p.sold - prevQty) / prevQty) * 100);
       } else {
-        p.growth = p.sales > 0 ? 100 : 0;
+        p.growth = p.sold > 0 ? 100 : 0;
       }
       
       if (p.growth > 10) p.status = 'Increasing';
@@ -175,9 +173,8 @@ const BranchProductWiseSales = () => {
       return p;
     });
 
-    // Generate weekly trend for the chart based on range
     const trend = [];
-    const daysToTrack = Math.min(duration, 30); // Max 30 days for trend
+    const daysToTrack = Math.min(duration, 30);
     for (let i = daysToTrack - 1; i >= 0; i--) {
       const d = end.clone().subtract(i, 'days');
       const dateStr = d.format('YYYY-MM-DD');
@@ -205,12 +202,11 @@ const BranchProductWiseSales = () => {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   ).filter(p => statusFilter === 'All' ? true : p.status === statusFilter);
 
-  // Sorting for top products
-  const sortedBySales = [...(filteredData.productWise || [])].sort((a, b) => b.sales - a.sales);
+  const sortedBySold = [...(filteredData.productWise || [])].sort((a, b) => b.sold - a.sold);
   const sortedByRevenue = [...(filteredData.productWise || [])].sort((a, b) => b.revenue - a.revenue);
   
-  const topProduct = sortedBySales[0] || { name: '-', sales: 0, revenue: 0, growth: 0 };
-  const topRevenueProduct = sortedByRevenue[0] || { name: '-', sales: 0, revenue: 0, growth: 0 };
+  const topProduct = sortedBySold[0] || { name: '-', sold: 0, revenue: 0, growth: 0 };
+  const topRevenueProduct = sortedByRevenue[0] || { name: '-', sold: 0, revenue: 0, growth: 0 };
   const avgSales = filteredData.stats.avgSales || 0;
   const avgGrowth = filteredData.productWise?.length > 0 ? (filteredData.productWise.reduce((sum, p) => sum + p.growth, 0) / filteredData.productWise.length).toFixed(1) : 0;
 
@@ -229,13 +225,14 @@ const BranchProductWiseSales = () => {
     setSelectedProduct({ ...product, history: productSales });
     setIsModalOpen(true);
   };
+
   const handleDownloadReport = () => {
     if (currentProducts.length === 0) return;
     
     const headers = ['Product Name', 'Units Sold', 'Revenue (₹)', 'Growth %', 'Status'];
     const csvData = currentProducts.map(p => [
       `"${p.name}"`,
-      p.sales,
+      p.sold,
       p.revenue,
       `${p.growth}%`,
       p.status
@@ -273,7 +270,6 @@ const BranchProductWiseSales = () => {
   return (
     <Layout>
       <Box pb="10">
-        {/* Header Section */}
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Product Sales Tracking</Heading>
@@ -297,11 +293,10 @@ const BranchProductWiseSales = () => {
           </HStack>
         </Flex>
 
-        {/* Top Performing Highlights */}
         <SimpleGrid columns={{ base: 2, md: 2, lg: 4 }} spacing="6" mb="10">
            {[
-              { label: 'MOST SOLD', name: topProduct.name, value: `${topProduct.sales} Units`, revenue: `₹${topProduct.revenue?.toLocaleString()}`, trend: `${topProduct.growth}%`, color: 'green', icon: ShoppingBag },
-              { label: 'TOP REVENUE', name: topRevenueProduct.name, value: `${topRevenueProduct.sales} Units`, revenue: `₹${topRevenueProduct.revenue?.toLocaleString()}`, trend: `${topRevenueProduct.growth}%`, color: 'blue', icon: TrendingUp },
+              { label: 'MOST SOLD', name: topProduct.name, value: `${topProduct.sold} Units`, revenue: `₹${topProduct.revenue?.toLocaleString()}`, trend: `${topProduct.growth}%`, color: 'green', icon: ShoppingBag },
+              { label: 'TOP REVENUE', name: topRevenueProduct.name, value: `${topRevenueProduct.sold} Units`, revenue: `₹${topRevenueProduct.revenue?.toLocaleString()}`, trend: `${topRevenueProduct.growth}%`, color: 'blue', icon: TrendingUp },
               { label: 'DAILY SPEED', name: `${avgSales} Units`, value: 'Avg Sales / Day', revenue: 'Active', trend: 'Good', color: 'orange', icon: BarChart2 },
               { label: 'GROWTH', name: `${avgGrowth > 0 ? '+' : ''}${avgGrowth}%`, value: 'Average Trend', revenue: 'Report', trend: avgGrowth > 0 ? 'Up' : 'Down', color: 'brand', icon: TrendingUp, isDark: true },
            ].map((stat, idx) => (
@@ -322,7 +317,6 @@ const BranchProductWiseSales = () => {
         </SimpleGrid>
 
         <Grid templateColumns={{ base: "1fr", lg: "repeat(3, 1fr)" }} gap="6" mb="10">
-           {/* Weekly Sales Trend Chart */}
            <Box gridColumn={{ lg: "span 2" }} className="premium-card" p="6">
               <Flex justify="space-between" align="center" mb="6">
                  <VStack align="start" spacing="0">
@@ -353,7 +347,6 @@ const BranchProductWiseSales = () => {
               </Box>
            </Box>
 
-           {/* Quick Action Panel */}
            <Box className="premium-card" p="6" bg="secondary" color="white">
               <VStack align="stretch" spacing="5">
                  <Heading size="xs" fontWeight="700">Sales Insights</Heading>
@@ -375,14 +368,13 @@ const BranchProductWiseSales = () => {
                        </VStack>
                     </HStack>
                  </Box>
-                 <Button colorScheme="brand" size="sm" borderRadius="lg" mt="2" rightIcon={<ArrowRight size={16} />} onClick={() => window.location.href = '/branch/sales-history'}>
+                 <Button colorScheme="brand" size="sm" borderRadius="lg" mt="2" rightIcon={<ArrowRight size={16} />} onClick={() => window.location.href = '/branch/product-sales'}>
                     View All Sales
                  </Button>
               </VStack>
            </Box>
         </Grid>
 
-        {/* Product Sales Detailed Table */}
         <Box className="premium-card" overflow="hidden">
            <Box p="6" borderBottom="1px solid" borderColor="gray.50" bg="gray.50/20">
               <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'stretch', md: 'center' }} gap="4">
@@ -445,8 +437,8 @@ const BranchProductWiseSales = () => {
                           </Td>
                           <Td borderColor="gray.100">
                              <VStack align="start" spacing="1">
-                                <Text fontWeight="800" fontSize="xs">{product.sales}</Text>
-                                <Progress value={Math.min((product.sales / (topProduct.sales || 1)) * 100, 100)} size="xs" w="60px" colorScheme="brand" borderRadius="full" />
+                                <Text fontWeight="800" fontSize="xs">{product.sold}</Text>
+                                <Progress value={Math.min((product.sold / (topProduct.sold || 1)) * 100, 100)} size="xs" w="60px" colorScheme="brand" borderRadius="full" />
                              </VStack>
                           </Td>
                           <Td borderColor="gray.100"><Text fontWeight="700" color="secondary" fontSize="xs">₹{product.revenue.toLocaleString()}</Text></Td>
@@ -495,7 +487,6 @@ const BranchProductWiseSales = () => {
         </Box>
       </Box>
 
-      {/* Product Details Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="xl">
         <ModalOverlay backdropFilter="blur(4px)" />
         <ModalContent borderRadius="2xl">
@@ -513,7 +504,7 @@ const BranchProductWiseSales = () => {
             <SimpleGrid columns={3} spacing="4" mb="8">
               <Box p="4" bg="gray.50" borderRadius="xl">
                 <Text fontSize="xs" color="gray.500" mb="1">Total Units</Text>
-                <Text fontWeight="800" fontSize="lg">{selectedProduct?.sales}</Text>
+                <Text fontWeight="800" fontSize="lg">{selectedProduct?.sold}</Text>
               </Box>
               <Box p="4" bg="gray.50" borderRadius="xl">
                 <Text fontSize="xs" color="gray.500" mb="1">Total Revenue</Text>

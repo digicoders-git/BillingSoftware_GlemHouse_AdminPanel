@@ -81,7 +81,9 @@ const AdminProducts = () => {
     category: '',
     description: '',
     minLevel: 5,
-    image: ''
+    image: '',
+    hsn: '',
+    batch: ''
   });
 
   useEffect(() => {
@@ -137,7 +139,9 @@ const AdminProducts = () => {
         category: product.category || '',
         description: product.description || '',
         minLevel: product.minLevel || 5,
-        image: product.image || ''
+        image: product.image || '',
+        hsn: product.hsn || '',
+        batch: product.batch || ''
       });
     } else {
       setEditingProduct(null);
@@ -149,7 +153,9 @@ const AdminProducts = () => {
         category: '',
         description: '',
         minLevel: 5,
-        image: ''
+        image: '',
+        hsn: '',
+        batch: ''
       });
     }
     onOpen();
@@ -255,6 +261,7 @@ const AdminProducts = () => {
              <Thead bg="gray.50/50">
                <Tr>
                  <Th py="4" px="6" border="none" fontSize="10px">Product</Th>
+                 <Th py="4" border="none" fontSize="10px">HSN / Batch</Th>
                  <Th py="4" border="none" fontSize="10px">Category</Th>
                  <Th py="4" border="none" fontSize="10px">Price</Th>
                  <Th py="4" border="none" fontSize="10px">Main Stock</Th>
@@ -275,6 +282,12 @@ const AdminProducts = () => {
                            <Text fontSize="10px" color="gray.400" fontWeight="700">{p.sku}</Text>
                         </Box>
                      </HStack>
+                   </Td>
+                   <Td>
+                      <VStack align="start" spacing="0">
+                        <Text fontWeight="800" color="secondary" fontSize="sm">{p.hsn || 'N/A'}</Text>
+                        <Text fontSize="10px" color="gray.400" fontWeight="700">Batch: {p.batch || 'N/A'}</Text>
+                      </VStack>
                    </Td>
                    <Td><Badge colorScheme="gray" variant="subtle" px="2" py="0.5" borderRadius="md" fontSize="10px">{p.category || 'Uncategorized'}</Badge></Td>
                    <Td><Text fontWeight="900" color="secondary" fontSize="sm">₹{p.price.toLocaleString()}</Text></Td>
@@ -386,17 +399,41 @@ const AdminProducts = () => {
                     </FormControl>
                  </SimpleGrid>
 
-                 <FormControl>
-                    <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Category</FormLabel>
-                    <Input 
-                      placeholder="e.g. Electronics, Furniture" 
-                      h="45px" 
-                      borderRadius="xl" 
-                      fontWeight="700" 
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    />
-                 </FormControl>
+                 <SimpleGrid columns={3} spacing={5}>
+                   <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Category</FormLabel>
+                      <Input 
+                        placeholder="e.g. Electronics, Furniture" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.category}
+                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      />
+                   </FormControl>
+                   <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">HSN Code</FormLabel>
+                      <Input 
+                        placeholder="e.g. 8516" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.hsn}
+                        onChange={(e) => setFormData({...formData, hsn: e.target.value})}
+                      />
+                   </FormControl>
+                   <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Batch No.</FormLabel>
+                      <Input 
+                        placeholder="e.g. BATCH-001" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.batch}
+                        onChange={(e) => setFormData({...formData, batch: e.target.value})}
+                      />
+                   </FormControl>
+                 </SimpleGrid>
 
                  <FormControl>
                     <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Product Image</FormLabel>

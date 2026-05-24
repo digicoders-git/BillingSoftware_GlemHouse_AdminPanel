@@ -71,7 +71,9 @@ const BranchAddProduct = () => {
     price: '',
     stock: '',
     minLevel: '5',
-    image: ''
+    image: '',
+    hsn: '',
+    batch: ''
   });
 
   useEffect(() => {
@@ -237,6 +239,17 @@ const BranchAddProduct = () => {
                           <InputRightElement h="full"><IconButton icon={<RefreshCcw size={16} />} variant="ghost" onClick={generateSKU} aria-label="reg" /></InputRightElement>
                         </InputGroup>
                       </FormControl>
+                  </Grid>
+
+                  <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap="6" w="full">
+                     <FormControl isRequired>
+                        <FormLabel fontSize="13px" fontWeight="700">HSN Code</FormLabel>
+                        <Input placeholder="e.g. 8516" h="55px" borderRadius="xl" bg="white" value={formData.hsn} onChange={(e) => setFormData({ ...formData, hsn: e.target.value })} />
+                     </FormControl>
+                     <FormControl isRequired>
+                        <FormLabel fontSize="13px" fontWeight="700">Batch No.</FormLabel>
+                        <Input placeholder="e.g. BATCH-001" h="55px" borderRadius="xl" bg="white" value={formData.batch} onChange={(e) => setFormData({ ...formData, batch: e.target.value })} />
+                     </FormControl>
                   </Grid>
 
                   <FormControl><FormLabel fontSize="13px" fontWeight="700">Description</FormLabel><Textarea placeholder="Describe the product..." borderRadius="xl" bg="white" h="150px" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} /></FormControl>

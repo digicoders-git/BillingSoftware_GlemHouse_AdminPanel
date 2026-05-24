@@ -69,7 +69,7 @@ import Layout from '../components/Layout';
 import API from '../utils/api';
 
 const ManageSales = () => {
-  const [salesList, setSalesList] = useState([]);
+  const [salesList, setsalesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -78,7 +78,7 @@ const ManageSales = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   
   const [deleteId, setDeleteId] = useState(null);
-  const [viewSales, setViewSales] = useState(null);
+  const [viewSales, setviewSales] = useState(null);
   
   const { isOpen: isDelOpen, onOpen: onDelOpen, onClose: onDelClose } = useDisclosure();
   const { isOpen: isViewOpen, onOpen: onViewOpen, onClose: onViewClose } = useDisclosure();
@@ -95,14 +95,14 @@ const ManageSales = () => {
     setLoading(true);
     try {
       const { data } = await API.get(`/sales?keyword=${search}&pageNumber=${page}&status=${statusFilter}`);
-      setSalesList(data.sales);
+      setsalesList(data.sales);
       setTotalPages(data.pages);
       setTotal(data.total);
       setLoading(false);
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch sales records',
+        description: 'Failed to fetch Super Stocklist records',
         status: 'error',
         duration: 3000,
       });
@@ -115,7 +115,7 @@ const ManageSales = () => {
       await API.delete(`/sales/${deleteId}`);
       toast({
         title: 'Success',
-        description: 'Sales record removed successfully',
+        description: 'Super Stocklist record removed successfully',
         status: 'success',
         duration: 3000,
       });
@@ -124,7 +124,7 @@ const ManageSales = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to remove sales record',
+        description: 'Failed to remove Super Stocklist record',
         status: 'error',
         duration: 3000,
       });
@@ -147,8 +147,8 @@ const ManageSales = () => {
       <Box pb="10">
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
-            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Sales</Heading>
-            <Text fontSize="sm" color="gray.500">View and manage all sales representatives</Text>
+            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Super Stocklist</Heading>
+            <Text fontSize="sm" color="gray.500">View and manage all Super Stocklist representatives</Text>
           </Box>
           <Button 
             leftIcon={<Plus size={16} />} 
@@ -157,21 +157,21 @@ const ManageSales = () => {
             size="sm" 
             onClick={() => navigate('/create-sales')}
           >
-            Add New Sales
+            Add New Super Stocklist
           </Button>
         </Flex>
 
         <Box className="premium-card" overflow="hidden">
           <Box p="6" borderBottom="1px solid" borderColor="gray.50">
             <Flex justify="space-between" align="center">
-              <Heading size="xs" color="secondary" fontWeight="700">Sales Directory</Heading>
+              <Heading size="xs" color="secondary" fontWeight="700">Super Stocklist Directory</Heading>
               <HStack spacing="3">
                 <InputGroup size="sm" maxW="250px">
                   <InputLeftElement pointerEvents="none">
                     <Search color="gray" size={16} />
                   </InputLeftElement>
                   <Input 
-                    placeholder="Search sales..." 
+                    placeholder="Search Super Stocklist..." 
                     borderRadius="lg" 
                     bg="white" 
                     value={search}
@@ -191,7 +191,7 @@ const ManageSales = () => {
               <Table variant="simple">
                 <Thead bg="gray.50/50">
                   <Tr>
-                    <Th fontSize="10px">Sales ID</Th>
+                    <Th fontSize="10px">Super Stocklist ID</Th>
                     <Th fontSize="10px">Name</Th>
                     <Th fontSize="10px">Location</Th>
                     <Th fontSize="10px">Contact</Th>
@@ -200,22 +200,22 @@ const ManageSales = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {salesList.length > 0 ? salesList.map((sales) => (
-                    <Tr key={sales._id} _hover={{ bg: 'gray.50/30' }}>
+                  {salesList.length > 0 ? salesList.map((rep) => (
+                    <Tr key={rep._id} _hover={{ bg: 'gray.50/30' }}>
                       <Td>
-                        <Text fontWeight="700" color="brand.500" fontSize="xs">{sales.salesId}</Text>
+                        <Text fontWeight="700" color="brand.500" fontSize="xs">{rep.salesId}</Text>
                       </Td>
                       <Td>
                          <HStack spacing="3">
-                            <Avatar size="xs" name={sales.name} bg="secondary" />
-                            <Text fontWeight="700" color="secondary" fontSize="xs">{sales.name}</Text>
+                            <Avatar size="xs" name={rep.name} bg="secondary" />
+                            <Text fontWeight="700" color="secondary" fontSize="xs">{rep.name}</Text>
                          </HStack>
                       </Td>
-                      <Td fontSize="xs" color="gray.600">{sales.location}</Td>
-                      <Td fontSize="xs" color="gray.600">{sales.contact}</Td>
+                      <Td fontSize="xs" color="gray.600">{rep.location}</Td>
+                      <Td fontSize="xs" color="gray.600">{rep.contact}</Td>
                       <Td>
-                        <Tag size="sm" variant="subtle" colorScheme="blue" cursor="pointer" onClick={() => copyToClipboard(sales.password)}>
-                          <TagLabel fontSize="10px" fontWeight="700">{sales.email}</TagLabel>
+                        <Tag size="sm" variant="subtle" colorScheme="blue" cursor="pointer" onClick={() => copyToClipboard(rep.password)}>
+                          <TagLabel fontSize="10px" fontWeight="700">{rep.email}</TagLabel>
                         </Tag>
                       </Td>
                       <Td textAlign="right">
@@ -225,7 +225,7 @@ const ManageSales = () => {
                             icon={<Eye size={14} />} 
                             size="xs" 
                             variant="ghost" 
-                            onClick={() => { setViewSales(sales); onViewOpen(); }}
+                            onClick={() => { setviewSales(rep); onViewOpen(); }}
                           />
                           <IconButton 
                             aria-label="Delete" 
@@ -233,14 +233,14 @@ const ManageSales = () => {
                             size="xs" 
                             variant="ghost" 
                             color="red.400" 
-                            onClick={() => { setDeleteId(sales._id); onDelOpen(); }}
+                            onClick={() => { setDeleteId(rep._id); onDelOpen(); }}
                           />
                         </HStack>
                       </Td>
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="6" textAlign="center" py="10" color="gray.500">No sales records found</Td>
+                      <Td colSpan="6" textAlign="center" py="10" color="gray.500">No Super Stocklist records found</Td>
                     </Tr>
                   )}
                 </Tbody>
@@ -264,7 +264,7 @@ const ManageSales = () => {
       <Modal isOpen={isViewOpen} onClose={onViewClose} size="md">
         <ModalOverlay backdropFilter="blur(4px)" />
         <ModalContent borderRadius="2xl">
-          <ModalHeader>Sales Representative Details</ModalHeader>
+          <ModalHeader>Super Stocklist Representative Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb="6">
             {viewSales && (
@@ -275,7 +275,7 @@ const ManageSales = () => {
                 </Box>
                 <Grid templateColumns="repeat(2, 1fr)" gap="4">
                   <GridItem>
-                    <Text fontSize="xs" color="gray.500" fontWeight="700">SALES ID</Text>
+                    <Text fontSize="xs" color="gray.500" fontWeight="700">Super Stocklist ID</Text>
                     <Text fontWeight="600">{viewSales.salesId}</Text>
                   </GridItem>
                   <GridItem>
@@ -311,7 +311,7 @@ const ManageSales = () => {
       <AlertDialog isOpen={isDelOpen} leastDestructiveRef={cancelRef} onClose={onDelClose}>
         <AlertDialogOverlay>
           <AlertDialogContent borderRadius="xl">
-            <AlertDialogHeader>Delete Sales Record</AlertDialogHeader>
+            <AlertDialogHeader>Delete Super Stocklist Record</AlertDialogHeader>
             <AlertDialogBody>Are you sure? This will also delete their login account.</AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onDelClose}>Cancel</Button>
@@ -325,3 +325,5 @@ const ManageSales = () => {
 };
 
 export default ManageSales;
+
+

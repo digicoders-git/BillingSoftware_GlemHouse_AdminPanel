@@ -64,7 +64,7 @@ const AdminInventoryLogs = () => {
     let locMatch = true;
     if (filterLocation === 'Warehouse') locMatch = !log.branch && !log.salesRep;
     else if (filterLocation === 'Deepo') locMatch = !!log.branch;
-    else if (filterLocation === 'Sales') locMatch = !!log.salesRep;
+    else if (filterLocation === 'Super Stocklist') locMatch = !!log.salesRep;
     
     const typeMatch = filterType === 'All' || log.type === filterType;
     return locMatch && typeMatch;
@@ -93,7 +93,7 @@ const AdminInventoryLogs = () => {
                   <option value="All">All Locations</option>
                   <option value="Warehouse">Warehouse</option>
                   <option value="Deepo">All Depots (Branches)</option>
-                  <option value="Sales">All Sales Partners</option>
+                  <option value="Super Stocklist">All Super Stocklist Partners</option>
               </Select>
            </FormControl>
            <FormControl w="200px">
@@ -147,7 +147,7 @@ const AdminInventoryLogs = () => {
                                   <Text fontSize="xs" fontWeight="700" color={log.branch ? 'blue.600' : log.salesRep ? 'purple.600' : 'gray.600'}>
                                      {log.branch ? log.branch.name : log.salesRep ? log.salesRep.name : 'Warehouse'}
                                   </Text>
-                                  {log.salesRep && <Text fontSize="9px" color="gray.400" fontWeight="700">SALES PARTNER</Text>}
+                                  {log.salesRep && <Text fontSize="9px" color="gray.400" fontWeight="700">Super Stocklist PARTNER</Text>}
                                </VStack>
                             </HStack>
                          </Td>
@@ -183,3 +183,4 @@ const AdminInventoryLogs = () => {
 };
 
 export default AdminInventoryLogs;
+

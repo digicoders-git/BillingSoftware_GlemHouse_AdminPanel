@@ -28,7 +28,9 @@ import ManageSales from './pages/ManageSales';
 import CreateSales from './pages/CreateSales';
 import ManageDistributors from './pages/ManageDistributors';
 import CreateDistributor from './pages/CreateDistributor';
+import LowStockAlert from './pages/LowStockAlert';
 import DeepoBilling from './pages/DeepoBilling';
+import DepotTransfer from './pages/DepotTransfer';
 
 // Branch Panel Pages
 import BranchDashboard from './pages/branch/BranchDashboard';
@@ -77,6 +79,8 @@ function App() {
         <Route path="/admin/inventory" element={<AdminInventory />} />
         <Route path="/admin/products" element={<AdminProducts />} />
         <Route path="/admin/inventory-logs" element={<AdminInventoryLogs />} />
+        <Route path="/admin/low-stock" element={<LowStockAlert />} />
+        <Route path="/admin/transfer-stock" element={<DepotTransfer />} />
         
         {/* Billing Routes */}
         <Route path="/billing/gst" element={<DeepoBilling isGst={true} />} />

@@ -283,10 +283,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={Users} label="Sales Team" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Users} label="Super Stocklist" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Sales Members', to: '/manage-sales' },
-                  { label: 'Add Sales Person', to: '/create-sales' },
+                  { label: 'Super Stocklist Members', to: '/manage-sales' },
+                  { label: 'Add Super Stocklist', to: '/create-sales' },
                 ]}
               </SidebarItem>
 
@@ -304,7 +304,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               )}
               <SidebarItem icon={Package} label="Warehouse Stock" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Stock Summary', to: '/admin/inventory' },
+                  { label: 'All Network Inventory', to: '/admin/inventory' },
                   { label: 'Product Catalog', to: '/admin/products' },
                   { label: 'Stock History', to: '/admin/inventory-logs' },
                 ]}
@@ -312,9 +312,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
 
               <SidebarItem icon={Receipt} label="Consignment Logic" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Dispatch with GST', to: '/billing/gst' },
-                  { label: 'Dispatch without GST', to: '/billing/non-gst' },
-                  { label: 'All Dispatches History', to: '/total-dispatch-stock' },
+                  { label: 'Stock Transfer', to: '/admin/transfer-stock' },
+                  { label: 'All Transfer History', to: '/total-dispatch-stock' },
                   { label: 'All Sales Records', to: '/admin/all-sales' },
                 ]}
               </SidebarItem>
@@ -373,7 +372,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           {/* SALES REP SIDEBAR */}
           {userRole === 'sales' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="Sales Dashboard" to="/sales/dashboard" isCollapsed={isCollapsed} />
+              <SidebarItem icon={LayoutDashboard} label="Super Stocklist Dashboard" to="/sales/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">

@@ -249,9 +249,9 @@ const BranchPerformance = () => {
               </Flex>
               <VStack align="stretch" spacing="5">
                  {[
-                   { name: 'iPhone 15 Pro', sales: 124, revenue: '₹1,23,876', growth: '+15%', status: 'Best Seller' },
-                   { name: 'MacBook Air M2', sales: 86, revenue: '₹1,11,714', growth: '+12%', status: 'Trending' },
-                   { name: 'AirPods Pro 2', sales: 245, revenue: '₹61,005', growth: '+25%', status: 'High Demand' },
+                   { name: 'iPhone 15 Pro', sold: 124, revenue: '₹1,23,876', growth: '+15%', status: 'Best Seller' },
+                   { name: 'MacBook Air M2', sold: 86, revenue: '₹1,11,714', growth: '+12%', status: 'Trending' },
+                   { name: 'AirPods Pro 2', sold: 245, revenue: '₹61,005', growth: '+25%', status: 'High Demand' },
                  ].map((item, idx) => (
                     <Flex key={idx} align="center" justify="space-between" p="4" bg="gray.50/50" borderRadius="22px" border="1px solid" borderColor="gray.100" transition="all 0.2s" _hover={{ shadow: 'md', bg: 'white', borderColor: 'brand.100' }}>
                        <HStack spacing="4">
@@ -260,7 +260,7 @@ const BranchPerformance = () => {
                           </Box>
                           <VStack align="start" spacing="0">
                              <Text fontWeight="900" color="secondary" fontSize="sm">{item.name}</Text>
-                             <Text fontSize="xs" color="gray.400" fontWeight="600">{item.sales} Units Sold</Text>
+                             <Text fontSize="xs" color="gray.400" fontWeight="600">{item.sold} Units Sold</Text>
                           </VStack>
                        </HStack>
                        <VStack align="end" spacing="0">

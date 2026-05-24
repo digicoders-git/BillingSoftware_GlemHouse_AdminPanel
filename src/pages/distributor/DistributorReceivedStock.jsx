@@ -93,7 +93,7 @@ const DistributorReceivedStock = () => {
       <Box pb="10">
         <Box mb="8">
           <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">Incoming Shipments</Heading>
-          <Text color="gray.500" fontWeight="500">Track and receive stock sent by Sales Representatives</Text>
+          <Text color="gray.500" fontWeight="500">Track and receive stock sent by Super Stoklist Representatives</Text>
         </Box>
 
         <Box className="premium-card" overflow="hidden">
@@ -126,7 +126,7 @@ const DistributorReceivedStock = () => {
                       <Td>
                         <HStack>
                           <Icon as={Truck} size={14} color="brand.500" />
-                          <Text fontWeight="700" fontSize="sm">{dsp.senderSalesRep?.name || 'Sales Rep'}</Text>
+                          <Text fontWeight="700" fontSize="sm">{dsp.senderSalesRep?.name || 'Super Stoklist Rep'}</Text>
                         </HStack>
                       </Td>
                       <Td>
@@ -210,7 +210,7 @@ const DistributorReceivedStock = () => {
                    <Box>
                       <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Sender Info</Text>
                       <Text fontWeight="800" color="secondary">{selectedDispatch.senderSalesRep?.name}</Text>
-                      <Text fontSize="xs" color="gray.500">Sales ID: {selectedDispatch.senderSalesRep?.salesId}</Text>
+                      <Text fontSize="xs" color="gray.500">Super Stoklist ID: {selectedDispatch.senderSalesRep?.salesId}</Text>
                    </Box>
                    <Box>
                       <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase">Dispatch Time</Text>
@@ -256,3 +256,4 @@ const DistributorReceivedStock = () => {
 };
 
 export default DistributorReceivedStock;
+

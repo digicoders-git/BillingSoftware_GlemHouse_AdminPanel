@@ -137,7 +137,7 @@ const Dashboard = () => {
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Master Control Dashboard</Heading>
              <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
-                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Depot(s)</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Sales</Text> recorded today
+                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Depot(s)</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Super Stocklist</Text> recorded today
              </Text>
           </Box>
           <Box bg="white" p="2" borderRadius="xl" shadow="sm" border="1px solid" borderColor="gray.100">
@@ -179,7 +179,7 @@ const Dashboard = () => {
               : `₹${(data.stats?.totalRevenue || 0).toLocaleString()}`} 
             icon={TrendingUp} 
             trend="up" 
-            trendValue={`${data.stats?.totalSalesCount || 0} Sales`}
+            trendValue={`${data.stats?.totalSalesCount || 0} Super Stocklist`}
             color="green" 
             onClick={() => navigate('/reports/daily')}
           />
@@ -197,7 +197,7 @@ const Dashboard = () => {
             onClick={() => navigate('/manage-branches')}
           />
           <ColoredStatCard 
-            title="Total Sales Team" 
+            title="Total Super Stocklist Team" 
             value={`${data.stats?.totalSalesReps || 0} Members`} 
             icon={Users} 
             trend="up" 
@@ -238,12 +238,12 @@ const Dashboard = () => {
           />
           <ColoredStatCard 
             title="Low Stock Warning" 
-            value={`${data.stats?.mainStock <= 10 ? 'CRITICAL' : 'STABLE'}`} 
+            value={`${data.stats?.lowStockCount || 0} Products`} 
             icon={AlertTriangle} 
-            trend={data.stats?.mainStock <= 10 ? 'down' : 'up'} 
-            trendValue="Warehouse"
-            color={data.stats?.mainStock <= 10 ? 'red' : 'green'} 
-            onClick={() => navigate('/admin/inventory')}
+            trend={data.stats?.lowStockCount > 0 ? 'down' : 'up'} 
+            trendValue={data.stats?.lowStockCount > 0 ? 'Needs Restock' : 'All Healthy'}
+            color={data.stats?.lowStockCount > 0 ? 'red' : 'green'} 
+            onClick={() => navigate('/admin/low-stock')}
           />
         </Grid>
 
@@ -275,7 +275,8 @@ const Dashboard = () => {
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
                     cursor={{fill: 'rgba(41, 138, 198, 0.05)'}}
                   />
-                  <Bar dataKey="dispatches" fill="#298AC6" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="dispatches" fill="#298AC6" radius={[4, 4, 0, 0]} barSize={30} name="Units Dispatched" />
+                  <Bar dataKey="sales" fill="#34D399" radius={[4, 4, 0, 0]} barSize={30} name="Revenue (₹)" />
                 </BarChart>
               </ResponsiveContainer>
             </Box>
@@ -309,7 +310,7 @@ const Dashboard = () => {
                   <Tooltip 
                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="#2167E3" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                  <Area type="monotone" dataKey="sales" stroke="#2167E3" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Revenue (₹)" />
                 </AreaChart>
               </ResponsiveContainer>
             </Box>
@@ -367,3 +368,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+

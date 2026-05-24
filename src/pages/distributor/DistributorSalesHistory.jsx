@@ -231,7 +231,7 @@ const DistributorSalesHistory = () => {
               {filteredSales.length === 0 && (
                  <Flex direction="column" align="center" py="20">
                     <Icon as={ShoppingBag} size={40} color="gray.200" mb="4" />
-                    <Text color="gray.400" fontWeight="600">No sales records found</Text>
+                    <Text color="gray.400" fontWeight="600">No Sales records found</Text>
                  </Flex>
               )}
             </Box>
@@ -322,3 +322,4 @@ const DistributorSalesHistory = () => {
 };
 
 export default DistributorSalesHistory;
+

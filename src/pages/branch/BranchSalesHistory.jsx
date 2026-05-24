@@ -95,7 +95,6 @@ const BranchSalesHistory = () => {
   };
 
   const handleDownloadInvoice = async (row) => {
-    // Reconstruct billData from the sale row
     const billData = {
       billNo: row.invoiceId,
       clientName: row.customerName,
@@ -123,10 +122,7 @@ const BranchSalesHistory = () => {
     const matchesSearch = s.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           s.products.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // We need to make sure the backend returns sellerType or we check s.sellerType
     const matchesType = !sellerTypeFilter || s.sellerType === sellerTypeFilter;
-    
     return matchesSearch && matchesType;
   });
 
@@ -153,7 +149,6 @@ const BranchSalesHistory = () => {
           </HStack>
         </Flex>
 
-        {/* Quick Sales Stats */}
         <Grid templateColumns={{ base: "1fr", sm: "repeat(4, 1fr)" }} gap="6" mb="8">
            <Box className="premium-card" p="5" transition="all 0.3s" _hover={{ transform: 'translateY(-5px)', shadow: 'xl' }}>
               <Flex align="center" gap="4">
@@ -201,7 +196,6 @@ const BranchSalesHistory = () => {
            </Box>
         </Grid>
 
-        {/* Sales Table */}
         <Box className="premium-card">
           <Box p="4" borderBottom="1px solid" borderColor="gray.50">
             <Flex direction={{ base: 'column', sm: 'row' }} gap="4" justify="space-between">
@@ -218,8 +212,8 @@ const BranchSalesHistory = () => {
                     value={sellerTypeFilter}
                     onChange={(e) => setSellerTypeFilter(e.target.value)}
                  >
-                    <option value="Branch">Branches</option>
-                    <option value="SalesRep">Sales Reps</option>
+                    <option value="Branch">Depots</option>
+                    <option value="SalesRep">Super Stoklist Reps</option>
                     <option value="Distributor">Distributors</option>
                  </Select>
                  <InputGroup maxW={{ base: 'full', sm: '300px' }}>

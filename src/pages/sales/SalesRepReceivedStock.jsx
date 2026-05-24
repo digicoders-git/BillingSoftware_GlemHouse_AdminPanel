@@ -55,7 +55,7 @@ const SalesRepReceivedStock = () => {
   const fetchDispatches = async () => {
     try {
       setLoading(true);
-      // Fetches dispatches where receiverSalesRep is the current user
+      // Fetches dispatches where receiversalesRep is the current user
       const { data } = await API.get('/dispatches');
       setDispatches(data.dispatches || []);
     } catch (error) {
@@ -283,3 +283,4 @@ const SalesRepReceivedStock = () => {
 };
 
 export default SalesRepReceivedStock;
+

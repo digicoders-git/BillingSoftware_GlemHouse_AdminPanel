@@ -23,8 +23,10 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
     
     const { 
         billNo, clientName, clientPhone, clientAddress, clientGSTIN, items, 
-        totalAmount, subTotal, totalTax, taxPercentage, createdAt, isGstEnabled 
+        totalAmount, subTotal, totalTax, taxPercentage, createdAt, isGstEnabled, billingType, senderType, receiverType
     } = bill;
+    
+    const isTransfer = billingType === 'Transfer' || (senderType === 'Admin' && receiverType === 'Branch');
 
     const billDate = new Date(createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const amountInWords = numberToWords(totalAmount || 0);
@@ -38,7 +40,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
         </div>
     ` : '';
 
-    const invoiceTitle = isGstEnabled ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION';
+    const invoiceTitle = isTransfer ? 'STOCK TRANSFER' : (isGstEnabled ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION');
 
     return `
     <!DOCTYPE html>
@@ -51,7 +53,8 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             .top-pan { border-bottom: 2px solid #000; display: flex; justify-content: space-between; padding: 5px 15px; font-weight: bold; font-size: 12px; }
             
             .header { text-align: center; border-bottom: 2px solid #000; padding: 15px; background: #fff; }
-            .comp-name { font-size: 32px; font-weight: 950; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; margin-top: 5px; }
+            .invoice-title { font-size: 16px; font-weight: 900; text-decoration: underline; margin-bottom: 8px; text-transform: uppercase; }
+            .comp-name { font-size: 26px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; margin-top: 5px; }
             .comp-addr { font-size: 14px; font-weight: 600; line-height: 1.5; }
             
             .info-section { display: flex; border-bottom: 2px solid #000; min-height: 130px; }
@@ -91,6 +94,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             ${watermarkHtml}
             
             <div class="header">
+                <div class="invoice-title">${invoiceTitle}</div>
                 ${headerLogoHtml}
                 <div class="comp-name">GLEM HOUSE CONSUMER CARE PVT LTD</div>
                 <div class="comp-addr">
@@ -117,12 +121,14 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             <table class="table-main">
                 <thead>
                     <tr>
-                        <th style="width: 8%;">S. NO.</th>
-                        <th style="width: 45%;">Description</th>
-                        <th style="width: 10%;">HSN Code</th>
-                        <th style="width: 10%;">Qty.</th>
+                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '50%' : '35%'};">Description</th>
+                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">HSN Code</th>
+                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">Batch No.</th>
+                            <th style="border-bottom: 2px solid #000; border-right: ${isTransfer ? 'none' : '2px solid #000'}; padding: 10px 5px; width: ${isTransfer ? '10%' : '10%'};">Qty.</th>
+                        ${!isTransfer ? `
                         <th style="width: 12%;">Rate</th>
                         <th style="width: 15%;">Amount</th>
+                        ` : ''}
                     </tr>
                 </thead>
                 <tbody>
@@ -130,21 +136,32 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                         <tr>
                             <td style="text-align: center;">${idx + 1}</td>
                             <td>${item.name || item.description || 'Product'}</td>
-                            <td style="text-align: center;">${item.hsn || '8516'}</td>
+                            <td style="text-align: center;">${item.hsn || item.product?.hsn || 'N/A'}</td>
+                            <td style="text-align: center;">${item.batch || item.product?.batch || 'N/A'}</td>
                             <td style="text-align: center;">${item.qty || 0}</td>
+                            ${!isTransfer ? `
                             <td style="text-align: right;">₹${Number(item.price || item.rate || 0).toLocaleString('en-IN')}</td>
                             <td style="text-align: right; font-weight: bold;">₹${Number(item.total || ((item.qty || 0) * (item.price || item.rate || 0))).toLocaleString('en-IN')}</td>
+                            ` : ''}
                         </tr>
                     `).join('')}
                     <!-- Dynamic filler to maintain spacing -->
-                    ${Array(Math.max(0, 8 - (items?.length || 0))).fill('<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td></tr>').join('')}
-                    <tr class="empty-row" style="height: 150px;"><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    ${Array(Math.max(0, 8 - (items?.length || 0))).fill(`<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td>${!isTransfer ? '<td></td><td></td>' : ''}</tr>`).join('')}
+                    <tr class="empty-row" style="height: 150px; border-bottom: none;">
+                        <td style="border-bottom: none;"></td>
+                        <td style="border-bottom: none;"></td>
+                        <td style="border-bottom: none;"></td>
+                        <td style="border-bottom: none;"></td>
+                        <td style="border-bottom: none;"></td>
+                        ${!isTransfer ? '<td style="border-bottom: none;"></td><td style="border-bottom: none;"></td>' : ''}
+                    </tr>
                 </tbody>
             </table>
 
+            ${!isTransfer ? `
             <div class="footer-box"><div class="footer-label" style="width: 44.8%;">SUBTOTAL</div><div class="footer-val" style="width: 12.8%;">${Number(subTotal || 0).toLocaleString('en-IN')}</div></div>
             ${isGstEnabled ? `
-                <div class="footer-box"><div class="footer-label" style="width: 44.8%;">TAX ${taxPercentage !== undefined ? `(${taxPercentage}%)` : ''}</div><div class="footer-val" style="width: 12.8%;">${Number(totalTax || 0).toLocaleString('en-IN')}</div></div>
+                <div class="footer-box"><div class="footer-label" style="width: 44.8%;">TAX ${taxPercentage !== undefined ? '(' + taxPercentage + '%)' : ''}</div><div class="footer-val" style="width: 12.8%;">${Number(totalTax || 0).toLocaleString('en-IN')}</div></div>
             ` : ''}
             <div class="footer-box" style="background:#f0f0f0;">
                 <div class="footer-label" style="width: 44.8%; border-bottom: 2px solid #000;">GRAND TOTAL</div>
@@ -152,6 +169,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             </div>
 
             <div class="inbound-words">Total Amount (in words) : RUPEES ${amountInWords}</div>
+            ` : ''}
 
             <div class="sign-section">
                 <div style="font-size: 10px;">E. & O. E.<br>Subject to Jurisdiction.</div>

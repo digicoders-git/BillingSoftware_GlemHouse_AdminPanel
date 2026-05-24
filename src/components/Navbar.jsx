@@ -176,8 +176,10 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
                   </Text>
                   <Text fontSize="11px" color="gray.500">
                     {profile?.role === 'admin' ? 'Super Admin' : 
-                     profile?.role === 'sales' ? 'Sales Partner' : 
-                     'Store Manager'}
+                     profile?.role === 'sales' ? 'Super Stocklist Partner' : 
+                     profile?.role === 'branch' ? 'Depot Manager' :
+                     profile?.role === 'distributor' ? 'Distribution Partner' :
+                     'Super Stocklist Partner'}
                   </Text>
                 </Box>
                 <ChevronDown size={14} color="gray" />

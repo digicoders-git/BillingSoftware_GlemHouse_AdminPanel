@@ -55,19 +55,23 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import API from '../utils/api';
 import Layout from '../components/Layout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const MotionBox = motion(Box);
 const MotionTr = motion(Tr);
 
 const AdminInventory = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [summary, setSummary] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
+  const [filterStatus, setFilterStatus] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('filter') || 'All';
+  });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -136,9 +140,9 @@ const AdminInventory = () => {
   const filteredProducts = products.filter(p => 
     (p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterStatus === 'All' || 
-     (filterStatus === 'Low' && p.totalStock <= 5 && p.totalStock > 0) ||
+     (filterStatus === 'Low' && p.totalStock <= (p.minLevel || 5) && p.totalStock > 0) ||
      (filterStatus === 'Out' && p.totalStock === 0) ||
-     (filterStatus === 'Healthy' && p.totalStock > 5))
+     (filterStatus === 'Healthy' && p.totalStock > (p.minLevel || 5)))
   );
 
   const getStatusColor = (stock) => {
@@ -154,9 +158,9 @@ const AdminInventory = () => {
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="8" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="800" letterSpacing="-1px">
-              Warehouse Hub
+              All Network Inventory
             </Heading>
-            <Text color="gray.500" fontSize="sm" mt="1">Real-time control over your central stock levels</Text>
+            <Text color="gray.500" fontSize="sm" mt="1">Complete overview of stock across Admin Warehouse and all Branches/Depots</Text>
           </Box>
           <HStack spacing="3" w={{ base: 'full', md: 'auto' }}>
             <Button 
@@ -357,14 +361,14 @@ const AdminInventory = () => {
                                    </Text>
                                    <Badge size="xs" variant="ghost" colorScheme="gray" fontSize="8px" fontWeight="700">TOTAL</Badge>
                                 </HStack>
-                                <HStack spacing="2">
+                                 <HStack spacing="3">
                                    <Box>
-                                      <Text fontSize="9px" color="gray.400" fontWeight="700">WHS: {p.warehouseStock}</Text>
+                                      <Text fontSize="9px" color="gray.400" fontWeight="700">ADMIN WAREHOUSE: {p.warehouseStock}</Text>
                                    </Box>
                                    <Box>
-                                      <Text fontSize="9px" color="brand.400" fontWeight="700">BCH: {p.branchStock}</Text>
+                                      <Text fontSize="9px" color="brand.400" fontWeight="700">ALL DEPOTS: {p.branchStock}</Text>
                                    </Box>
-                                </HStack>
+                                 </HStack>
                                 <Progress 
                                    value={(p.totalStock / 50) * 100} 
                                    size="xs" 

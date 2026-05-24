@@ -130,7 +130,10 @@ const DispatchStock = () => {
         tax: dsp.gstAmount || 0,
         discount: 0,
         totalAmount: dsp.totalAmount,
-        isGstEnabled: dsp.billingType === 'With GST'
+        isGstEnabled: dsp.billingType === 'With GST',
+        billingType: dsp.billingType,
+        senderType: dsp.senderType,
+        receiverType: dsp.receiverType
       };
 
       const html = pdfTemplate(invoiceData);
@@ -229,37 +232,16 @@ const DispatchStock = () => {
               isLoading={loading}
             />
             <Button leftIcon={<Printer size={16} />} variant="outline" borderRadius="xl" size="sm" color="gray.600">Print</Button>
-            <Menu>
-              <MenuButton 
-                as={Button} 
-                leftIcon={<Package size={16} />} 
-                rightIcon={<ChevronDown size={14} />}
-                colorScheme="brand" 
-                borderRadius="xl" 
-                shadow="sm" 
-                size="sm"
-              >
-                New Dispatch
-              </MenuButton>
-              <MenuList borderRadius="xl" shadow="2xl" border="none" p="1">
-                <MenuItem 
-                  icon={<ArrowUpRight size={14} />} 
-                  fontSize="xs" 
-                  fontWeight="700"
-                  onClick={() => navigate('/billing/gst')}
-                >
-                  Dispatch with GST
-                </MenuItem>
-                <MenuItem 
-                  icon={<Package size={14} />} 
-                  fontSize="xs" 
-                  fontWeight="700"
-                  onClick={() => navigate('/billing/non-gst')}
-                >
-                  Dispatch without GST
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Button
+              leftIcon={<Package size={16} />} 
+              colorScheme="brand" 
+              borderRadius="xl" 
+              shadow="sm" 
+              size="sm"
+              onClick={() => navigate('/admin/transfer-stock')}
+            >
+              Transfer Stock
+            </Button>
           </HStack>
         </Flex>
 
@@ -368,7 +350,9 @@ const DispatchStock = () => {
                       <Td borderColor="gray.100">
                         <VStack align="start" spacing="0">
                           <Text fontSize="xs" fontWeight="800" color="secondary">{dsp.totalItems} Units</Text>
-                          <Text fontSize="10px" color="gray.400">₹{(dsp.totalAmount || 0).toLocaleString()}</Text>
+                          <Text fontSize="10px" color="gray.400">
+                             {dsp.billingType === 'Transfer' ? 'Transfer' : `₹${(dsp.totalAmount || 0).toLocaleString()}`}
+                          </Text>
                         </VStack>
                       </Td>
                       <Td borderColor="gray.100">
@@ -479,3 +463,4 @@ const DispatchStock = () => {
 };
 
 export default DispatchStock;
+

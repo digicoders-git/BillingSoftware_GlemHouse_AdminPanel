@@ -108,6 +108,7 @@ const DispatchSummary = () => {
   }
 
   const amountInWords = numberToWords(dispatch.totalAmount || dispatch.totalValue || 0);
+  const isTransfer = dispatch.billingType === 'Transfer' || (dispatch.senderType === 'Admin' && dispatch.receiverType === 'Branch');
 
   return (
     <Layout>
@@ -205,7 +206,10 @@ const DispatchSummary = () => {
 
             {/* Header */}
             <VStack spacing="0" p="15px 15px" borderBottom="2px solid #000" textAlign="center" position="relative" zIndex="1" bg="white">
-               <Text fontSize="32px" fontWeight="950" letterSpacing="2px" mb="1" mt="1" lineHeight="1">GLEM HOUSE CONSUMER CARE PVT LTD</Text>
+               <Text fontSize="16px" fontWeight="900" textDecoration="underline" mb="2">
+                 {isTransfer ? 'STOCK TRANSFER' : (dispatch.billingType === 'With GST' ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION')}
+               </Text>
+               <Text fontSize="26px" fontWeight="800" letterSpacing="1px" mb="1" mt="1" lineHeight="1">GLEM HOUSE CONSUMER CARE PVT LTD</Text>
                <VStack spacing="1" fontSize="13px" fontWeight="700">
                  <Text>Address: 1/093,New A, Jiyamau, Hazratganj, Lucknow (Uttar Pradesh)-226001</Text>
                  <Text>Gst no: 09AAACG1234H1Z5</Text>
@@ -249,12 +253,17 @@ const DispatchSummary = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
                 <thead>
                   <tr style={{ background: '#f0f0f0', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '8%', fontWeight: '950', fontSize: '13px' }}>S. NO.</th>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '45%', fontWeight: '950', fontSize: '13px' }}>Description</th>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>HSN Code</th>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '10%', fontWeight: '950', fontSize: '13px' }}>Qty.</th>
-                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '12%', fontWeight: '950', fontSize: '13px' }}>Rate</th>
-                    <th style={{ borderBottom: '2px solid #000', padding: '12px 8px', width: '15%', fontWeight: '950', fontSize: '13px' }}>Amount</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: isTransfer ? '10%' : '8%', fontWeight: '950', fontSize: '13px' }}>S. NO.</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: isTransfer ? '50%' : '35%', fontWeight: '950', fontSize: '13px' }}>Description</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: isTransfer ? '15%' : '10%', fontWeight: '950', fontSize: '13px' }}>HSN Code</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: isTransfer ? '15%' : '10%', fontWeight: '950', fontSize: '13px' }}>Batch No.</th>
+                    <th style={{ borderBottom: '2px solid #000', borderRight: isTransfer ? 'none' : '2px solid #000', padding: '12px 8px', width: isTransfer ? '10%' : '10%', fontWeight: '950', fontSize: '13px' }}>Qty.</th>
+                    {!isTransfer && (
+                      <>
+                        <th style={{ borderBottom: '2px solid #000', borderRight: '2px solid #000', padding: '12px 8px', width: '12%', fontWeight: '950', fontSize: '13px' }}>Rate</th>
+                        <th style={{ borderBottom: '2px solid #000', padding: '12px 8px', width: '15%', fontWeight: '950', fontSize: '13px' }}>Amount</th>
+                      </>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -262,31 +271,46 @@ const DispatchSummary = () => {
                     <tr key={idx}>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{idx + 1}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', fontWeight: '900' }}>{item.name}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.hsn || '8516'}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '950' }}>{item.qty}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900' }}>₹{(item.price || 0).toLocaleString('en-IN')}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '950' }}>₹{((item.qty || 0) * (item.price || 0)).toLocaleString('en-IN')}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.hsn || item.product?.hsn || 'N/A'}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.batch || item.product?.batch || 'N/A'}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: isTransfer ? 'none' : '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '950' }}>{item.qty}</td>
+                      {!isTransfer && (
+                        <>
+                          <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '900' }}>{`₹${(item.price || 0).toLocaleString('en-IN')}`}</td>
+                          <td style={{ borderBottom: '1.5px solid #000', padding: '10px 8px', textAlign: 'right', fontWeight: '950' }}>{`₹${((item.qty || 0) * (item.price || 0)).toLocaleString('en-IN')}`}</td>
+                        </>
+                      )}
                     </tr>
                   ))}
                   {/* Filler rows */}
-                  {[...Array(Math.max(0, 5 - dispatch.items.length))].map((_, i) => (
-                    <tr key={`empty-${i}`} style={{ height: '30px' }}>
+                  {Array.from({ length: Math.max(0, 8 - (dispatch.items?.length || 0)) }).map((_, i) => (
+                    <tr key={`empty-${i}`} style={{ height: '35px' }}>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
-                      <td style={{ borderBottom: '1.5px solid #000' }}></td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: isTransfer ? 'none' : '2px solid #000' }}></td>
+                      {!isTransfer && (
+                        <>
+                          <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000' }}></td>
+                          <td style={{ borderBottom: '1.5px solid #000' }}></td>
+                        </>
+                      )}
                     </tr>
                   ))}
                   {/* Spacer for bottom items */}
-                  <tr style={{ height: '40px' }}>
+                  <tr style={{ height: '40px', borderBottom: isTransfer ? '2px solid #000' : 'none' }}>
                     <td style={{ borderRight: '2px solid #000' }}></td>
                     <td style={{ borderRight: '2px solid #000' }}></td>
                     <td style={{ borderRight: '2px solid #000' }}></td>
                     <td style={{ borderRight: '2px solid #000' }}></td>
-                    <td style={{ borderRight: '2px solid #000' }}></td>
-                    <td></td>
+                    <td style={{ borderRight: isTransfer ? 'none' : '2px solid #000' }}></td>
+                    {!isTransfer && (
+                      <>
+                        <td style={{ borderRight: '2px solid #000' }}></td>
+                        <td></td>
+                      </>
+                    )}
                   </tr>
                 </tbody>
               </table>
@@ -294,32 +318,38 @@ const DispatchSummary = () => {
 
             {/* Totals Section */}
             <Box position="relative" zIndex="1" bg="white">
-               <Flex justify="flex-end" borderTop="2px solid #000">
-                  <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>SUBTOTAL</Box>
-                  <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
-                    ₹{(dispatch.taxableAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
-                  </Box>
-               </Flex>
-               {dispatch.billingType === 'With GST' && (
-                 <Flex justify="flex-end">
-                    <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TAX ({dispatch.gstRate}%)</Box>
+            {!isTransfer && (
+               <>
+                 <Flex justify="flex-end" borderTop="2px solid #000">
+                    <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>SUBTOTAL</Box>
                     <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
-                       ₹{(dispatch.gstAmount || 0).toLocaleString('en-IN')}
+                      ₹{(dispatch.taxableAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
                     </Box>
                  </Flex>
-               )}
-               <Flex justify="flex-end">
-                  <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>GRAND TOTAL</Box>
-                  <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
-                    ₹{(dispatch.totalAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
-                  </Box>
-               </Flex>
+                 {dispatch.billingType === 'With GST' && (
+                   <Flex justify="flex-end">
+                      <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TAX ({dispatch.gstRate}%)</Box>
+                      <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
+                         ₹{(dispatch.gstAmount || 0).toLocaleString('en-IN')}
+                      </Box>
+                   </Flex>
+                 )}
+                 <Flex justify="flex-end">
+                    <Box w="45.1%" bg="#f0f0f0" p="10px" fontWeight="950" textAlign="center" borderRight="2px solid #000" borderBottom="2px solid #000" sx={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>GRAND TOTAL</Box>
+                    <Box w="15.1%" p="10px" fontWeight="950" textAlign="right" borderBottom="2px solid #000">
+                      ₹{(dispatch.totalAmount || dispatch.totalValue || 0).toLocaleString('en-IN')}
+                    </Box>
+                 </Flex>
+               </>
+            )}
             </Box>
 
             {/* Amount in words */}
-            <Box borderBottom="2px solid #000" p="12px 15px" fontWeight="950" textTransform="uppercase" fontSize="13px" position="relative" zIndex="1" bg="white">
-               Total Amount (in words) : RUPEES {amountInWords}
-            </Box>
+            {!isTransfer && (
+              <Box borderBottom="2px solid #000" p="12px 15px" fontWeight="950" textTransform="uppercase" fontSize="13px" position="relative" zIndex="1" bg="white">
+                 Total Amount (in words) : RUPEES {amountInWords}
+              </Box>
+            )}
 
             {/* Footer Section */}
             <Flex justify="space-between" align="flex-end" p="15px 15px 20px 15px" mt="auto" position="relative" zIndex="1" bg="white">
@@ -341,3 +371,4 @@ const DispatchSummary = () => {
 };
 
 export default DispatchSummary;
+

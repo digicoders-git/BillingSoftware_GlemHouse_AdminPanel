@@ -99,7 +99,7 @@ const BranchReports = () => {
     const doc = new jsPDF();
     const userRole = localStorage.getItem('userRole') || 'branch';
     let roleText = 'Branch';
-    if (userRole === 'sales') roleText = 'Sales Rep';
+    if (userRole === 'sales') roleText = 'sales Rep';
     if (userRole === 'distributor') roleText = 'Partner';
     
     // Add Header
@@ -139,7 +139,7 @@ const BranchReports = () => {
     } else if (reportType === 'category') {
         total = data.reduce((sum, item) => sum + (Number(item["Revenue"]) || 0), 0);
     } else if (reportType === 'products') {
-        total = data.reduce((sum, item) => sum + (Number(item["Total Sales"]) || 0), 0);
+        total = data.reduce((sum, item) => sum + (Number(item["Total sales"]) || 0), 0);
     }
     return total;
   };
@@ -174,7 +174,7 @@ const BranchReports = () => {
               <FormControl>
                 <FormLabel fontSize="xs" fontWeight="700" color="gray.500">REPORT TYPE</FormLabel>
                 <Select h="50px" borderRadius="xl" bg="gray.50" value={reportType} onChange={(e) => setReportType(e.target.value)}>
-                  <option value="sales">Sales Transactions</option>
+                  <option value="sales">sales Transactions</option>
                   <option value="products">Product Performance</option>
                   <option value="category">Category-wise Analysis</option>
                 </Select>
@@ -244,7 +244,7 @@ const BranchReports = () => {
                     data.slice(0, 50).map((row, idx) => (
                       <Tr key={idx} _hover={{ bg: 'gray.50/50' }}>
                         {Object.entries(row).map(([key, val], i) => {
-                          const isCurrency = ['Amount', 'Total Sales', 'Revenue'].includes(key);
+                          const isCurrency = ['Amount', 'Total sales', 'Revenue'].includes(key);
                           return (
                             <Td key={i} py="4" fontWeight="600" color="secondary" fontSize="xs">
                               {isCurrency ? `₹${Number(val).toLocaleString()}` : val}

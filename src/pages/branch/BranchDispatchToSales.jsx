@@ -46,7 +46,6 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
   const location = useLocation();
   const toast = useToast();
   
-  // Check if GST mode from prop or path
   const isGst = propIsGst ?? location.pathname.includes('gst');
 
   const [items, setItems] = useState([
@@ -141,7 +140,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
 
   const handleConfirmBilling = async () => {
     if (!dispatchData.receiverId) {
-      return toast({ title: "Select a Sales Representative", status: "error" });
+      return toast({ title: "Select a Super Stoklist Representative", status: "error" });
     }
     if (items.some(item => !item.product || item.qty <= 0)) {
       return toast({ title: "Invalid items or quantities", status: "error" });
@@ -161,7 +160,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
       
       toast({
         title: "Dispatch Created",
-        description: `Invoice ${response.data.invoiceNo} generated for Sales Rep.`,
+        description: `Invoice ${response.data.invoiceNo} generated for Super Stoklist Rep.`,
         status: "success",
       });
       
@@ -199,7 +198,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">
                {isGst ? 'GST Dispatch Console' : 'Stock Transfer (Non-GST)'}
             </Heading>
-            <Text color="gray.500" fontWeight="500" fontSize="sm">Move inventory from branch storage to sales representative shelf</Text>
+            <Text color="gray.500" fontWeight="500" fontSize="sm">Move inventory from depot storage to Super Stoklist representative shelf</Text>
           </Box>
           <HStack spacing="3">
              <Badge colorScheme={isGst ? "green" : "orange"} px="4" py="2" borderRadius="xl" fontSize="11px" shadow="sm" border="1px solid" borderColor={`${isGst ? 'green' : 'orange'}.100`}>
@@ -217,7 +216,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                     </Heading>
                     <VStack spacing="5" align="stretch">
                         <FormControl isRequired>
-                            <FormLabel fontSize="10px" fontWeight="800" color="gray.400">SELECT SALES REP</FormLabel>
+                            <FormLabel fontSize="10px" fontWeight="800" color="gray.400">SELECT SUPER STOKLIST REP</FormLabel>
                             <Select 
                                 placeholder="Choose Partner" 
                                 h="48px" 
@@ -302,7 +301,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                     <Box p="2.5" bg="brand.50" color="brand.500" borderRadius="xl" shadow="sm"><ShoppingBag size={20} /></Box>
                     <VStack align="start" spacing="0">
                         <Heading size="sm" color="secondary" fontWeight="800">Consignment Items</Heading>
-                        <Text fontSize="xs" color="gray.400">Items will be deducted from branch inventory</Text>
+                        <Text fontSize="xs" color="gray.400">Items will be deducted from depot inventory</Text>
                     </VStack>
                  </HStack>
                  <Button 
@@ -411,7 +410,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                             </Box>
                             <Box w="full" bg="white" p="5" borderRadius="2xl" border="1px dashed" borderColor="gray.200" shadow="sm">
                                 <HStack mb="2"><Box p="1" bg="orange.50" color="orange.500" borderRadius="md"><Truck size={12}/></Box><Text fontSize="10px" fontWeight="900" color="orange.600">INVENTORY SYNC</Text></HStack>
-                                <Text fontSize="xs" color="gray.500" fontWeight="500">Stock will be deducted from branch and added to Sales Rep shelf upon their confirmation.</Text>
+                                <Text fontSize="xs" color="gray.500" fontWeight="500">Stock will be deducted from depot and added to Super Stoklist Rep shelf upon their confirmation.</Text>
                             </Box>
                         </VStack>
                     </GridItem>

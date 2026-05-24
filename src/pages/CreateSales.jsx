@@ -50,7 +50,7 @@ const CreateSales = () => {
       await API.post('/sales', formData);
       toast({
         title: 'Success',
-        description: 'Sales representative created successfully',
+        description: 'Super Stocklist representative created successfully',
         status: 'success',
         duration: 3000,
         position: 'top-right'
@@ -59,7 +59,7 @@ const CreateSales = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Failed to create sales record',
+        description: error.response?.data?.message || 'Failed to create Super Stocklist record',
         status: 'error',
         duration: 3000,
         position: 'top-right'
@@ -73,16 +73,16 @@ const CreateSales = () => {
       <Box>
         <Flex justify="space-between" align="center" mb="6">
           <Box>
-            <Heading size="md" color="secondary">Create New Sales</Heading>
+            <Heading size="md" color="secondary">Create New Super Stocklist</Heading>
             <Breadcrumb spacing="8px" separator={<ChevronRight size={14} color="gray" />} mt="1">
               <BreadcrumbItem>
                 <BreadcrumbLink href="/" color="gray.500" fontSize="sm">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/manage-sales" color="gray.500" fontSize="sm">Sales</BreadcrumbLink>
+                <BreadcrumbLink href="/manage-sales" color="gray.500" fontSize="sm">Super Stocklist</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbItem isCurrentPage>
-                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Add Sales</BreadcrumbLink>
+                <BreadcrumbLink href="#" color="brand.500" fontSize="sm" fontWeight="600">Add Super Stocklist</BreadcrumbLink>
               </BreadcrumbItem>
             </Breadcrumb>
           </Box>
@@ -102,7 +102,7 @@ const CreateSales = () => {
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
-                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Sales ID</FormLabel>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Super Stocklist ID</FormLabel>
                       <Input name="salesId" value={formData.salesId} onChange={handleChange} placeholder="e.g. SL-001" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
@@ -127,7 +127,7 @@ const CreateSales = () => {
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Email (Username)</FormLabel>
-                      <Input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="sales@example.com" h="45px" borderRadius="lg" />
+                      <Input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="Super Stocklist@example.com" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
@@ -166,7 +166,7 @@ const CreateSales = () => {
                   isLoading={loading}
                   px="10"
                 >
-                  Save Sales
+                  Save Super Stocklist
                 </Button>
               </Flex>
             </VStack>
@@ -178,3 +178,5 @@ const CreateSales = () => {
 };
 
 export default CreateSales;
+
+
