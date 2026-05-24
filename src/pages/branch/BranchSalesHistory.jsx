@@ -119,9 +119,9 @@ const BranchSalesHistory = () => {
   };
 
   const filteredSales = data.sales.filter(s => {
-    const matchesSearch = s.invoiceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          s.products.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (s.invoiceId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (s.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (s.products || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = !sellerTypeFilter || s.sellerType === sellerTypeFilter;
     return matchesSearch && matchesType;
   });

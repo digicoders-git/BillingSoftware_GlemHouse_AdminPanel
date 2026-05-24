@@ -94,8 +94,8 @@ const DistributorSalesHistory = () => {
   };
 
   const filteredSales = sales.filter(sale => 
-    sale.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sale.invoiceId.toLowerCase().includes(searchTerm.toLowerCase())
+    (sale.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (sale.invoiceId || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
