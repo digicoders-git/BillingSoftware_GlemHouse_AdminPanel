@@ -135,7 +135,7 @@ const BranchDashboard = () => {
               <Text fontSize="xs" fontWeight="700" opacity="0.8">SYNCED JUST NOW</Text>
             </HStack>
             <Heading size="lg" fontWeight="900" letterSpacing="-1px">
-              {data.branchName || 'Branch'} Control Center
+              {data.name || 'Branch'} Control Center
             </Heading>
             <Text fontSize="sm" mt="1" opacity="0.9" fontWeight="500">
                {data.stats.lowStockCount > 0 
