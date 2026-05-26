@@ -34,6 +34,7 @@ import Layout from '../../components/Layout';
 import API from '../../utils/api';
 import moment from 'moment';
 import { pdfTemplate } from '../../utils/pdfTemplate';
+import { downloadInvoiceAsJpg } from '../../utils/downloadInvoice';
 
 const SalesRepSalesHistory = () => {
   const navigate = useNavigate();
@@ -78,6 +79,29 @@ const SalesRepSalesHistory = () => {
       printWindow.focus();
       printWindow.print();
     };
+  };
+
+  const handleDownloadInvoice = async (sale) => {
+    const billData = {
+      billNo: sale.invoiceId,
+      clientName: sale.customerName,
+      clientPhone: sale.customerPhone,
+      items: sale.items,
+      subTotal: sale.taxableAmount,
+      totalTax: sale.gstAmount,
+      taxPercentage: sale.gstRate,
+      totalAmount: sale.totalAmount,
+      isGstEnabled: sale.billingType === 'With GST',
+      createdAt: sale.createdAt
+    };
+    
+    const html = pdfTemplate(billData);
+    toast({ title: "Generating JPG...", status: "info", duration: 2000 });
+    try {
+      await downloadInvoiceAsJpg(html, `Invoice_${sale.invoiceId}.jpg`);
+    } catch (error) {
+      toast({ title: "Failed to download", status: "error" });
+    }
   };
 
   const filteredSales = sales.filter(s => 
@@ -147,8 +171,8 @@ const SalesRepSalesHistory = () => {
                   </Td>
                   <Td textAlign="right">
                     <HStack justify="flex-end" spacing="2">
-                       <IconButton icon={<Printer size={16} />} size="sm" variant="ghost" onClick={() => handlePrint(sale)} />
-                       <IconButton icon={<Download size={16} />} size="sm" variant="ghost" />
+                       <IconButton aria-label="Print" icon={<Printer size={16} />} size="sm" variant="ghost" onClick={() => handlePrint(sale)} />
+                       <IconButton aria-label="Download" icon={<Download size={16} />} size="sm" variant="ghost" onClick={() => handleDownloadInvoice(sale)} />
                     </HStack>
                   </Td>
                 </Tr>

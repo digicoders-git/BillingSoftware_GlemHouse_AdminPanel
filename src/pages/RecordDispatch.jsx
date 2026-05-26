@@ -38,7 +38,7 @@ const RecordDispatch = () => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -77,7 +77,7 @@ const RecordDispatch = () => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -96,7 +96,8 @@ const RecordDispatch = () => {
             name: product?.name || '', 
             sku: product?.sku || '', 
             price: product?.price || 0,
-            maxStock: product?.stock || 0
+            maxStock: product?.stock || 0,
+            expiryDate: product?.expiry || ''
           }
         : item
     ));
@@ -144,6 +145,32 @@ const RecordDispatch = () => {
         duration: 3000,
       });
       return;
+    }
+
+    // Verify Stock First
+    for (const item of items) {
+      const product = products.find(p => p._id === item.product);
+      if (!product) continue;
+      const qtyNum = Number(item.qty) || 0;
+      if (qtyNum <= 0) {
+        toast({
+          title: "Invalid Quantity",
+          description: `Quantity for "${product.name}" must be greater than zero.`,
+          status: "error",
+          duration: 3000,
+        });
+        return;
+      }
+      if (qtyNum > product.stock) {
+        toast({
+          title: "Insufficient Stock",
+          description: `Product "${product.name}" only has ${product.stock} units available in Main Warehouse stock. You entered ${qtyNum}.`,
+          status: "error",
+          duration: 4000,
+          isClosable: true
+        });
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -296,7 +323,8 @@ const RecordDispatch = () => {
                 <Table variant="simple">
                   <Thead bg="gray.50/50">
                     <Tr>
-                      <Th color="gray.400" border="none" py="5">Product</Th>
+                      <Th color="gray.400" border="none" py="5" minW="200px">Product</Th>
+                      <Th color="gray.400" border="none" py="5" w="130px">Expiry (Optional)</Th>
                       <Th color="gray.400" border="none" py="5">SKU</Th>
                       <Th color="gray.400" border="none" py="5" w="120px">Quantity</Th>
                       <Th color="gray.400" border="none" py="5">Unit Price</Th>
@@ -324,6 +352,18 @@ const RecordDispatch = () => {
                               <option key={p._id} value={p._id}>{p.name} ({p.sku}) — Stock: {p.stock}</option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td borderColor="gray.100">
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="38px"
+                            borderRadius="lg"
+                            fontWeight="700"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td borderColor="gray.100"><Text fontSize="xs" color="gray.400" fontWeight="700">{item.sku || '---'}</Text></Td>
                         <Td borderColor="gray.100">

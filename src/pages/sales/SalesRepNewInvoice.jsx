@@ -51,7 +51,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   const [isGst, setIsGst] = useState(propIsGst ?? false);
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0 }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -78,7 +78,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
   };
 
   const removeItem = (id) => {
@@ -102,7 +102,8 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
             price: price,
             qty: qty,
             total: qty * price,
-            maxStock: selectedProduct.stock || 0
+            maxStock: selectedProduct.stock || 0,
+            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
           };
         }
         return item;
@@ -130,6 +131,20 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
     if (!customerDetails.name) return toast({ title: "Customer name required", status: "error" });
     const validItems = items.filter(i => i.product && i.qty > 0);
     if (validItems.length === 0) return toast({ title: "Add products", status: "error" });
+
+    // Strict Stock Validation
+    for (const item of validItems) {
+      const qtyNum = Number(item.qty) || 0;
+      if (qtyNum > item.maxStock) {
+        return toast({ 
+          title: `Insufficient Stock for ${item.name}`, 
+          description: `Only ${item.maxStock} units available in your shelf inventory. You entered ${qtyNum}.`,
+          status: "error",
+          duration: 4000,
+          isClosable: true
+        });
+      }
+    }
 
     setSubmitting(true);
     try {
@@ -232,15 +247,16 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
               </Flex>
               
               <Box overflowX="auto" p="2">
-                <Table variant="simple" size="sm">
+                <Table variant="simple" size="sm" minW="750px">
                   <Thead>
-                    <Tr>
-                      <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px">ITEM DESCRIPTION</Th>
-                      <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="100px" textAlign="center">QUANTITY</Th>
-                      <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="140px">UNIT PRICE</Th>
-                      <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" textAlign="right">TOTAL</Th>
-                      <Th py="4" w="50px"></Th>
-                    </Tr>
+                     <Tr>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" minW="220px">ITEM DESCRIPTION</Th>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="140px">EXPIRY (OPTIONAL)</Th>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="110px" textAlign="center">QUANTITY</Th>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="120px">UNIT PRICE</Th>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" textAlign="right" w="100px">TOTAL</Th>
+                       <Th py="4" w="50px"></Th>
+                     </Tr>
                   </Thead>
                   <Tbody>
                     {items.map((item) => (
@@ -268,6 +284,20 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
                               </option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            variant="filled"
+                            borderRadius="xl"
+                            h="45px"
+                            fontWeight="700"
+                            bg="gray.50"
+                            fontSize="sm"
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td>
                           <Input 
@@ -414,7 +444,28 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
                     
                     {isGst && (
                         <Flex justify="space-between" align="center">
-                            <Text color="whiteAlpha.700" fontWeight="600" fontSize="sm">GST ({gstRate}%)</Text>
+                            <HStack spacing="1">
+                                <Text color="whiteAlpha.700" fontWeight="600" fontSize="sm">GST (</Text>
+                                <input 
+                                    type="number" 
+                                    value={gstRate === 0 ? '' : gstRate}
+                                    placeholder="0"
+                                    onChange={(e) => setGstRate(e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
+                                    style={{
+                                        width: '45px',
+                                        height: '24px',
+                                        background: 'rgba(255, 255, 255, 0.15)',
+                                        border: 'none',
+                                        outline: 'none',
+                                        color: 'white',
+                                        textAlign: 'center',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        borderRadius: '6px',
+                                    }}
+                                />
+                                <Text color="whiteAlpha.700" fontWeight="600" fontSize="sm">%)</Text>
+                            </HStack>
                             <Text fontWeight="800" color="brand.300">₹{gstAmount.toLocaleString()}</Text>
                         </Flex>
                     )}

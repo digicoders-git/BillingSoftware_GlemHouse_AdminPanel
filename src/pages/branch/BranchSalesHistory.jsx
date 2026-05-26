@@ -215,6 +215,7 @@ const BranchSalesHistory = () => {
                     <option value="Branch">Depots</option>
                     <option value="SalesRep">Super Stoklist Reps</option>
                     <option value="Distributor">Distributors</option>
+                    <option value="Admin">Admin / Shop</option>
                  </Select>
                  <InputGroup maxW={{ base: 'full', sm: '300px' }}>
                     <InputLeftElement pointerEvents="none">

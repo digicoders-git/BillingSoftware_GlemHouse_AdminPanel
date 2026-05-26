@@ -121,33 +121,49 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             <table class="table-main">
                 <thead>
                     <tr>
-                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '50%' : '35%'};">Description</th>
-                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">HSN Code</th>
-                            <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">Batch No.</th>
-                            <th style="border-bottom: 2px solid #000; border-right: ${isTransfer ? 'none' : '2px solid #000'}; padding: 10px 5px; width: ${isTransfer ? '10%' : '10%'};">Qty.</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: 5%;">S.No.</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '35%' : '30%'};">Description</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">HSN Code</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">Batch No.</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: ${isTransfer ? '15%' : '10%'};">Exp. Date</th>
+                        <th style="border-bottom: 2px solid #000; border-right: ${isTransfer ? 'none' : '2px solid #000'}; padding: 10px 5px; width: ${isTransfer ? '15%' : '7%'};">Qty.</th>
                         ${!isTransfer ? `
-                        <th style="width: 12%;">Rate</th>
-                        <th style="width: 15%;">Amount</th>
+                        <th style="border-bottom: 2px solid #000; border-right: 2px solid #000; padding: 10px 5px; width: 14%;">Rate</th>
+                        <th style="border-bottom: 2px solid #000; padding: 10px 5px; width: 14%;">Amount</th>
                         ` : ''}
                     </tr>
                 </thead>
                 <tbody>
-                    ${(items || []).map((item, idx) => `
+                    ${(items || []).map((item, idx) => {
+                        const rawExpiry = item.expiry || item.expiryDate || item.product?.expiry || item.product?.expiryDate || '';
+                        let expiryDisplay = 'N/A';
+                        if (rawExpiry) {
+                            // Convert YYYY-MM (from month input) to MM/YYYY
+                            const monthMatch = rawExpiry.match(/^(\d{4})-(\d{2})$/);
+                            if (monthMatch) {
+                                expiryDisplay = `${monthMatch[2]}/${monthMatch[1]}`;
+                            } else {
+                                expiryDisplay = rawExpiry;
+                            }
+                        }
+                        return `
                         <tr>
                             <td style="text-align: center;">${idx + 1}</td>
                             <td>${item.name || item.description || 'Product'}</td>
                             <td style="text-align: center;">${item.hsn || item.product?.hsn || 'N/A'}</td>
                             <td style="text-align: center;">${item.batch || item.product?.batch || 'N/A'}</td>
+                            <td style="text-align: center;">${expiryDisplay}</td>
                             <td style="text-align: center;">${item.qty || 0}</td>
                             ${!isTransfer ? `
                             <td style="text-align: right;">₹${Number(item.price || item.rate || 0).toLocaleString('en-IN')}</td>
                             <td style="text-align: right; font-weight: bold;">₹${Number(item.total || ((item.qty || 0) * (item.price || item.rate || 0))).toLocaleString('en-IN')}</td>
                             ` : ''}
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                     <!-- Dynamic filler to maintain spacing -->
-                    ${Array(Math.max(0, 8 - (items?.length || 0))).fill(`<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td>${!isTransfer ? '<td></td><td></td>' : ''}</tr>`).join('')}
+                    ${Array(Math.max(0, 8 - (items?.length || 0))).fill(`<tr class="empty-row"><td></td><td></td><td></td><td></td><td></td><td></td>${!isTransfer ? '<td></td><td></td>' : ''}</tr>`).join('')}
                     <tr class="empty-row" style="height: 150px; border-bottom: none;">
+                        <td style="border-bottom: none;"></td>
                         <td style="border-bottom: none;"></td>
                         <td style="border-bottom: none;"></td>
                         <td style="border-bottom: none;"></td>
@@ -159,13 +175,13 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
             </table>
 
             ${!isTransfer ? `
-            <div class="footer-box"><div class="footer-label" style="width: 44.8%;">SUBTOTAL</div><div class="footer-val" style="width: 12.8%;">${Number(subTotal || 0).toLocaleString('en-IN')}</div></div>
+            <div class="footer-box"><div class="footer-label" style="width: 86%;">SUBTOTAL</div><div class="footer-val" style="width: 14%;">${Number(subTotal || 0).toLocaleString('en-IN')}</div></div>
             ${isGstEnabled ? `
-                <div class="footer-box"><div class="footer-label" style="width: 44.8%;">TAX ${taxPercentage !== undefined ? '(' + taxPercentage + '%)' : ''}</div><div class="footer-val" style="width: 12.8%;">${Number(totalTax || 0).toLocaleString('en-IN')}</div></div>
+                <div class="footer-box"><div class="footer-label" style="width: 86%;">TAX ${taxPercentage !== undefined ? '(' + taxPercentage + '%)' : ''}</div><div class="footer-val" style="width: 14%;">${Number(totalTax || 0).toLocaleString('en-IN')}</div></div>
             ` : ''}
             <div class="footer-box" style="background:#f0f0f0;">
-                <div class="footer-label" style="width: 44.8%; border-bottom: 2px solid #000;">GRAND TOTAL</div>
-                <div class="footer-val" style="width: 12.8%; border-bottom: 2px solid #000;">₹ ${Number(totalAmount || 0).toLocaleString('en-IN')}</div>
+                <div class="footer-label" style="width: 86%; border-bottom: 2px solid #000;">GRAND TOTAL</div>
+                <div class="footer-val" style="width: 14%; border-bottom: 2px solid #000;">₹ ${Number(totalAmount || 0).toLocaleString('en-IN')}</div>
             </div>
 
             <div class="inbound-words">Total Amount (in words) : RUPEES ${amountInWords}</div>

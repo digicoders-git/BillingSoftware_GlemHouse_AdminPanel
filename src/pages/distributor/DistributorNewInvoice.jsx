@@ -44,6 +44,8 @@ import Layout from '../../components/Layout';
 import API from '../../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { pdfTemplate } from '../../utils/pdfTemplate';
+import { downloadInvoiceAsJpg } from '../../utils/downloadInvoice';
+import { Download } from 'lucide-react';
 
 const DistributorNewInvoice = () => {
   const toast = useToast();
@@ -52,13 +54,16 @@ const DistributorNewInvoice = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [inventory, setInventory] = useState([]);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [billDataState, setBillDataState] = useState(null);
   
   // GST Mode from query or path
   const [isGst, setIsGst] = useState(location.pathname.includes('gst'));
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0 }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -85,7 +90,7 @@ const DistributorNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
   };
 
   const removeItem = (id) => {
@@ -120,7 +125,8 @@ const DistributorNewInvoice = () => {
             price: price,
             qty: qty,
             total: qty * price,
-            maxStock: selectedProduct.stock || selectedProduct.currentStock || 0
+            maxStock: selectedProduct.stock || selectedProduct.currentStock || 0,
+            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
           };
         }
         return item;
@@ -170,7 +176,8 @@ const DistributorNewInvoice = () => {
         price: invItem.product?.price || invItem.price || 0,
         qty: 1,
         total: invItem.product?.price || invItem.price || 0,
-        maxStock: invItem.stock || 0
+        maxStock: invItem.stock || 0,
+        expiryDate: ''
      };
 
      // Replace the first empty item if it exists, else append
@@ -195,6 +202,20 @@ const DistributorNewInvoice = () => {
     const validItems = items.filter(i => i.product && i.qty > 0);
     if (validItems.length === 0) return toast({ title: "Add products first", status: "warning" });
 
+    // Strict Stock Validation
+    for (const item of validItems) {
+      const qtyNum = Number(item.qty) || 0;
+      if (qtyNum > item.maxStock) {
+        return toast({ 
+          title: `Insufficient Stock for ${item.name}`, 
+          description: `Only ${item.maxStock} units available in distributor inventory. You entered ${qtyNum}.`,
+          status: "error",
+          duration: 4000,
+          isClosable: true
+        });
+      }
+    }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -207,7 +228,8 @@ const DistributorNewInvoice = () => {
           name: i.name,
           qty: i.qty,
           price: i.price,
-          total: i.total
+          total: i.total,
+          expiryDate: i.expiryDate || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,
@@ -221,7 +243,6 @@ const DistributorNewInvoice = () => {
       
       toast({ title: "Sale Recorded Successfully!", status: "success" });
 
-      // Auto Print/Download logic
       const billData = {
         billNo: newSale.invoiceId,
         clientName: customerDetails.name,
@@ -237,20 +258,98 @@ const DistributorNewInvoice = () => {
       };
       
       const html = pdfTemplate(billData);
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.onload = () => {
-          printWindow.focus();
-          printWindow.print();
-          navigate('/distributor/history');
-      };
+      setBillDataState(billData);
+      setPreviewHtml(html);
+      setIsPreviewOpen(true);
     } catch (error) {
       toast({ title: "Transaction Failed", description: error.response?.data?.message, status: "error" });
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handlePrintInvoice = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(previewHtml);
+    printWindow.document.close();
+    printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+    };
+  };
+
+  const handleDownloadInvoice = async () => {
+    toast({ title: "Generating JPG...", status: "info", duration: 2000 });
+    try {
+      await downloadInvoiceAsJpg(previewHtml, `Invoice_${billDataState?.billNo}.jpg`);
+    } catch (error) {
+      toast({ title: "Failed to download", status: "error" });
+    }
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    navigate('/distributor/history');
+  };
+
+  if (isPreviewOpen) {
+    return (
+      <Layout>
+        <Box pb="10">
+          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="8" gap="4">
+            <Box>
+              <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">
+                  Invoice Created Successfully
+              </Heading>
+              <Text color="gray.500" fontWeight="500">Invoice ID: {billDataState?.billNo}</Text>
+            </Box>
+            <HStack spacing="3">
+              <Button 
+                leftIcon={<Printer size={18} />} 
+                colorScheme="blue" 
+                variant="outline" 
+                borderRadius="xl"
+                onClick={handlePrintInvoice}
+              >
+                Print Invoice
+              </Button>
+              <Button 
+                leftIcon={<Download size={18} />} 
+                colorScheme="brand" 
+                borderRadius="xl"
+                onClick={handleDownloadInvoice}
+              >
+                Download JPG
+              </Button>
+              <Button 
+                bg="#222021" 
+                color="white"
+                borderRadius="xl"
+                _hover={{ bg: '#333132' }}
+                onClick={handleClosePreview}
+              >
+                Go to Sales Records
+              </Button>
+            </HStack>
+          </Flex>
+
+          <Box className="premium-card" p="0" overflow="hidden" bg="white" boxShadow="xl" borderRadius="2xl">
+            <iframe 
+              id="invoice-iframe"
+              srcDoc={previewHtml}
+              title="Invoice Print Preview"
+              style={{
+                width: '100%',
+                height: '850px',
+                border: 'none',
+                background: 'white'
+              }}
+            />
+          </Box>
+        </Box>
+      </Layout>
+    );
+  }
 
   if (loading) return <Layout><Flex justify="center" align="center" h="70vh"><Spinner size="xl" color="brand.500" /></Flex></Layout>;
 
@@ -333,13 +432,14 @@ const DistributorNewInvoice = () => {
              )}
 
              <Box p="4">
-                <Table variant="simple" size="sm">
+                <Table variant="simple" size="sm" minW="800px">
                    <Thead>
                       <Tr>
-                         <Th color="gray.400" fontSize="10px" py="4">PRODUCT DESCRIPTION</Th>
-                         <Th color="gray.400" fontSize="10px" py="4" textAlign="center" w="150px">QUANTITY</Th>
-                         <Th color="gray.400" fontSize="10px" py="4" w="140px">UNIT RATE</Th>
-                         <Th color="gray.400" fontSize="10px" py="4" textAlign="right">SUBTOTAL</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" minW="220px">PRODUCT DESCRIPTION</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" w="140px">EXPIRY (OPTIONAL)</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" textAlign="center" w="130px">QUANTITY</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" w="130px">UNIT RATE</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" textAlign="right" w="100px">SUBTOTAL</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="50px"></Th>
                       </Tr>
                    </Thead>
@@ -364,6 +464,20 @@ const DistributorNewInvoice = () => {
                                     </option>
                                  ))}
                               </Select>
+                           </Td>
+                           <Td>
+                              <Input
+                                type="text"
+                                value={item.expiryDate || ''}
+                                onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                                variant="filled"
+                                h="48px"
+                                borderRadius="xl"
+                                fontWeight="700"
+                                bg="gray.50"
+                                fontSize="sm"
+                                placeholder="MM/YYYY (optional)"
+                              />
                            </Td>
                            <Td>
                               <HStack spacing="2" justify="center">
@@ -470,30 +584,34 @@ const DistributorNewInvoice = () => {
                       <Text fontWeight="800">₹{taxableAmount.toLocaleString()}</Text>
                    </Flex>
                    {isGst && (
-                      <VStack spacing="2" align="stretch">
-                         <Flex justify="space-between" align="center" fontSize="sm">
-                            <Text color="whiteAlpha.600" fontWeight="600">GST Rate (%)</Text>
-                            <Input 
-                               type="number" 
-                               variant="filled" 
-                               bg="whiteAlpha.100"
-                               color="white"
-                               textAlign="right" 
-                               w="70px" 
-                               size="sm"
-                               borderRadius="lg"
-                               fontWeight="900" 
-                               value={gstRate} 
-                               onChange={(e) => setGstRate(parseFloat(e.target.value) || 0)} 
-                               _focus={{ bg: 'whiteAlpha.200', borderColor: 'brand.500' }}
-                            />
-                         </Flex>
-                         <Flex justify="space-between" align="center" fontSize="xs">
-                            <Text color="whiteAlpha.500" fontWeight="600">GST Amount</Text>
-                            <Text fontWeight="700">₹{gstAmount.toLocaleString()}</Text>
-                         </Flex>
-                      </VStack>
-                   )}
+                       <VStack spacing="2" align="stretch">
+                          <Flex justify="space-between" align="center" fontSize="sm">
+                             <HStack spacing="1">
+                                <Text color="whiteAlpha.600" fontWeight="600">GST (</Text>
+                                <input 
+                                    type="number" 
+                                    value={gstRate === 0 ? '' : gstRate}
+                                    placeholder="0"
+                                    onChange={(e) => setGstRate(e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
+                                    style={{
+                                        width: '45px',
+                                        height: '24px',
+                                        background: 'rgba(255, 255, 255, 0.15)',
+                                        border: 'none',
+                                        outline: 'none',
+                                        color: 'white',
+                                        textAlign: 'center',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        borderRadius: '6px',
+                                    }}
+                                />
+                                <Text color="whiteAlpha.600" fontWeight="600">%)</Text>
+                             </HStack>
+                             <Text fontWeight="800" color="orange.300">₹{gstAmount.toLocaleString()}</Text>
+                          </Flex>
+                       </VStack>
+                    )}
                    <Flex justify="space-between" align="center" fontSize="sm">
                       <Text color="whiteAlpha.600" fontWeight="600">Discount</Text>
                       <Input type="number" variant="unstyled" textAlign="right" w="60px" fontWeight="900" color="brand.400" value={discount} onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)} />
@@ -503,8 +621,8 @@ const DistributorNewInvoice = () => {
                       <Text fontWeight="900" fontSize="lg">Total</Text>
                       <Text fontWeight="900" fontSize="3xl" color="brand.400" letterSpacing="-1px">₹{totalAmount.toLocaleString()}</Text>
                    </Flex>
-                   <Button colorScheme="brand" size="lg" h="60px" mt="2" borderRadius="2xl" leftIcon={<Printer size={20} />} isLoading={submitting} onClick={handleComplete} fontSize="md" fontWeight="900">
-                      Print Invoice
+                   <Button colorScheme="brand" size="lg" h="60px" mt="2" borderRadius="2xl" leftIcon={<Save size={20} />} isLoading={submitting} onClick={handleComplete} fontSize="md" fontWeight="900">
+                      Complete Billing
                    </Button>
                 </VStack>
              </Box>

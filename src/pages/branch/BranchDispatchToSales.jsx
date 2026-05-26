@@ -49,7 +49,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
   const isGst = propIsGst ?? location.pathname.includes('gst');
 
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -86,7 +86,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -106,7 +106,8 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
             sku: invItem?.sku || '', 
             price: invItem?.price || 0,
             total: (invItem?.price || 0) * item.qty,
-            maxStock: invItem?.stock || 0
+            maxStock: invItem?.stock || 0,
+            expiryDate: invItem?.product?.expiry || invItem?.expiry || ''
           }
         : item
     ));
@@ -323,8 +324,9 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                 <Table variant="simple" size="sm">
                   <Thead>
                     <Tr>
-                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px">DESCRIPTION</Th>
-                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="100px" textAlign="center">QTY</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" minW="220px">DESCRIPTION</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="130px">EXPIRY (OPT.)</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="110px" textAlign="center">QTY</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="140px">UNIT PRICE</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" textAlign="right">SUBTOTAL</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" w="50px"></Th>
@@ -351,6 +353,20 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                               </option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="45px"
+                            variant="filled"
+                            borderRadius="xl"
+                            fontWeight="700"
+                            bg="gray.50"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td>
                           <Input 
@@ -421,8 +437,29 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                                 <Text fontWeight="800" fontSize="sm">₹{taxableAmount.toLocaleString()}</Text>
                             </Flex>
                             {isGst && (
-                                <Flex justify="space-between">
-                                    <Text color="gray.500" fontWeight="700" fontSize="sm">GST ({dispatchData.gstRate}%)</Text>
+                                <Flex justify="space-between" align="center">
+                                    <HStack spacing="1">
+                                        <Text color="gray.500" fontWeight="700" fontSize="sm">GST (</Text>
+                                        <input 
+                                            type="number" 
+                                            value={dispatchData.gstRate === 0 ? '' : dispatchData.gstRate}
+                                            placeholder="0"
+                                            onChange={(e) => setDispatchData({...dispatchData, gstRate: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0)})}
+                                            style={{
+                                                width: '45px',
+                                                height: '24px',
+                                                background: 'rgba(0, 0, 0, 0.05)',
+                                                border: 'none',
+                                                outline: 'none',
+                                                color: 'inherit',
+                                                textAlign: 'center',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                borderRadius: '6px',
+                                            }}
+                                        />
+                                        <Text color="gray.500" fontWeight="700" fontSize="sm">%)</Text>
+                                    </HStack>
                                     <Text fontWeight="800" color="orange.500" fontSize="sm">₹{gstAmount.toLocaleString()}</Text>
                                 </Flex>
                             )}

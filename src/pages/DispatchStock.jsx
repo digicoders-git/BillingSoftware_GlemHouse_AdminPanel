@@ -124,7 +124,10 @@ const DispatchStock = () => {
           name: item.name,
           qty: item.qty,
           price: item.price,
-          total: item.qty * item.price
+          total: item.qty * item.price,
+          expiryDate: item.expiryDate || '',
+          hsn: item.hsn || '',
+          batch: item.batch || ''
         })),
         subtotal: dsp.taxableAmount || dsp.totalAmount,
         tax: dsp.gstAmount || 0,

@@ -42,7 +42,7 @@ const DepotTransfer = () => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -83,7 +83,7 @@ const DepotTransfer = () => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -102,7 +102,8 @@ const DepotTransfer = () => {
             name: product?.name || '', 
             sku: product?.sku || '', 
             price: 0,
-            total: 0
+            total: 0,
+            expiryDate: product?.expiry || ''
           }
         : item
     ));
@@ -146,6 +147,32 @@ const DepotTransfer = () => {
         duration: 3000,
       });
       return;
+    }
+
+    // Verify Stock First
+    for (const item of items) {
+      const product = products.find(p => p._id === item.product);
+      if (!product) continue;
+      const qtyNum = Number(item.qty) || 0;
+      if (qtyNum <= 0) {
+        toast({
+          title: "Invalid Quantity",
+          description: `Quantity for "${product.name}" must be greater than zero.`,
+          status: "error",
+          duration: 3000,
+        });
+        return;
+      }
+      if (qtyNum > product.stock) {
+        toast({
+          title: "Insufficient Stock",
+          description: `Product "${product.name}" only has ${product.stock} units available in Central Warehouse stock. You entered ${qtyNum}.`,
+          status: "error",
+          duration: 4000,
+          isClosable: true
+        });
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -292,7 +319,8 @@ const DepotTransfer = () => {
                 <Table variant="simple">
                   <Thead bg="gray.50/50">
                     <Tr>
-                      <Th color="gray.500" border="none" py="4" fontSize="10px">Description</Th>
+                      <Th color="gray.500" border="none" py="4" fontSize="10px" minW="200px">Description</Th>
+                      <Th color="gray.500" border="none" py="4" fontSize="10px" w="130px">Expiry (Optional)</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="150px">Quantity Transferring</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px"></Th>
                     </Tr>
@@ -311,9 +339,21 @@ const DepotTransfer = () => {
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
                             {products.map(p => (
-                              <option key={p._id} value={p._id}>{p.name} ({p.sku})</option>
+                              <option key={p._id} value={p._id}>{p.name} ({p.sku}) — Stock: {p.stock || 0}</option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="40px"
+                            borderRadius="lg"
+                            fontWeight="700"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td>
                           <Input 

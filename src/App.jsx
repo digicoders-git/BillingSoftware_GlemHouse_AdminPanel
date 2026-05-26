@@ -31,6 +31,7 @@ import CreateDistributor from './pages/CreateDistributor';
 import LowStockAlert from './pages/LowStockAlert';
 import DeepoBilling from './pages/DeepoBilling';
 import DepotTransfer from './pages/DepotTransfer';
+import AdminNewInvoice from './pages/AdminNewInvoice';
 
 // Branch Panel Pages
 import BranchDashboard from './pages/branch/BranchDashboard';
@@ -85,6 +86,8 @@ function App() {
         {/* Billing Routes */}
         <Route path="/billing/gst" element={<DeepoBilling isGst={true} />} />
         <Route path="/billing/non-gst" element={<DeepoBilling isGst={false} />} />
+        <Route path="/admin/billing/gst" element={<AdminNewInvoice isGst={true} />} />
+        <Route path="/admin/billing/non-gst" element={<AdminNewInvoice isGst={false} />} />
         <Route path="/admin/all-sales" element={<BranchSalesHistory />} />
         
         {/* Sales & Distributors */}

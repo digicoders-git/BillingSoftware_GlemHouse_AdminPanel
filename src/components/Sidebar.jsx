@@ -273,6 +273,19 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
+                  Billing
+                </Text>
+              )}
+              <SidebarItem icon={Receipt} label="Direct Billing" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'New Bill (GST)', to: '/admin/billing/gst' },
+                  { label: 'New Bill (Non-GST)', to: '/admin/billing/non-gst' },
+                  { label: 'All Sales Records', to: '/admin/all-sales' },
+                ]}
+              </SidebarItem>
+
+              {!isCollapsed && (
+                <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Team Management
                 </Text>
               )}
@@ -299,7 +312,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
 
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
-                  Inventory & Billing
+                  Inventory
                 </Text>
               )}
               <SidebarItem icon={Package} label="Warehouse Stock" isCollapsed={isCollapsed}>
@@ -310,11 +323,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={Receipt} label="Consignment Logic" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Truck} label="Consignment Logic" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Stock Transfer', to: '/admin/transfer-stock' },
                   { label: 'All Transfer History', to: '/total-dispatch-stock' },
-                  { label: 'All Sales Records', to: '/admin/all-sales' },
                 ]}
               </SidebarItem>
 

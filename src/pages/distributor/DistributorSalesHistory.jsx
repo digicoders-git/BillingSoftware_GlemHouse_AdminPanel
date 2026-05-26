@@ -37,6 +37,7 @@ import Layout from '../../components/Layout';
 import API from '../../utils/api';
 import moment from 'moment';
 import { pdfTemplate } from '../../utils/pdfTemplate';
+import { downloadInvoiceAsJpg } from '../../utils/downloadInvoice';
 
 const DistributorSalesHistory = () => {
   const [loading, setLoading] = useState(true);
@@ -86,6 +87,29 @@ const DistributorSalesHistory = () => {
       printWindow.focus();
       printWindow.print();
     };
+  };
+
+  const handleDownloadInvoice = async (sale) => {
+    const billData = {
+      billNo: sale.invoiceId,
+      clientName: sale.customerName,
+      clientPhone: sale.customerPhone || 'N/A',
+      items: sale.items || [],
+      subTotal: sale.taxableAmount || sale.totalAmount,
+      totalTax: sale.gstAmount || 0,
+      taxPercentage: sale.gstRate || 0,
+      totalAmount: sale.totalAmount,
+      isGstEnabled: sale.billingType === 'With GST',
+      createdAt: sale.date
+    };
+    
+    const html = pdfTemplate(billData);
+    toast({ title: "Generating JPG...", status: "info", duration: 2000 });
+    try {
+      await downloadInvoiceAsJpg(html, `Invoice_${sale.invoiceId}.jpg`);
+    } catch (error) {
+      toast({ title: "Failed to download", status: "error" });
+    }
   };
 
   const handleView = (sale) => {
@@ -209,20 +233,32 @@ const DistributorSalesHistory = () => {
                         </Tag>
                       </Td>
                       <Td textAlign="right">
-                        <IconButton 
-                          icon={<Eye size={18} />} 
-                          variant="ghost" 
-                          colorScheme="brand" 
-                          size="sm" 
-                          onClick={() => handleView(sale)}
-                        />
-                        <IconButton 
-                          icon={<Printer size={18} />} 
-                          variant="ghost" 
-                          colorScheme="gray" 
-                          size="sm" 
-                          onClick={() => handlePrint(sale)}
-                        />
+                        <HStack spacing="1" justify="flex-end">
+                          <IconButton 
+                            aria-label="View"
+                            icon={<Eye size={18} />} 
+                            variant="ghost" 
+                            colorScheme="brand" 
+                            size="sm" 
+                            onClick={() => handleView(sale)}
+                          />
+                          <IconButton 
+                            aria-label="Print"
+                            icon={<Printer size={18} />} 
+                            variant="ghost" 
+                            colorScheme="gray" 
+                            size="sm" 
+                            onClick={() => handlePrint(sale)}
+                          />
+                          <IconButton 
+                            aria-label="Download"
+                            icon={<Download size={18} />} 
+                            variant="ghost" 
+                            colorScheme="blue" 
+                            size="sm" 
+                            onClick={() => handleDownloadInvoice(sale)}
+                          />
+                        </HStack>
                       </Td>
                     </Tr>
                   ))}
@@ -264,28 +300,30 @@ const DistributorSalesHistory = () => {
                </Box>
             </SimpleGrid>
 
-            <Box bg="gray.50" p="4" borderRadius="xl" mb="6">
-               <Table variant="simple" size="sm">
-                  <Thead>
-                     <Tr>
-                        <Th fontSize="10px" color="gray.400">PRODUCT</Th>
-                        <Th fontSize="10px" color="gray.400" textAlign="center">QTY</Th>
-                        <Th fontSize="10px" color="gray.400" textAlign="right">PRICE</Th>
-                        <Th fontSize="10px" color="gray.400" textAlign="right">TOTAL</Th>
-                     </Tr>
-                  </Thead>
-                  <Tbody>
-                     {selectedSale?.items.map((item, idx) => (
-                        <Tr key={idx}>
-                           <Td fontWeight="700" fontSize="xs">{item.name}</Td>
-                           <Td textAlign="center" fontWeight="800">{item.qty}</Td>
-                           <Td textAlign="right" fontSize="xs">₹{item.price.toLocaleString()}</Td>
-                           <Td textAlign="right" fontWeight="900" color="brand.500">₹{item.total.toLocaleString()}</Td>
-                        </Tr>
-                     ))}
-                  </Tbody>
-               </Table>
-            </Box>
+             <Box bg="gray.50" p="4" borderRadius="xl" mb="6">
+                <Table variant="simple" size="sm">
+                   <Thead>
+                      <Tr>
+                         <Th fontSize="10px" color="gray.400">PRODUCT</Th>
+                         <Th fontSize="10px" color="gray.400">EXPIRY</Th>
+                         <Th fontSize="10px" color="gray.400" textAlign="center">QTY</Th>
+                         <Th fontSize="10px" color="gray.400" textAlign="right">PRICE</Th>
+                         <Th fontSize="10px" color="gray.400" textAlign="right">TOTAL</Th>
+                      </Tr>
+                   </Thead>
+                   <Tbody>
+                      {selectedSale?.items.map((item, idx) => (
+                         <Tr key={idx}>
+                            <Td fontWeight="700" fontSize="xs">{item.name}</Td>
+                            <Td fontSize="xs" fontWeight="700" color="orange.600">{item.expiryDate || 'N/A'}</Td>
+                            <Td textAlign="center" fontWeight="800">{item.qty}</Td>
+                            <Td textAlign="right" fontSize="xs">₹{item.price.toLocaleString()}</Td>
+                            <Td textAlign="right" fontWeight="900" color="brand.500">₹{item.total.toLocaleString()}</Td>
+                         </Tr>
+                      ))}
+                   </Tbody>
+                </Table>
+             </Box>
 
             <VStack align="stretch" spacing="2" borderTop="1px solid" borderColor="gray.100" pt="4">
                <Flex justify="space-between" fontSize="sm">
@@ -311,9 +349,14 @@ const DistributorSalesHistory = () => {
                </Flex>
             </VStack>
 
-            <Button leftIcon={<Printer size={18}/>} colorScheme="brand" w="full" h="50px" borderRadius="xl" mt="8" onClick={() => handlePrint(selectedSale)}>
-               Print / Download Invoice
-            </Button>
+             <HStack spacing="4" mt="8">
+                <Button leftIcon={<Printer size={18}/>} colorScheme="gray" variant="outline" flex={1} h="50px" borderRadius="xl" onClick={() => handlePrint(selectedSale)}>
+                   Print Invoice
+                </Button>
+                <Button leftIcon={<Download size={18}/>} colorScheme="brand" flex={1} h="50px" borderRadius="xl" onClick={() => handleDownloadInvoice(selectedSale)}>
+                   Download JPG
+                </Button>
+             </HStack>
           </ModalBody>
         </ModalContent>
       </Modal>

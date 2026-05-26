@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -25,9 +25,7 @@ import {
   Spinner,
   Badge,
   InputGroup,
-  InputRightAddon,
-  Tooltip
-} from '@chakra-ui/react';
+  InputRightAddon} from '@chakra-ui/react';
 import { 
   Plus, 
   Trash2, 
@@ -35,11 +33,7 @@ import {
   ShoppingBag,
   ChevronLeft,
   Truck,
-  User as UserIcon,
-  Package,
-  TrendingUp,
-  History
-} from 'lucide-react';
+  User as UserIcon} from 'lucide-react';
 import Layout from '../../components/Layout';
 import API from '../../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -58,7 +52,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
   const isGst = propIsGst ?? location.pathname.includes('gst');
 
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -90,7 +84,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -114,7 +108,8 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
             price: price,
             qty: qty,
             total: qty * price,
-            maxStock: selectedProduct.stock || 0
+            maxStock: selectedProduct.stock || 0,
+            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
           };
         }
         return item;
@@ -329,8 +324,9 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
                 <Table variant="simple" size="sm">
                   <Thead>
                     <Tr>
-                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px">PRODUCT DESCRIPTION</Th>
-                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="100px" textAlign="center">QTY</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" minW="220px">PRODUCT DESCRIPTION</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="130px">EXPIRY (OPT.)</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="110px" textAlign="center">QTY</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="140px">UNIT PRICE</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" textAlign="right">SUBTOTAL</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" w="50px"></Th>
@@ -357,6 +353,20 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
                               </option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="45px"
+                            variant="filled"
+                            borderRadius="xl"
+                            fontWeight="700"
+                            bg="gray.50"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td>
                           <Input 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -22,10 +22,7 @@ import {
   HStack,
   Select,
   useToast,
-  Spinner,
-  Badge,
-  Switch
-} from '@chakra-ui/react';
+  Spinner} from '@chakra-ui/react';
 import { 
   Plus, 
   Trash, 
@@ -36,13 +33,13 @@ import {
   ShoppingBag,
   ChevronLeft
 } from 'lucide-react';
-import Layout from '../../components/Layout';
-import API from '../../utils/api';
+import Layout from '../components/Layout';
+import API from '../utils/api';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { pdfTemplate } from '../../utils/pdfTemplate';
-import { downloadInvoiceAsJpg } from '../../utils/downloadInvoice';
+import { pdfTemplate } from '../utils/pdfTemplate';
+import { downloadInvoiceAsJpg } from '../utils/downloadInvoice';
 
-const BranchNewInvoice = () => {
+const AdminNewInvoice = ({ isGst: propIsGst }) => {
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,8 +47,13 @@ const BranchNewInvoice = () => {
   const [submitting, setSubmitting] = useState(false);
   const [inventory, setInventory] = useState([]);
   
-  // GST Mode from query or default
-  const [isGst, setIsGst] = useState(location.pathname.includes('gst'));
+  // Print/Download Preview Modal States
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [billDataState, setBillDataState] = useState(null);
+  
+  // GST Mode from prop or path (ends with /gst)
+  const isGst = propIsGst ?? location.pathname.endsWith('/gst');
   
   // Invoice State
   const [items, setItems] = useState([
@@ -67,20 +69,16 @@ const BranchNewInvoice = () => {
   const [gstRate, setGstRate] = useState(18);
 
   useEffect(() => {
-    fetchInventory();
+    fetchProducts();
   }, []);
 
-  const fetchInventory = async () => {
+  const fetchProducts = async () => {
     try {
-      const userRole = localStorage.getItem('userRole');
-      let endpoint = '/branch-inventory';
-      if (userRole === 'distributor') endpoint = '/distributor-inventory';
-      
-      const { data } = await API.get(endpoint);
-      setInventory(data.inventory || []);
+      const { data } = await API.get('/products');
+      setInventory(data || []);
       setLoading(false);
     } catch (error) {
-      toast({ title: "Failed to load inventory", status: "error" });
+      toast({ title: "Failed to load warehouse inventory", status: "error" });
       setLoading(false);
     }
   };
@@ -96,7 +94,7 @@ const BranchNewInvoice = () => {
   };
 
   const handleProductChange = (id, productId) => {
-    const selectedProduct = inventory.find(inv => (inv.product?._id === productId || inv.product === productId || inv._id === productId));
+    const selectedProduct = inventory.find(prod => prod._id === productId);
     
     if (selectedProduct) {
       if (items.some(item => item.product === productId && item.id !== id)) {
@@ -107,17 +105,17 @@ const BranchNewInvoice = () => {
       setItems(items.map(item => {
         if (item.id === id) {
           const qty = 1;
-          const price = selectedProduct.product?.price || selectedProduct.price || 0;
+          const price = selectedProduct.price || 0;
           return {
             ...item,
             product: productId,
-            name: selectedProduct.product?.name || selectedProduct.name,
-            category: selectedProduct.product?.category || selectedProduct.category,
+            name: selectedProduct.name,
+            category: selectedProduct.category || 'General',
             price: price,
             qty: qty,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
-            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
+            expiryDate: selectedProduct.expiry || ''
           };
         }
         return item;
@@ -148,7 +146,7 @@ const BranchNewInvoice = () => {
         let finalQty = parsedQty;
         if (item.product && finalQty > item.maxStock) {
           toast({ 
-            title: `Only ${item.maxStock} units available`, 
+            title: `Only ${item.maxStock} units available in warehouse`, 
             status: "warning", 
             duration: 1500 
           });
@@ -257,7 +255,7 @@ const BranchNewInvoice = () => {
       if (item.qty > item.maxStock) {
         return toast({ 
           title: `Insufficient stock for ${item.name}`, 
-          description: `Only ${item.maxStock} units available in branch inventory.`,
+          description: `Only ${item.maxStock} units available in warehouse.`,
           status: "error" 
         });
       }
@@ -290,10 +288,10 @@ const BranchNewInvoice = () => {
       
       toast({
         title: "Transaction Successful",
+        description: `Direct Bill ${newSale.invoiceId} Generated`,
         status: "success",
       });
 
-      // Auto Download Invoice
       const billData = {
         billNo: newSale.invoiceId,
         clientName: customerDetails.name,
@@ -309,13 +307,9 @@ const BranchNewInvoice = () => {
       };
       
       const html = pdfTemplate(billData);
-      try {
-        await downloadInvoiceAsJpg(html, `Invoice_${newSale.invoiceId}.jpg`);
-      } catch (e) {
-        console.error('Download error:', e);
-      }
-
-      navigate('/sales/history');
+      setBillDataState(billData);
+      setPreviewHtml(html);
+      setIsPreviewOpen(true);
     } catch (error) {
       toast({ 
         title: "Transaction Failed", 
@@ -326,6 +320,88 @@ const BranchNewInvoice = () => {
       setSubmitting(false);
     }
   };
+
+  const handlePrintInvoice = () => {
+    const iframe = document.getElementById('invoice-iframe');
+    if (iframe) {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!previewHtml || !billDataState) return;
+    toast({ title: "Generating JPG...", status: "info", duration: 1500 });
+    try {
+      await downloadInvoiceAsJpg(previewHtml, `Invoice_${billDataState.billNo}.jpg`);
+    } catch (error) {
+      toast({ title: "Failed to download", status: "error" });
+    }
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    navigate('/admin/all-sales');
+  };
+
+  if (isPreviewOpen) {
+    return (
+      <Layout>
+        <Box pb="10">
+          <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="8" gap="4">
+            <Box>
+              <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">
+                  Invoice Created Successfully
+              </Heading>
+              <Text color="gray.500" fontWeight="500">Invoice ID: {billDataState?.billNo}</Text>
+            </Box>
+            <HStack spacing="3">
+              <Button 
+                leftIcon={<Printer size={18} />} 
+                colorScheme="blue" 
+                variant="outline" 
+                borderRadius="xl"
+                onClick={handlePrintInvoice}
+              >
+                Print Invoice
+              </Button>
+              <Button 
+                leftIcon={<Download size={18} />} 
+                colorScheme="brand" 
+                borderRadius="xl"
+                onClick={handleDownloadInvoice}
+              >
+                Download JPG
+              </Button>
+              <Button 
+                bg="#222021" 
+                color="white"
+                borderRadius="xl"
+                _hover={{ bg: '#333132' }}
+                onClick={handleClosePreview}
+              >
+                Go to Sales Records
+              </Button>
+            </HStack>
+          </Flex>
+
+          <Box className="premium-card" p="0" overflow="hidden" bg="white" boxShadow="xl" borderRadius="2xl">
+            <iframe 
+              id="invoice-iframe"
+              srcDoc={previewHtml}
+              title="Invoice Print Preview"
+              style={{
+                width: '100%',
+                height: '850px',
+                border: 'none',
+                background: 'white'
+              }}
+            />
+          </Box>
+        </Box>
+      </Layout>
+    );
+  }
 
   if (loading) {
     return (
@@ -347,19 +423,13 @@ const BranchNewInvoice = () => {
                <Text fontSize="sm" fontWeight="700">Back</Text>
             </HStack>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">
-                New Invoice {isGst ? '(GST)' : '(Non-GST)'}
+                Direct Shop Billing {isGst ? '(GST)' : '(Non-GST)'}
             </Heading>
-            <Text color="gray.500" fontWeight="500">Create a professional bill for your customer</Text>
+            <Text color="gray.500" fontWeight="500">Create a professional bill for direct shop customer</Text>
           </Box>
-          <HStack spacing="4">
-            <FormControl display="flex" alignItems="center">
-                <FormLabel htmlFor="gst-mode" mb="0" fontSize="sm" fontWeight="700">GST Billing</FormLabel>
-                <Switch id="gst-mode" colorScheme="brand" isChecked={isGst} onChange={() => setIsGst(!isGst)} />
-            </FormControl>
-            <HStack spacing="2">
-                <Button leftIcon={<Printer size={18} />} variant="outline" borderRadius="xl" size="sm" onClick={handlePrint}>Print</Button>
-                <Button leftIcon={<Download size={18} />} variant="outline" borderRadius="xl" size="sm" onClick={handleDownloadDraft}>Draft</Button>
-            </HStack>
+          <HStack spacing="2">
+              <Button leftIcon={<Printer size={18} />} variant="outline" borderRadius="xl" size="sm" onClick={handlePrint}>Print</Button>
+              <Button leftIcon={<Download size={18} />} variant="outline" borderRadius="xl" size="sm" onClick={handleDownloadDraft}>Draft</Button>
           </HStack>
         </Flex>
 
@@ -371,7 +441,7 @@ const BranchNewInvoice = () => {
                     <Box p="2" bg="brand.50" borderRadius="lg" color="brand.500"><ShoppingBag size={20} /></Box>
                     <VStack align="start" spacing="0">
                         <Heading size="sm" color="secondary">Product Particulars</Heading>
-                        <Text fontSize="xs" color="gray.400">Select products from your inventory</Text>
+                        <Text fontSize="xs" color="gray.400">Select products from warehouse inventory</Text>
                     </VStack>
                  </HStack>
                  <Button leftIcon={<Plus size={16} />} variant="solid" colorScheme="brand" size="sm" borderRadius="lg" onClick={addItem}>
@@ -405,13 +475,13 @@ const BranchNewInvoice = () => {
                             value={item.product || ''}
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
-                            {inventory.map(inv => (
+                            {inventory.map(prod => (
                               <option 
-                                key={inv._id} 
-                                value={inv.productID || inv.product || inv._id} 
-                                disabled={(inv.stock || 0) === 0}
+                                key={prod._id} 
+                                value={prod._id} 
+                                disabled={(prod.stock || 0) === 0}
                               >
-                                {inv.name} ({inv.sku || inv.product?.sku}) — Stock: {inv.stock || 0}
+                                {prod.name} ({prod.sku}) — Stock: {prod.stock || 0}
                               </option>
                             ))}
                           </Select>
@@ -546,9 +616,9 @@ const BranchNewInvoice = () => {
 
                 <Box className="premium-card" p="6" bg="secondary" color="white">
                   <Heading size="sm" mb="8" color="whiteAlpha.800" borderBottom="1px solid" borderColor="whiteAlpha.200" pb="4">Order Summary</Heading>
-                  <VStack spacing="4" align="stretch">
+                  <VStack spacing="5" align="stretch">
                     <Flex justify="space-between">
-                      <Text color="whiteAlpha.600" fontWeight="600">Taxable Value</Text>
+                      <Text color="whiteAlpha.600" fontWeight="600">{isGst ? 'Taxable Value' : 'Subtotal'}</Text>
                       <Text fontWeight="700">₹{taxableAmount.toLocaleString()}</Text>
                     </Flex>
                     
@@ -574,24 +644,27 @@ const BranchNewInvoice = () => {
                                         borderRadius: '6px',
                                     }}
                                 />
-                                <Text color="whiteAlpha.600" fontWeight="600">% )</Text>
+                                <Text color="whiteAlpha.600" fontWeight="600">%)</Text>
                             </HStack>
                             <Text fontWeight="700" color="orange.300">₹{gstAmount.toLocaleString()}</Text>
                         </Flex>
                     )}
 
                     <Flex justify="space-between" align="center">
-                      <Text color="whiteAlpha.600" fontWeight="600">Discount</Text>
+                      <Text color="whiteAlpha.600" fontWeight="600">Discount (₹)</Text>
                       <Input 
                         type="number" 
-                        value={discount}
+                        value={discount === 0 ? '' : discount}
+                        placeholder="0"
                         onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                        size="xs" 
-                        w="80px" 
-                        bg="whiteAlpha.100"
+                        size="sm" 
+                        w="90px" 
+                        bg="whiteAlpha.200"
                         border="none"
                         color="white"
                         textAlign="right"
+                        borderRadius="md"
+                        _focus={{ bg: 'whiteAlpha.300' }}
                       />
                     </Flex>
                     
@@ -626,4 +699,4 @@ const BranchNewInvoice = () => {
   );
 };
 
-export default BranchNewInvoice;
+export default AdminNewInvoice;

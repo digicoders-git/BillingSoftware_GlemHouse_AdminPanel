@@ -44,7 +44,7 @@ const DeepoBilling = ({ isGst }) => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0 }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -85,7 +85,7 @@ const DeepoBilling = ({ isGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0 }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -104,7 +104,8 @@ const DeepoBilling = ({ isGst }) => {
             name: product?.name || '', 
             sku: product?.sku || '', 
             price: product?.price || 0,
-            total: (product?.price || 0) * item.qty
+            total: (product?.price || 0) * item.qty,
+            expiryDate: product?.expiry || ''
           }
         : item
     ));
@@ -148,6 +149,32 @@ const DeepoBilling = ({ isGst }) => {
         duration: 3000,
       });
       return;
+    }
+
+    // Verify Stock First
+    for (const item of items) {
+      const product = products.find(p => p._id === item.product);
+      if (!product) continue;
+      const qtyNum = Number(item.qty) || 0;
+      if (qtyNum <= 0) {
+        toast({
+          title: "Invalid Quantity",
+          description: `Quantity for "${product.name}" must be greater than zero.`,
+          status: "error",
+          duration: 3000,
+        });
+        return;
+      }
+      if (qtyNum > product.stock) {
+        toast({
+          title: "Insufficient Stock",
+          description: `Product "${product.name}" only has ${product.stock} units available in Central Warehouse stock. You entered ${qtyNum}.`,
+          status: "error",
+          duration: 4000,
+          isClosable: true
+        });
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -312,7 +339,8 @@ const DeepoBilling = ({ isGst }) => {
                 <Table variant="simple">
                   <Thead bg="gray.50/50">
                     <Tr>
-                      <Th color="gray.500" border="none" py="4" fontSize="10px">Description</Th>
+                      <Th color="gray.500" border="none" py="4" fontSize="10px" minW="200px">Description</Th>
+                      <Th color="gray.500" border="none" py="4" fontSize="10px" w="130px">Expiry (Optional)</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="120px">Quantity</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="150px">Unit Price</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" textAlign="right">Taxable Value</Th>
@@ -333,9 +361,21 @@ const DeepoBilling = ({ isGst }) => {
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
                             {products.map(p => (
-                              <option key={p._id} value={p._id}>{p.name} ({p.sku})</option>
+                              <option key={p._id} value={p._id}>{p.name} ({p.sku}) — Stock: {p.stock || 0}</option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="40px"
+                            borderRadius="lg"
+                            fontWeight="700"
+                            value={item.expiryDate || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, expiryDate: e.target.value } : i))}
+                            placeholder="MM/YYYY (optional)"
+                          />
                         </Td>
                         <Td>
                           <Input 
@@ -400,8 +440,29 @@ const DeepoBilling = ({ isGst }) => {
                                 <Text fontWeight="700">₹{taxableAmount.toLocaleString()}</Text>
                             </Flex>
                             {isGst && (
-                                <Flex justify="space-between">
-                                    <Text color="gray.500" fontWeight="600">GST ({dispatchData.gstRate}%)</Text>
+                                <Flex justify="space-between" align="center">
+                                    <HStack spacing="1">
+                                        <Text color="gray.500" fontWeight="600" fontSize="sm">GST (</Text>
+                                        <input 
+                                            type="number" 
+                                            value={dispatchData.gstRate === 0 ? '' : dispatchData.gstRate}
+                                            placeholder="0"
+                                            onChange={(e) => setDispatchData({...dispatchData, gstRate: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0)})}
+                                            style={{
+                                                width: '45px',
+                                                height: '24px',
+                                                background: 'rgba(0, 0, 0, 0.05)',
+                                                border: 'none',
+                                                outline: 'none',
+                                                color: 'inherit',
+                                                textAlign: 'center',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                                borderRadius: '6px',
+                                            }}
+                                        />
+                                        <Text color="gray.500" fontWeight="600" fontSize="sm">%)</Text>
+                                    </HStack>
                                     <Text fontWeight="700" color="orange.500">₹{gstAmount.toLocaleString()}</Text>
                                 </Flex>
                             )}
