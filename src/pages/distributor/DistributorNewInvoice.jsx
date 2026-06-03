@@ -101,10 +101,10 @@ const DistributorNewInvoice = () => {
 
   const handleProductChange = (id, productId) => {
     const selectedProduct = inventory.find(inv => (
+      inv._id === productId ||
       inv.productID === productId || 
       inv.product?._id === productId || 
-      inv.product === productId || 
-      inv._id === productId
+      inv.product === productId
     ));
     
     if (selectedProduct) {
@@ -119,7 +119,7 @@ const DistributorNewInvoice = () => {
           const price = selectedProduct.product?.price || selectedProduct.price || 0;
           return {
             ...item,
-            product: selectedProduct.productID || selectedProduct.product?._id || selectedProduct._id,
+            product: productId,
             name: selectedProduct.product?.name || selectedProduct.name,
             sku: selectedProduct.product?.sku || selectedProduct.sku,
             price: price,
@@ -459,7 +459,7 @@ const DistributorNewInvoice = () => {
                                  onChange={(e) => handleProductChange(item.id, e.target.value)}
                               >
                                  {inventory.map(inv => (
-                                    <option key={inv._id} value={inv.productID || inv.product?._id || inv._id} disabled={inv.stock <= 0}>
+                                    <option key={inv._id} value={inv._id}>
                                        {inv.name} — ({inv.stock} available)
                                     </option>
                                  ))}

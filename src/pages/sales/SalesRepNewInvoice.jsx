@@ -88,7 +88,11 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const handleProductChange = (id, productId) => {
-    const selectedProduct = inventory.find(inv => inv.productID === productId || inv._id === productId);
+    const selectedProduct = inventory.find(inv => 
+      inv.productID === productId || 
+      inv._id === productId || 
+      inv.product === productId
+    );
     
     if (selectedProduct) {
       setItems(items.map(item => {
@@ -97,7 +101,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
           const price = selectedProduct.price || 0;
           return {
             ...item,
-            product: selectedProduct.productID,
+            product: selectedProduct._id,
             name: selectedProduct.name,
             price: price,
             qty: qty,
@@ -277,10 +281,9 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
                             {inventory.map(inv => (
                               <option 
                                 key={inv._id} 
-                                value={inv.productID || inv.product || inv._id} 
-                                disabled={(inv.stock || 0) === 0}
+                                value={inv._id} 
                               >
-                                {inv.name} — {inv.stock} available
+                                {inv.name} ({inv.sku}) — {inv.stock} available
                               </option>
                             ))}
                           </Select>

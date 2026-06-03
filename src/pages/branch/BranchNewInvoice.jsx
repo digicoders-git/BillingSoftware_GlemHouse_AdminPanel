@@ -96,7 +96,11 @@ const BranchNewInvoice = () => {
   };
 
   const handleProductChange = (id, productId) => {
-    const selectedProduct = inventory.find(inv => (inv.product?._id === productId || inv.product === productId || inv._id === productId));
+    const selectedProduct = inventory.find(inv => 
+      inv._id === productId || 
+      inv.product?._id === productId || 
+      inv.productID === productId
+    );
     
     if (selectedProduct) {
       if (items.some(item => item.product === productId && item.id !== id)) {
@@ -408,8 +412,7 @@ const BranchNewInvoice = () => {
                             {inventory.map(inv => (
                               <option 
                                 key={inv._id} 
-                                value={inv.productID || inv.product || inv._id} 
-                                disabled={(inv.stock || 0) === 0}
+                                value={inv._id} 
                               >
                                 {inv.name} ({inv.sku || inv.product?.sku}) — Stock: {inv.stock || 0}
                               </option>
