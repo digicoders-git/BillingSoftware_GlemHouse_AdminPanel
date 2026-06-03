@@ -269,18 +269,20 @@ const DispatchSummary = () => {
                 </thead>
                 <tbody>
                   {dispatch.items.map((item, idx) => {
-                    const rawExpiry = item.expiryDate || item.expiry || item.product?.expiry || '';
+                    let rawExpiry = item.expiryDate || item.expiry || item.product?.expiry || '';
                     let expiryDisplay = 'N/A';
-                    if (rawExpiry) {
+                    if (rawExpiry && rawExpiry.trim()) {
                       const m = rawExpiry.match(/^(\d{4})-(\d{2})$/);
                       expiryDisplay = m ? `${m[2]}/${m[1]}` : rawExpiry;
                     }
+                    const hsnValue = (item.hsn && item.hsn.trim() && item.hsn !== 'N/A') ? item.hsn : ((item.product?.hsn && item.product.hsn.trim() && item.product.hsn !== 'N/A') ? item.product.hsn : 'N/A');
+                    const batchValue = (item.batch && item.batch.trim() && item.batch !== 'N/A') ? item.batch : ((item.product?.batch && item.product.batch.trim() && item.product.batch !== 'N/A') ? item.product.batch : 'N/A');
                     return (
                     <tr key={idx}>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{idx + 1}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', fontWeight: '900' }}>{item.name}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.hsn || item.product?.hsn || 'N/A'}</td>
-                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{item.batch || item.product?.batch || 'N/A'}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{hsnValue}</td>
+                      <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{batchValue}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '900' }}>{expiryDisplay}</td>
                       <td style={{ borderBottom: '1.5px solid #000', borderRight: isTransfer ? 'none' : '2px solid #000', padding: '10px 8px', textAlign: 'center', fontWeight: '950' }}>{item.qty}</td>
                       {!isTransfer && (

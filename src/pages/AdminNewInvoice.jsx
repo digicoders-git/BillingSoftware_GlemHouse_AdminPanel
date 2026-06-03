@@ -57,7 +57,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -84,7 +84,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -115,7 +115,9 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
             qty: qty,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
-            expiryDate: selectedProduct.expiry || ''
+            expiryDate: selectedProduct.expiry || '',
+            hsn: selectedProduct.hsn || '',
+            batch: selectedProduct.batch || ''
           };
         }
         return item;
@@ -274,7 +276,9 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
           qty: i.qty,
           price: i.price,
           total: i.total,
-          expiryDate: i.expiryDate || ''
+          expiryDate: i.expiryDate || '',
+          hsn: i.hsn || '',
+          batch: i.batch || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,

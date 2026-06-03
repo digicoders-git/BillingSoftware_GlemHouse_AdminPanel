@@ -44,7 +44,7 @@ const DeepoBilling = ({ isGst }) => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -85,7 +85,7 @@ const DeepoBilling = ({ isGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -102,10 +102,12 @@ const DeepoBilling = ({ isGst }) => {
             ...item, 
             product: productId, 
             name: product?.name || '', 
-            sku: product?.sku || '', 
+            sku: product?.sku || '',
+            hsn: product?.hsn && product.hsn.trim() ? product.hsn : '',
+            batch: product?.batch && product.batch.trim() ? product.batch : '',
             price: product?.price || 0,
             total: (product?.price || 0) * item.qty,
-            expiryDate: product?.expiry || ''
+            expiryDate: product?.expiry && product.expiry.trim() ? product.expiry : ''
           }
         : item
     ));
@@ -497,3 +499,4 @@ const DeepoBilling = ({ isGst }) => {
 };
 
 export default DeepoBilling;
+
