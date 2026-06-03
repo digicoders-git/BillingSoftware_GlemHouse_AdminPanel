@@ -108,7 +108,7 @@ const DistributorNewInvoice = () => {
     ));
     
     if (selectedProduct) {
-      if (items.some(item => item.product === productId && item.id !== id)) {
+      if (items.some(item => item.product === (selectedProduct.productID || selectedProduct._id) && item.id !== id)) {
          toast({ title: "Product already added to list", status: "warning", position: 'top' });
          return;
       }
@@ -116,17 +116,17 @@ const DistributorNewInvoice = () => {
       setItems(items.map(item => {
         if (item.id === id) {
           const qty = 1;
-          const price = selectedProduct.product?.price || selectedProduct.price || 0;
+          const price = selectedProduct.price || 0;
           return {
             ...item,
-            product: productId,
-            name: selectedProduct.product?.name || selectedProduct.name,
-            sku: selectedProduct.product?.sku || selectedProduct.sku,
+            product: selectedProduct.productID || selectedProduct._id,
+            name: selectedProduct.name,
+            sku: selectedProduct.sku,
             price: price,
             qty: qty,
             total: qty * price,
-            maxStock: selectedProduct.stock || selectedProduct.currentStock || 0,
-            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
+            maxStock: selectedProduct.stock || 0,
+            expiryDate: ''
           };
         }
         return item;
@@ -163,19 +163,20 @@ const DistributorNewInvoice = () => {
   const quickAddProduct = (invItem) => {
      if (invItem.stock <= 0) return toast({ title: "Out of Stock", status: "error" });
      
-     if (items.some(i => i.product === (invItem.productID || invItem.product?._id || invItem._id))) {
+     const productId = invItem.productID || invItem._id;
+     if (items.some(i => i.product === productId)) {
         toast({ title: "Already in cart", status: "info" });
         return;
      }
 
      const newItem = {
         id: Date.now(),
-        product: invItem.productID || invItem.product?._id || invItem._id,
-        name: invItem.product?.name || invItem.name,
-        sku: invItem.product?.sku || invItem.sku,
-        price: invItem.product?.price || invItem.price || 0,
+        product: productId,
+        name: invItem.name,
+        sku: invItem.sku,
+        price: invItem.price || 0,
         qty: 1,
-        total: invItem.product?.price || invItem.price || 0,
+        total: invItem.price || 0,
         maxStock: invItem.stock || 0,
         expiryDate: ''
      };
@@ -459,7 +460,7 @@ const DistributorNewInvoice = () => {
                                  onChange={(e) => handleProductChange(item.id, e.target.value)}
                               >
                                  {inventory.map(inv => (
-                                    <option key={inv._id} value={inv._id}>
+                                    <option key={inv._id} value={inv.productID || inv._id}>
                                        {inv.name} — ({inv.stock} available)
                                     </option>
                                  ))}
