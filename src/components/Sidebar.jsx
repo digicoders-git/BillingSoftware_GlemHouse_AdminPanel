@@ -348,14 +348,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           {/* BRANCH SIDEBAR */}
           {userRole === 'branch' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="Branch Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
+              <SidebarItem icon={LayoutDashboard} label="SS Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Stock Management
                 </Text>
               )}
-              <SidebarItem icon={Package} label="Branch Inventory" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Package} label="SS Inventory" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Manage Stock', to: '/branch/manage-products' },
                   { label: 'Incoming Shipments', to: '/branch/received-stock' },
@@ -363,7 +363,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={ArrowUpRight} label="Dispatch to Sales" isCollapsed={isCollapsed}>
+              <SidebarItem icon={ArrowUpRight} label="Dispatch to SS" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Dispatch with GST', to: '/branch/dispatch-to-sales-gst' },
                   { label: 'Dispatch (Non-GST)', to: '/branch/dispatch-to-sales' },
@@ -376,8 +376,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                   Sales & Billing
                 </Text>
               )}
-              <SidebarItem icon={TrendingUp} label="Sales Analytics" to="/branch/product-sales" isCollapsed={isCollapsed} />
-              <SidebarItem icon={FileText} label="Branch Reports" to="/branch/reports" isCollapsed={isCollapsed} />
+              <SidebarItem icon={TrendingUp} label="SS Analytics" to="/branch/product-sales" isCollapsed={isCollapsed} />
+              <SidebarItem icon={FileText} label="SS Reports" to="/branch/reports" isCollapsed={isCollapsed} />
             </>
           )}
 
