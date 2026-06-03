@@ -348,14 +348,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           {/* BRANCH SIDEBAR */}
           {userRole === 'branch' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="SS Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
+              <SidebarItem icon={LayoutDashboard} label="Depot Dashboard" to="/branch/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Stock Management
                 </Text>
               )}
-              <SidebarItem icon={Package} label="SS Inventory" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Package} label="Depot Inventory" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Manage Stock', to: '/branch/manage-products' },
                   { label: 'Incoming Shipments', to: '/branch/received-stock' },
@@ -376,8 +376,8 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                   Sales & Billing
                 </Text>
               )}
-              <SidebarItem icon={TrendingUp} label="SS Analytics" to="/branch/product-sales" isCollapsed={isCollapsed} />
-              <SidebarItem icon={FileText} label="SS Reports" to="/branch/reports" isCollapsed={isCollapsed} />
+              <SidebarItem icon={TrendingUp} label="Depot Analytics" to="/branch/product-sales" isCollapsed={isCollapsed} />
+              <SidebarItem icon={FileText} label="Depot Reports" to="/branch/reports" isCollapsed={isCollapsed} />
             </>
           )}
 
