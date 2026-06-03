@@ -1,7 +1,22 @@
 import axios from 'axios';
 
+// Automatically detect API URL based on environment
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // For production: use same domain as frontend
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `${window.location.protocol}//${window.location.hostname}/api`;
+  }
+  
+  // For local development
+  return 'http://localhost:5555/api';
+};
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getApiUrl(),
 });
 
 // Add a request interceptor to add the auth token to every request

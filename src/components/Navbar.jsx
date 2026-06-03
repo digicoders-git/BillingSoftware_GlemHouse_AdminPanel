@@ -37,22 +37,40 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
   const cancelRef = useRef();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const retryTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchProfile();
     
     // Listen for profile updates from Profile page
-    const handleProfileUpdate = () => fetchProfile();
+    const handleProfileUpdate = () => {
+      setRetryCount(0);
+      fetchProfile();
+    };
     window.addEventListener('profile_updated', handleProfileUpdate);
-    return () => window.removeEventListener('profile_updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profile_updated', handleProfileUpdate);
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+    };
   }, []);
 
   const fetchProfile = async () => {
     try {
       const { data } = await API.get('/users/profile');
       setProfile(data);
+      setRetryCount(0);
     } catch (error) {
-      console.error("Failed to fetch navbar profile", error);
+      console.error("Failed to fetch navbar profile:", error.message);
+      
+      // Retry logic - exponential backoff
+      if (retryCount < 3) {
+        const delay = Math.min(1000 * Math.pow(2, retryCount), 5000);
+        retryTimeoutRef.current = setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          fetchProfile();
+        }, delay);
+      }
     }
   };
 
@@ -60,6 +78,7 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
     onLogoutClose();
     localStorage.removeItem('userRole');
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('token');
     navigate('/login');
   };
 
@@ -99,7 +118,7 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
   const getProfilePic = (pic) => {
     if (!pic) return 'https://bit.ly/dan-abramov';
     if (pic.startsWith('http')) return pic;
-    const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5555';
+    const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || `${window.location.protocol}//${window.location.hostname}`;
     // Handle both old paths (with uploads/) and new paths (just filename)
     const cleanPath = pic.startsWith('uploads/') ? pic : `uploads/${pic}`;
     return `${API_URL}/${cleanPath}`;

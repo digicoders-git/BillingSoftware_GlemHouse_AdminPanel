@@ -122,15 +122,19 @@ const BranchManageProducts = () => {
   const fetchInventory = async () => {
     try {
       const { data } = await API.get('/branch-inventory');
-      setInventory(data.inventory);
-      setStats(data.stats);
+      setInventory(data.inventory || []);
+      setStats(data.stats || {});
       setLoading(false);
     } catch (error) {
+      console.error('Inventory fetch error:', error.response?.data?.message || error.message);
       toast({
         title: "Error fetching inventory",
+        description: error.response?.data?.message || "Please check your connection and try again",
         status: "error",
-        duration: 3000,
+        duration: 4000,
       });
+      setInventory([]);
+      setStats({});
       setLoading(false);
     }
   };
