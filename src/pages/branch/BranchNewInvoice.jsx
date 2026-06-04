@@ -55,7 +55,7 @@ const BranchNewInvoice = () => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -69,6 +69,21 @@ const BranchNewInvoice = () => {
   useEffect(() => {
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    setIsGst(location.pathname.includes('gst'));
+    setItems([
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    ]);
+    setCustomerDetails({
+      name: '',
+      phone: '',
+      paymentMethod: 'Cash',
+      notes: ''
+    });
+    setDiscount(0);
+    setGstRate(18);
+  }, [location.pathname]);
 
   const fetchInventory = async () => {
     try {
@@ -86,7 +101,7 @@ const BranchNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -121,7 +136,9 @@ const BranchNewInvoice = () => {
             qty: qty,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
-            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
+            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || '',
+            hsn: selectedProduct.product?.hsn || selectedProduct.hsn || '',
+            batch: selectedProduct.product?.batch || selectedProduct.batch || ''
           };
         }
         return item;
@@ -280,7 +297,9 @@ const BranchNewInvoice = () => {
           qty: i.qty,
           price: i.price,
           total: i.total,
-          expiryDate: i.expiryDate || ''
+          expiryDate: i.expiryDate || '',
+          hsn: i.hsn || '',
+          batch: i.batch || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,

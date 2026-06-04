@@ -423,11 +423,11 @@ const BranchManageProducts = () => {
                 />
               </InputGroup>
               <HStack spacing="3">
-                <Select placeholder="All Categories" borderRadius="lg" bg="white" maxW="150px" size="sm" fontSize="11px">
+                {/* <Select placeholder="All Categories" borderRadius="lg" bg="white" maxW="150px" size="sm" fontSize="11px">
                   <option>Mobiles</option>
                   <option>Laptops</option>
                   <option>Accessories</option>
-                </Select>
+                </Select> */}
                 <Menu>
                   <MenuButton 
                     as={Button} 

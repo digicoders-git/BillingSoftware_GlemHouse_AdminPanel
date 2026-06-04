@@ -51,7 +51,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   const [isGst, setIsGst] = useState(propIsGst ?? false);
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -78,7 +78,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -107,7 +107,9 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
             qty: qty,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
-            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
+            expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || '',
+            hsn: selectedProduct.product?.hsn || selectedProduct.hsn || '',
+            batch: selectedProduct.product?.batch || selectedProduct.batch || ''
           };
         }
         return item;
@@ -157,7 +159,16 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
         customerPhone: customerDetails.phone,
         paymentMethod: customerDetails.paymentMethod,
         notes: customerDetails.notes,
-        items: validItems,
+        items: validItems.map(i => ({
+          product: i.product,
+          name: i.name,
+          qty: i.qty,
+          price: i.price,
+          total: i.total,
+          expiryDate: i.expiryDate || '',
+          hsn: i.hsn || '',
+          batch: i.batch || ''
+        })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,
         taxableAmount,

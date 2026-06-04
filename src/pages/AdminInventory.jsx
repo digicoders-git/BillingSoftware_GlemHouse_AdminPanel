@@ -70,7 +70,9 @@ const AdminInventory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('filter') || 'All';
+    const filterParam = params.get('filter');
+    if (!filterParam) return 'All';
+    return filterParam.charAt(0).toUpperCase() + filterParam.slice(1).toLowerCase();
   });
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -140,14 +142,14 @@ const AdminInventory = () => {
   const filteredProducts = products.filter(p => 
     (p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (filterStatus === 'All' || 
-     (filterStatus === 'Low' && p.totalStock <= (p.minLevel || 5) && p.totalStock > 0) ||
-     (filterStatus === 'Out' && p.totalStock === 0) ||
-     (filterStatus === 'Healthy' && p.totalStock > (p.minLevel || 5)))
+     (filterStatus === 'Low' && p.warehouseStock > 0 && p.warehouseStock <= (p.minLevel || 5)) ||
+     (filterStatus === 'Out' && p.warehouseStock === 0) ||
+     (filterStatus === 'Healthy' && p.warehouseStock > (p.minLevel || 5)))
   );
 
-  const getStatusColor = (stock) => {
+  const getStatusColor = (stock, minLevel = 5) => {
     if (stock === 0) return 'red';
-    if (stock <= 5) return 'orange';
+    if (stock <= minLevel) return 'orange';
     return 'green';
   };
 
@@ -356,7 +358,7 @@ const AdminInventory = () => {
                           <Td borderColor="gray.100">
                              <VStack align="start" spacing="1">
                                 <HStack spacing="2">
-                                   <Text fontWeight="900" fontSize="sm" color={p.totalStock <= 5 ? "red.600" : "secondary"}>
+                                   <Text fontWeight="900" fontSize="sm" color={p.warehouseStock === 0 ? "red.600" : p.warehouseStock <= (p.minLevel || 5) ? "orange.500" : "secondary"}>
                                       {p.totalStock} Units
                                    </Text>
                                    <Badge size="xs" variant="ghost" colorScheme="gray" fontSize="8px" fontWeight="700">TOTAL</Badge>
@@ -370,11 +372,11 @@ const AdminInventory = () => {
                                    </Box>
                                  </HStack>
                                 <Progress 
-                                   value={(p.totalStock / 50) * 100} 
+                                   value={Math.max(0, Math.min((p.warehouseStock / ((p.minLevel || 5) * 2)) * 100, 100))} 
                                    size="xs" 
                                    w="60px" 
                                    borderRadius="full" 
-                                   colorScheme={getStatusColor(p.totalStock)} 
+                                   colorScheme={getStatusColor(p.warehouseStock, p.minLevel)} 
                                 />
                              </VStack>
                           </Td>
@@ -383,7 +385,7 @@ const AdminInventory = () => {
                           </Td>
                           <Td borderColor="gray.100">
                              <Badge 
-                                colorScheme={getStatusColor(p.totalStock)} 
+                                colorScheme={getStatusColor(p.warehouseStock, p.minLevel)} 
                                 variant="subtle" 
                                 borderRadius="full" 
                                 px="3" 
@@ -391,7 +393,7 @@ const AdminInventory = () => {
                                 fontSize="9px" 
                                 fontWeight="800"
                              >
-                                {p.totalStock > 10 ? "Optimal" : p.totalStock > 0 ? "Critically Low" : "Empty"}
+                                {p.warehouseStock > (p.minLevel || 5) ? "Optimal" : p.warehouseStock > 0 ? "Critically Low" : "Empty"}
                              </Badge>
                           </Td>
                           <Td borderColor="gray.100" py="4" px="8">

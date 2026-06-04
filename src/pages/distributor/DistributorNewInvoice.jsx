@@ -63,7 +63,7 @@ const DistributorNewInvoice = () => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -78,6 +78,24 @@ const DistributorNewInvoice = () => {
     fetchInventory();
   }, []);
 
+  useEffect(() => {
+    setIsGst(location.pathname.includes('gst'));
+    setIsPreviewOpen(false);
+    setPreviewHtml('');
+    setBillDataState(null);
+    setItems([
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    ]);
+    setCustomerDetails({
+      name: '',
+      phone: '',
+      paymentMethod: 'Cash',
+      notes: ''
+    });
+    setDiscount(0);
+    setGstRate(18);
+  }, [location.pathname]);
+
   const fetchInventory = async () => {
     try {
       const { data } = await API.get('/distributor-inventory');
@@ -90,7 +108,7 @@ const DistributorNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -126,7 +144,9 @@ const DistributorNewInvoice = () => {
             qty: qty,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
-            expiryDate: ''
+            expiryDate: selectedProduct.expiry || selectedProduct.expiryDate || '',
+            hsn: selectedProduct.hsn || '',
+            batch: selectedProduct.batch || ''
           };
         }
         return item;
@@ -178,7 +198,9 @@ const DistributorNewInvoice = () => {
         qty: 1,
         total: invItem.price || 0,
         maxStock: invItem.stock || 0,
-        expiryDate: ''
+        expiryDate: invItem.expiry || invItem.expiryDate || '',
+        hsn: invItem.hsn || '',
+        batch: invItem.batch || ''
      };
 
      // Replace the first empty item if it exists, else append
@@ -230,7 +252,9 @@ const DistributorNewInvoice = () => {
           qty: i.qty,
           price: i.price,
           total: i.total,
-          expiryDate: i.expiryDate || ''
+          expiryDate: i.expiryDate || '',
+          hsn: i.hsn || '',
+          batch: i.batch || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,

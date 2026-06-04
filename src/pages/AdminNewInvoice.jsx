@@ -72,6 +72,23 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    setIsPreviewOpen(false);
+    setPreviewHtml('');
+    setBillDataState(null);
+    setItems([
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    ]);
+    setCustomerDetails({
+      name: '',
+      phone: '',
+      paymentMethod: 'Cash',
+      notes: ''
+    });
+    setDiscount(0);
+    setGstRate(18);
+  }, [location.pathname]);
+
   const fetchProducts = async () => {
     try {
       const { data } = await API.get('/products');

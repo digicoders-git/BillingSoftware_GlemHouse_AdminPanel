@@ -197,7 +197,7 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase" letterSpacing="1px">Back to Dashboard</Text>
             </HStack>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">
-               {isGst ? 'GST Dispatch Console' : 'Stock Transfer (Non-GST)'}
+               {isGst ? 'Dispatch Console(GST)' : 'Dispatch Console(Non-GST)'}
             </Heading>
             <Text color="gray.500" fontWeight="500" fontSize="sm">Move inventory from depot storage to Super Stoklist representative shelf</Text>
           </Box>

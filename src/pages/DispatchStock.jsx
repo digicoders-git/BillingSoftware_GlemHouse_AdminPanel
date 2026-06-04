@@ -69,6 +69,7 @@ const DispatchStock = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const userRole = localStorage.getItem('userRole') || 'admin';
   
   const [dispatches, setDispatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -235,16 +236,26 @@ const DispatchStock = () => {
               isLoading={loading}
             />
             <Button leftIcon={<Printer size={16} />} variant="outline" borderRadius="xl" size="sm" color="gray.600">Print</Button>
-            <Button
-              leftIcon={<Package size={16} />} 
-              colorScheme="brand" 
-              borderRadius="xl" 
-              shadow="sm" 
-              size="sm"
-              onClick={() => navigate('/admin/transfer-stock')}
-            >
-              Transfer Stock
-            </Button>
+            {userRole !== 'distributor' && (
+              <Button
+                leftIcon={<Package size={16} />} 
+                colorScheme="brand" 
+                borderRadius="xl" 
+                shadow="sm" 
+                size="sm"
+                onClick={() => {
+                  if (userRole === 'branch') {
+                    navigate('/branch/dispatch-to-sales');
+                  } else if (userRole === 'sales') {
+                    navigate('/sales/dispatch-to-distributor');
+                  } else {
+                    navigate('/admin/transfer-stock');
+                  }
+                }}
+              >
+                Transfer Stock
+              </Button>
+            )}
           </HStack>
         </Flex>
 
