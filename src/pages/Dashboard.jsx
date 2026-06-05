@@ -137,7 +137,7 @@ const Dashboard = () => {
           <Box>
             <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Master Control Dashboard</Heading>
              <Text fontSize="sm" color="gray.500" mt="1" fontWeight="400">
-                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Depot(s)</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Super Stocklist</Text> recorded today
+                Managing <Text as="span" color="brand.500" fontWeight="600">{data.stats?.totalBranches || 0} Depot(s)</Text> with <Text as="span" color="brand.500" fontWeight="600">{data.stats?.todaySales || 0} New Superstockist</Text> recorded today
              </Text>
           </Box>
           <Box bg="white" p="2" borderRadius="xl" shadow="sm" border="1px solid" borderColor="gray.100">
@@ -179,7 +179,7 @@ const Dashboard = () => {
               : `₹${(data.stats?.totalRevenue || 0).toLocaleString()}`} 
             icon={TrendingUp} 
             trend="up" 
-            trendValue={`${data.stats?.totalSalesCount || 0} Super Stocklist`}
+            trendValue={`${data.stats?.totalSalesCount || 0} Superstockist`}
             color="green" 
             onClick={() => navigate('/reports/daily')}
           />
@@ -197,7 +197,7 @@ const Dashboard = () => {
             onClick={() => navigate('/manage-branches')}
           />
           <ColoredStatCard 
-            title="Total Super Stocklist Team" 
+            title="Total Superstockist Team" 
             value={`${data.stats?.totalSalesReps || 0} Members`} 
             icon={Users} 
             trend="up" 

@@ -296,10 +296,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={Users} label="Super Stocklist" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Users} label="Superstockist" isCollapsed={isCollapsed}>
                 {[
-                  { label: 'Super Stocklist Members', to: '/manage-sales' },
-                  { label: 'Add Super Stocklist', to: '/create-sales' },
+                  { label: 'Superstockist Members', to: '/manage-sales' },
+                  { label: 'Add Superstockist', to: '/create-sales' },
                 ]}
               </SidebarItem>
 
@@ -363,7 +363,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={ArrowUpRight} label="Dispatch to SS" isCollapsed={isCollapsed}>
+              <SidebarItem icon={ArrowUpRight} label="Dispatch to Superstockist" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Dispatch with GST', to: '/branch/dispatch-to-sales-gst' },
                   { label: 'Dispatch (Non-GST)', to: '/branch/dispatch-to-sales' },
@@ -384,7 +384,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           {/* SALES REP SIDEBAR */}
           {userRole === 'sales' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="Super Stocklist Dashboard" to="/sales/dashboard" isCollapsed={isCollapsed} />
+              <SidebarItem icon={LayoutDashboard} label="Superstockist Dashboard" to="/sales/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">

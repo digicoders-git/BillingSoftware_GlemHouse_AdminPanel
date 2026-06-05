@@ -102,7 +102,7 @@ const ManageSales = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to fetch Super Stocklist records',
+        description: 'Failed to fetch Superstockist records',
         status: 'error',
         duration: 3000,
       });
@@ -115,7 +115,7 @@ const ManageSales = () => {
       await API.delete(`/sales/${deleteId}`);
       toast({
         title: 'Success',
-        description: 'Super Stocklist record removed successfully',
+        description: 'Superstockist record removed successfully',
         status: 'success',
         duration: 3000,
       });
@@ -124,7 +124,7 @@ const ManageSales = () => {
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to remove Super Stocklist record',
+        description: 'Failed to remove Superstockist record',
         status: 'error',
         duration: 3000,
       });
@@ -147,8 +147,8 @@ const ManageSales = () => {
       <Box pb="10">
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
-            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Super Stocklist</Heading>
-            <Text fontSize="sm" color="gray.500">View and manage all Super Stocklist representatives</Text>
+            <Heading size="lg" color="secondary" fontWeight="700" letterSpacing="-0.5px">Manage Superstockist</Heading>
+            <Text fontSize="sm" color="gray.500">View and manage all Superstockist representatives</Text>
           </Box>
           <Button 
             leftIcon={<Plus size={16} />} 
@@ -157,21 +157,21 @@ const ManageSales = () => {
             size="sm" 
             onClick={() => navigate('/create-sales')}
           >
-            Add New Super Stocklist
+            Add New Superstockist
           </Button>
         </Flex>
 
         <Box className="premium-card" overflow="hidden">
           <Box p="6" borderBottom="1px solid" borderColor="gray.50">
             <Flex justify="space-between" align="center">
-              <Heading size="xs" color="secondary" fontWeight="700">Super Stocklist Directory</Heading>
+              <Heading size="xs" color="secondary" fontWeight="700">Superstockist Directory</Heading>
               <HStack spacing="3">
                 <InputGroup size="sm" maxW="250px">
                   <InputLeftElement pointerEvents="none">
                     <Search color="gray" size={16} />
                   </InputLeftElement>
                   <Input 
-                    placeholder="Search Super Stocklist..." 
+                    placeholder="Search Superstockist..." 
                     borderRadius="lg" 
                     bg="white" 
                     value={search}
@@ -191,7 +191,7 @@ const ManageSales = () => {
               <Table variant="simple">
                 <Thead bg="gray.50/50">
                   <Tr>
-                    <Th fontSize="10px">Super Stocklist ID</Th>
+                    <Th fontSize="10px">Superstockist ID</Th>
                     <Th fontSize="10px">Name</Th>
                     <Th fontSize="10px">Location</Th>
                     <Th fontSize="10px">Contact</Th>
@@ -240,7 +240,7 @@ const ManageSales = () => {
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="6" textAlign="center" py="10" color="gray.500">No Super Stocklist records found</Td>
+                      <Td colSpan="6" textAlign="center" py="10" color="gray.500">No Superstockist records found</Td>
                     </Tr>
                   )}
                 </Tbody>
@@ -264,7 +264,7 @@ const ManageSales = () => {
       <Modal isOpen={isViewOpen} onClose={onViewClose} size="md">
         <ModalOverlay backdropFilter="blur(4px)" />
         <ModalContent borderRadius="2xl">
-          <ModalHeader>Super Stocklist Representative Details</ModalHeader>
+          <ModalHeader>Superstockist Representative Details</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb="6">
             {viewSales && (
@@ -275,7 +275,7 @@ const ManageSales = () => {
                 </Box>
                 <Grid templateColumns="repeat(2, 1fr)" gap="4">
                   <GridItem>
-                    <Text fontSize="xs" color="gray.500" fontWeight="700">Super Stocklist ID</Text>
+                    <Text fontSize="xs" color="gray.500" fontWeight="700">Superstockist ID</Text>
                     <Text fontWeight="600">{viewSales.salesId}</Text>
                   </GridItem>
                   <GridItem>
@@ -311,7 +311,7 @@ const ManageSales = () => {
       <AlertDialog isOpen={isDelOpen} leastDestructiveRef={cancelRef} onClose={onDelClose}>
         <AlertDialogOverlay>
           <AlertDialogContent borderRadius="xl">
-            <AlertDialogHeader>Delete Super Stocklist Record</AlertDialogHeader>
+            <AlertDialogHeader>Delete Superstockist Record</AlertDialogHeader>
             <AlertDialogBody>Are you sure? This will also delete their login account.</AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onDelClose}>Cancel</Button>

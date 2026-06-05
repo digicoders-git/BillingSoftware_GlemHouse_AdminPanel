@@ -68,7 +68,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
 
   const fetchInventory = async () => {
     try {
-      const { data } = await API.get('/branch-inventory'); // Super Stocklist role gets their own stock
+      const { data } = await API.get('/branch-inventory'); // Superstockist role gets their own stock
       setInventory(data.inventory || []);
       setLoading(false);
     } catch (error) {
@@ -220,7 +220,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">
                {isGst ? 'New GST Invoice' : 'Standard Bill'}
             </Heading>
-            <Text color="gray.500" fontWeight="500" fontSize="sm">Generate a professional receipt for your field Super Stocklist</Text>
+            <Text color="gray.500" fontWeight="500" fontSize="sm">Generate a professional receipt for your field Superstockist</Text>
           </Box>
           <HStack spacing="4" bg="white" p="2" borderRadius="2xl" shadow="sm" border="1px solid" borderColor="gray.50">
              <Box px="4" py="2" borderRight="1px solid" borderColor="gray.100">

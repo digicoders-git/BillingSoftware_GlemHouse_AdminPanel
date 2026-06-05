@@ -223,14 +223,14 @@ const Profile = () => {
                 <Heading size="md" color="secondary" fontWeight="800">{profile.name}</Heading>
                 <Text color="gray.500" fontSize="sm" fontWeight="600" mb="4">
                    {profile.role === 'admin' ? 'System Administrator' : 
-                    profile.role === 'sales' ? 'Super Stocklist Partner' : 
+                    profile.role === 'sales' ? 'Superstockist Partner' : 
                     profile.role === 'distributor' ? 'Authorized Distributor' :
                     `${branchInfo?.name || 'Depot'} Manager`}
                 </Text>
                 
                 <HStack justify="center" spacing="2" mb="2">
                   <Badge colorScheme="green" variant="solid" borderRadius="full" px="3">Verified Account</Badge>
-                  <Badge colorScheme="brand" variant="subtle" borderRadius="full" px="3">{profile.role === 'sales' ? 'SUPER STOCKLIST' : profile.role?.toUpperCase()}</Badge>
+                  <Badge colorScheme="brand" variant="subtle" borderRadius="full" px="3">{profile.role === 'sales' ? 'Superstockist' : profile.role?.toUpperCase()}</Badge>
                 </HStack>
               </Box>
 
@@ -246,7 +246,7 @@ const Profile = () => {
                       <Text fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Designation</Text>
                       <Text fontSize="sm" fontWeight="700" color="secondary">
                         {profile.role === 'admin' ? 'Master Admin' : 
-                         profile.role === 'sales' ? 'Super Stocklist Partner' : 
+                         profile.role === 'sales' ? 'Superstockist Partner' : 
                          profile.role === 'distributor' ? 'Distribution Partner' :
                          'Depot Manager'}
                       </Text>

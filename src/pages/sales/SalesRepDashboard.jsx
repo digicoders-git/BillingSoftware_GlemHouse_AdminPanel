@@ -95,11 +95,11 @@ const SalesRepDashboard = () => {
           position="relative"
         >
           <Box zIndex="1">
-            <Badge colorScheme="whiteAlpha" mb="2">Super Stocklist Representative Panel</Badge>
+            <Badge colorScheme="whiteAlpha" mb="2">Superstockist Representative Panel</Badge>
             <Heading size="lg" fontWeight="900" letterSpacing="-1px">
-               Welcome Back, {data.name || 'Super Stocklist Partner'}
+               Welcome Back, {data.name || 'Superstockist Partner'}
             </Heading>
-            <Text fontSize="sm" opacity="0.9">Track your inventory and daily Super Stocklist targets</Text>
+            <Text fontSize="sm" opacity="0.9">Track your inventory and daily Superstockist targets</Text>
           </Box>
           <HStack spacing="3" zIndex="1" mt={{ base: 4, md: 0 }}>
              <Menu>
@@ -141,7 +141,7 @@ const SalesRepDashboard = () => {
 
         <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="6" mb="10">
           <StatCard 
-            title="Today's Super Stocklist" 
+            title="Today's Superstockist" 
             value={`₹${data.stats.todayRevenue?.toLocaleString()}`}
             icon={TrendingUp}
             color="green"
@@ -173,7 +173,7 @@ const SalesRepDashboard = () => {
         <Grid templateColumns={{ base: "1fr", lg: "repeat(3, 1fr)" }} gap="8">
            <GridItem colSpan={{ base: 3, lg: 2 }}>
               <Box className="premium-card" p="8">
-                 <Heading size="xs" mb="6" color="secondary" fontWeight="900">Super Stocklist PERFORMANCE</Heading>
+                 <Heading size="xs" mb="6" color="secondary" fontWeight="900">Superstockist PERFORMANCE</Heading>
                  <Box h="300px">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={data.weeklyTrend}>
