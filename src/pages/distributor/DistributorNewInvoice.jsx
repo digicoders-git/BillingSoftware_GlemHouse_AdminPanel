@@ -63,7 +63,7 @@ const DistributorNewInvoice = () => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -84,7 +84,7 @@ const DistributorNewInvoice = () => {
     setPreviewHtml('');
     setBillDataState(null);
     setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
     ]);
     setCustomerDetails({
       name: '',
@@ -108,7 +108,7 @@ const DistributorNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -142,6 +142,7 @@ const DistributorNewInvoice = () => {
             sku: selectedProduct.sku,
             price: price,
             qty: qty,
+            margin: 0,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.expiry || selectedProduct.expiryDate || '',
@@ -162,7 +163,7 @@ const DistributorNewInvoice = () => {
           toast({ title: `Limit: ${item.maxStock} units`, status: "warning", duration: 1000 });
           return item;
         }
-        return { ...item, qty: newQty, total: newQty * item.price };
+        return { ...item, qty: newQty, total: newQty * item.price * (1 - (item.margin || 0) / 100) };
       }
       return item;
     }));
@@ -170,7 +171,21 @@ const DistributorNewInvoice = () => {
 
   const handlePriceChange = (id, price) => {
     const p = parseFloat(price) || 0;
-    setItems(items.map(item => item.id === id ? { ...item, price: p, total: item.qty * p } : item));
+    setItems(items.map(item => item.id === id ? { ...item, price: p, total: item.qty * p * (1 - (item.margin || 0) / 100) } : item));
+  };
+
+  const handleMarginChange = (id, margin) => {
+    const parsedMargin = parseFloat(margin) || 0;
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          margin: parsedMargin,
+          total: item.qty * item.price * (1 - parsedMargin / 100)
+        };
+      }
+      return item;
+    }));
   };
 
   // Calculations
@@ -196,6 +211,7 @@ const DistributorNewInvoice = () => {
         sku: invItem.sku,
         price: invItem.price || 0,
         qty: 1,
+        margin: 0,
         total: invItem.price || 0,
         maxStock: invItem.stock || 0,
         expiryDate: invItem.expiry || invItem.expiryDate || '',
@@ -251,6 +267,7 @@ const DistributorNewInvoice = () => {
           name: i.name,
           qty: i.qty,
           price: i.price,
+          margin: i.margin || 0,
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
@@ -456,14 +473,15 @@ const DistributorNewInvoice = () => {
                 </Box>
              )}
 
-             <Box p="4">
-                <Table variant="simple" size="sm" minW="800px">
+             <Box p="4" overflowX="auto">
+                <Table variant="simple" size="sm" minW="1000px">
                    <Thead>
                       <Tr>
                          <Th color="gray.400" fontSize="10px" py="4" minW="220px">PRODUCT DESCRIPTION</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="140px">EXPIRY (OPTIONAL)</Th>
                          <Th color="gray.400" fontSize="10px" py="4" textAlign="center" w="130px">QUANTITY</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="130px">UNIT RATE</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" w="100px">MARGIN (%)</Th>
                          <Th color="gray.400" fontSize="10px" py="4" textAlign="right" w="100px">SUBTOTAL</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="50px"></Th>
                       </Tr>
@@ -525,6 +543,18 @@ const DistributorNewInvoice = () => {
                                     onChange={(e) => handlePriceChange(item.id, e.target.value)}
                                  />
                               </InputGroup>
+                           </Td>
+                           <Td>
+                              <Input 
+                                type="number" 
+                                value={item.margin || ''}
+                                placeholder="0"
+                                onChange={(e) => handleMarginChange(item.id, e.target.value)}
+                                variant="filled" 
+                                borderRadius="xl" 
+                                h="48px" 
+                                fontWeight="800"
+                              />
                            </Td>
                            <Td textAlign="right">
                               <Text fontWeight="900" color="secondary" fontSize="md">₹{item.total.toLocaleString()}</Text>

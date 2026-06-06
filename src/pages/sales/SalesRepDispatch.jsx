@@ -52,7 +52,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
   const isGst = propIsGst ?? location.pathname.includes('gst');
 
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -84,7 +84,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -107,6 +107,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
             sku: selectedProduct.sku || selectedProduct.product?.sku,
             price: price,
             qty: qty,
+            margin: 0,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || ''
@@ -125,7 +126,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
         if (q > item.maxStock) {
             toast({ title: `Only ${item.maxStock} in shelf stock`, status: "warning", position: 'top' });
         }
-        return { ...item, qty: validQty, total: validQty * item.price };
+        return { ...item, qty: validQty, total: validQty * item.price * (1 - (item.margin || 0) / 100) };
       }
       return item;
     }));
@@ -135,7 +136,21 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
     const p = parseFloat(price) || 0;
     setItems(items.map(item => {
       if (item.id === id) {
-        return { ...item, price: p, total: item.qty * p };
+        return { ...item, price: p, total: item.qty * p * (1 - (item.margin || 0) / 100) };
+      }
+      return item;
+    }));
+  };
+
+  const handleMarginChange = (id, margin) => {
+    const m = parseFloat(margin) || 0;
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          margin: m,
+          total: item.qty * item.price * (1 - m / 100)
+        };
       }
       return item;
     }));
@@ -155,7 +170,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
     try {
       const payload = {
         ...dispatchData,
-        items: validItems,
+        items: validItems.map(item => ({ ...item, margin: item.margin || 0 })),
         totalItems,
         taxableAmount,
         gstAmount,
@@ -328,6 +343,7 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="130px">EXPIRY (OPT.)</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="110px" textAlign="center">QTY</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="140px">UNIT PRICE</Th>
+                      <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" w="100px">MARGIN (%)</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" letterSpacing="1px" textAlign="right">SUBTOTAL</Th>
                       <Th color="gray.400" border="none" py="4" fontSize="10px" w="50px"></Th>
                     </Tr>
@@ -394,6 +410,20 @@ const SalesRepDispatch = ({ isGst: propIsGst }) => {
                                 bg="gray.50"
                                 value={item.price}
                                 onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                            />
+                        </Td>
+                        <Td>
+                            <Input 
+                                type="number" 
+                                size="sm" 
+                                h="45px"
+                                variant="filled"
+                                borderRadius="xl" 
+                                fontWeight="900"
+                                bg="gray.50"
+                                value={item.margin || ''}
+                                placeholder="0"
+                                onChange={(e) => handleMarginChange(item.id, e.target.value)}
                             />
                         </Td>
                         <Td textAlign="right">

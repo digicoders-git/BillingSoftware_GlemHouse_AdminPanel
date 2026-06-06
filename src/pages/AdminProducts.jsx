@@ -16,7 +16,6 @@ import {
   VStack,
   IconButton,
   Avatar,
-  Icon,
   Menu,
   MenuButton,
   MenuList,
@@ -38,9 +37,7 @@ import {
   FormControl,
   FormLabel,
   Textarea,
-  Image,
-  Select
-} from '@chakra-ui/react';
+  Image} from '@chakra-ui/react';
 import { 
   Package, 
   Plus, 
@@ -48,17 +45,15 @@ import {
   Edit3, 
   Trash2, 
   MoreVertical, 
-  Filter,
-  Download,
   ShoppingBag,
-  Tag,
-  DollarSign,
-  Layers,
   AlertTriangle,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload,
+  Download
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import API from '../utils/api';
+import Papa from 'papaparse';
 
 const AdminProducts = () => {
   const toast = useToast();
@@ -68,9 +63,13 @@ const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [editingProduct, setEditingProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingCSV, setUploadingCSV] = useState(false);
   const fileInputRef = React.useRef();
+  const csvInputRef = React.useRef();
   
   // Form State
   const [formData, setFormData] = useState({
@@ -83,7 +82,9 @@ const AdminProducts = () => {
     minLevel: 5,
     image: '',
     hsn: '',
-    batch: ''
+    batch: '',
+    packSize: '',
+    cartenSize: ''
   });
 
   useEffect(() => {
@@ -141,7 +142,9 @@ const AdminProducts = () => {
         minLevel: product.minLevel || 5,
         image: product.image || '',
         hsn: product.hsn || '',
-        batch: product.batch || ''
+        batch: product.batch || '',
+        packSize: product.packSize || '',
+        cartenSize: product.cartenSize || ''
       });
     } else {
       setEditingProduct(null);
@@ -155,7 +158,9 @@ const AdminProducts = () => {
         minLevel: 5,
         image: '',
         hsn: '',
-        batch: ''
+        batch: '',
+        packSize: '',
+        cartenSize: ''
       });
     }
     onOpen();
@@ -199,6 +204,68 @@ const AdminProducts = () => {
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const downloadSampleCSV = () => {
+    const headers = ['Name', 'SKU', 'Price', 'Stock', 'MinLevel', 'Category', 'HSN', 'Batch', 'PackSize', 'CartenSize'];
+    const sample = ['Example Product', 'SKU-001', '100', '50', '5', 'General', '', '', '1 Pcs', '10 Pcs'];
+    const csvContent = headers.join(',') + '\n' + sample.join(',');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'products_sample.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleCSVUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingCSV(true);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const bulkProducts = results.data.map(row => ({
+            name: row.Name || row.name,
+            sku: row.SKU || row.sku,
+            price: Number(row.Price || row.price) || 0,
+            stock: Number(row.Stock || row.stock) || 0,
+            minLevel: Number(row.MinLevel || row.minLevel) || 5,
+            category: row.Category || row.category || '',
+            hsn: row.HSN || row.hsn || '',
+            batch: row.Batch || row.batch || '',
+            packSize: row.PackSize || row.packSize || '',
+            cartenSize: row.CartenSize || row.cartenSize || ''
+          })).filter(p => p.name);
+
+          if (bulkProducts.length === 0) {
+            toast({ title: 'No valid products found in CSV', status: 'warning' });
+            return setUploadingCSV(false);
+          }
+
+          const res = await API.post('/products/bulk', { products: bulkProducts });
+          toast({ title: res.data.message || 'Products imported successfully', status: 'success' });
+          if (res.data.errors && res.data.errors.length > 0) {
+             toast({ title: 'Some SKUs were skipped', description: `${res.data.errors.length} duplicates found.`, status: 'info' });
+          }
+          fetchProducts();
+        } catch (error) {
+          toast({ title: 'Import failed', description: error.response?.data?.message || 'Check your CSV format', status: 'error' });
+        } finally {
+          setUploadingCSV(false);
+          if (csvInputRef.current) csvInputRef.current.value = '';
+        }
+      }
+    });
+  };
+
   return (
     <Layout>
       <Box pb="10">
@@ -208,16 +275,40 @@ const AdminProducts = () => {
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1px">Master Product Catalog</Heading>
             <Text color="gray.500" fontWeight="500">Create and manage products available across your network</Text>
           </Box>
-          <Button 
-            leftIcon={<Plus size={18} />} 
-            colorScheme="brand" 
-            borderRadius="xl" 
-            px="6" 
-            shadow="lg"
-            onClick={() => handleOpenModal()}
-          >
-            Create Product
-          </Button>
+          <HStack spacing="3">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              colorScheme="brand" 
+              borderRadius="lg" 
+              leftIcon={<Download size={16} />}
+              onClick={downloadSampleCSV}
+            >
+              Sample CSV
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              colorScheme="brand" 
+              borderRadius="lg" 
+              leftIcon={<Upload size={16} />}
+              onClick={() => csvInputRef.current.click()}
+              isLoading={uploadingCSV}
+            >
+              Import CSV
+            </Button>
+            <input type="file" accept=".csv" ref={csvInputRef} onChange={handleCSVUpload} style={{ display: 'none' }} />
+            <Button 
+              leftIcon={<Plus size={18} />} 
+              colorScheme="brand" 
+              borderRadius="xl" 
+              px="6" 
+              shadow="lg"
+              onClick={() => handleOpenModal()}
+            >
+              Create Product
+            </Button>
+          </HStack>
         </Flex>
 
         {/* Search & Stats */}
@@ -231,7 +322,10 @@ const AdminProducts = () => {
                   borderRadius="xl" 
                   h="45px" 
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
               </InputGroup>
            </Box>
@@ -262,6 +356,8 @@ const AdminProducts = () => {
                <Tr>
                  <Th py="4" px="6" border="none" fontSize="10px">Product</Th>
                  <Th py="4" border="none" fontSize="10px">HSN / Batch</Th>
+                 <Th py="4" border="none" fontSize="10px">Pack Size</Th>
+                 <Th py="4" border="none" fontSize="10px">Carten Size</Th>
                  <Th py="4" border="none" fontSize="10px">Category</Th>
                  <Th py="4" border="none" fontSize="10px">Price</Th>
                  <Th py="4" border="none" fontSize="10px">Main Stock</Th>
@@ -272,8 +368,8 @@ const AdminProducts = () => {
              <Tbody>
                {loading ? (
                  <Tr><Td colSpan="6" textAlign="center" py="10"><Spinner color="brand.500" /></Td></Tr>
-               ) : filteredProducts.map((p) => (
-                 <Tr key={p._id} _hover={{ bg: 'gray.50/30' }}>
+                ) : currentProducts.map((p) => (
+                  <Tr key={p._id} _hover={{ bg: 'gray.50/30' }}>
                    <Td py="4" px="6">
                      <HStack spacing="3">
                         <Avatar size="sm" src={p.image?.startsWith('http') ? p.image : `${BASE_URL}${p.image}`} name={p.name} borderRadius="lg" bg="gray.100" color="gray.500" icon={<Package size={16} />} />
@@ -289,6 +385,8 @@ const AdminProducts = () => {
                         <Text fontSize="10px" color="gray.400" fontWeight="700">Batch: {p.batch || 'N/A'}</Text>
                       </VStack>
                    </Td>
+                   <Td><Text fontWeight="800" color="secondary" fontSize="sm">{p.packSize || 'N/A'}</Text></Td>
+                   <Td><Text fontWeight="800" color="secondary" fontSize="sm">{p.cartenSize || 'N/A'}</Text></Td>
                    <Td><Badge colorScheme="gray" variant="subtle" px="2" py="0.5" borderRadius="md" fontSize="10px">{p.category || 'Uncategorized'}</Badge></Td>
                    <Td><Text fontWeight="900" color="secondary" fontSize="sm">₹{p.price.toLocaleString()}</Text></Td>
                    <Td>
@@ -315,7 +413,47 @@ const AdminProducts = () => {
                ))}
              </Tbody>
            </Table>
-        </Box>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Flex justify="space-between" align="center" p="4" borderTop="1px solid" borderColor="gray.100" bg="white">
+                <Text fontSize="sm" color="gray.500" fontWeight="600">
+                  Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} entries
+                </Text>
+                <HStack spacing="2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    isDisabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <HStack spacing="1">
+                    {[...Array(totalPages)].map((_, i) => (
+                      <Button 
+                        key={i + 1} 
+                        size="sm" 
+                        variant={currentPage === i + 1 ? "solid" : "ghost"}
+                        colorScheme={currentPage === i + 1 ? "brand" : "gray"}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </Button>
+                    ))}
+                  </HStack>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    isDisabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </HStack>
+              </Flex>
+            )}
+         </Box>
       </Box>
 
       {/* Product Modal */}
@@ -349,7 +487,7 @@ const AdminProducts = () => {
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                        />
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl>
                        <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">SKU / Model ID</FormLabel>
                        <Input 
                         placeholder="e.g. APL-IP15P" 
@@ -375,7 +513,7 @@ const AdminProducts = () => {
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
                        />
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl>
                        <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Initial Stock</FormLabel>
                        <Input 
                         type="number" 
@@ -386,7 +524,7 @@ const AdminProducts = () => {
                         onChange={(e) => setFormData({...formData, stock: e.target.value})}
                        />
                     </FormControl>
-                    <FormControl isRequired>
+                    <FormControl>
                        <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Min. Stock Level</FormLabel>
                        <Input 
                         type="number" 
@@ -433,6 +571,31 @@ const AdminProducts = () => {
                         onChange={(e) => setFormData({...formData, batch: e.target.value})}
                       />
                    </FormControl>
+                 </SimpleGrid>
+
+                 <SimpleGrid columns={2} spacing={5}>
+                    <FormControl>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Pack Size</FormLabel>
+                       <Input 
+                        placeholder="e.g. 10 Pcs" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.packSize}
+                        onChange={(e) => setFormData({...formData, packSize: e.target.value})}
+                       />
+                    </FormControl>
+                    <FormControl>
+                       <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Carten Size</FormLabel>
+                       <Input 
+                        placeholder="e.g. 100 Pcs" 
+                        h="45px" 
+                        borderRadius="xl" 
+                        fontWeight="700" 
+                        value={formData.cartenSize}
+                        onChange={(e) => setFormData({...formData, cartenSize: e.target.value})}
+                       />
+                    </FormControl>
                  </SimpleGrid>
 
                  <FormControl>

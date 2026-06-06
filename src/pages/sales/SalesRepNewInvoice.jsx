@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -29,8 +29,6 @@ import {
 import { 
   Plus, 
   Trash, 
-  Printer, 
-  Download, 
   Save, 
   User,
   ShoppingBag,

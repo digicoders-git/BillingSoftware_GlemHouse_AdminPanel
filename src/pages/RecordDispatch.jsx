@@ -38,7 +38,7 @@ const RecordDispatch = () => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, margin: 0, expiryDate: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -77,7 +77,7 @@ const RecordDispatch = () => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', qty: 1, price: 0, margin: 0, expiryDate: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -96,6 +96,7 @@ const RecordDispatch = () => {
             name: product?.name || '', 
             sku: product?.sku || '', 
             price: product?.price || 0,
+            margin: 0,
             maxStock: product?.stock || 0,
             expiryDate: product?.expiry || ''
           }
@@ -124,7 +125,12 @@ const RecordDispatch = () => {
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
-  const totalValue = items.reduce((sum, item) => sum + (item.qty * item.price), 0);
+  const totalValue = items.reduce((sum, item) => sum + (item.qty * item.price * (1 - (item.margin || 0) / 100)), 0);
+
+  const handleMarginChange = (id, margin) => {
+    const m = parseFloat(margin) || 0;
+    setItems(items.map(item => item.id === id ? { ...item, margin: m } : item));
+  };
 
   const handleConfirmDispatch = async () => {
     if (!dispatchData.branch || !dispatchData.method) {
@@ -177,7 +183,7 @@ const RecordDispatch = () => {
     try {
       const response = await API.post('/dispatches', {
         ...dispatchData,
-        items,
+        items: items.map(item => ({ ...item, margin: item.margin || 0 })),
         totalItems,
         totalValue
       });
@@ -328,6 +334,7 @@ const RecordDispatch = () => {
                       <Th color="gray.400" border="none" py="5">SKU</Th>
                       <Th color="gray.400" border="none" py="5" w="120px">Quantity</Th>
                       <Th color="gray.400" border="none" py="5">Unit Price</Th>
+                      <Th color="gray.400" border="none" py="5" w="100px">Margin (%)</Th>
                       <Th color="gray.400" border="none" py="5" textAlign="right">Total</Th>
                       <Th color="gray.400" border="none" py="5"></Th>
                     </Tr>
@@ -381,8 +388,23 @@ const RecordDispatch = () => {
                           />
                         </Td>
                         <Td borderColor="gray.100"><Text fontSize="sm" fontWeight="700">₹{item.price}</Text></Td>
+                        <Td borderColor="gray.100">
+                          <Input 
+                            type="number" 
+                            size="sm" 
+                            h="38px"
+                            borderRadius="lg" 
+                            bg="white" 
+                            border="1px solid"
+                            borderColor="gray.100" 
+                            fontWeight="800"
+                            placeholder="0"
+                            value={item.margin || ''}
+                            onChange={(e) => handleMarginChange(item.id, e.target.value)}
+                          />
+                        </Td>
                         <Td borderColor="gray.100" textAlign="right">
-                           <Text fontWeight="900" color="secondary">₹{(item.qty * item.price).toLocaleString()}</Text>
+                           <Text fontWeight="900" color="secondary">₹{(item.qty * item.price * (1 - (item.margin || 0) / 100)).toLocaleString()}</Text>
                         </Td>
                         <Td borderColor="gray.100">
                           <IconButton 

@@ -74,6 +74,8 @@ const AdminInventory = () => {
     if (!filterParam) return 'All';
     return filterParam.charAt(0).toUpperCase() + filterParam.slice(1).toLowerCase();
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
@@ -145,6 +147,12 @@ const AdminInventory = () => {
      (filterStatus === 'Low' && p.warehouseStock > 0 && p.warehouseStock <= (p.minLevel || 5)) ||
      (filterStatus === 'Out' && p.warehouseStock === 0) ||
      (filterStatus === 'Healthy' && p.warehouseStock > (p.minLevel || 5)))
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   const getStatusColor = (stock, minLevel = 5) => {
@@ -262,7 +270,7 @@ const AdminInventory = () => {
                         <Text color="red.600" fontSize="xs">{summary.lowStockCount} items are running below minimum safety levels.</Text>
                       </Box>
                     </HStack>
-                    <Button size="xs" colorScheme="red" variant="solid" px="4" borderRadius="lg" onClick={() => setFilterStatus('Low')}>
+                    <Button size="xs" colorScheme="red" variant="solid" px="4" borderRadius="lg" onClick={() => { setFilterStatus('Low'); setCurrentPage(1); }}>
                       Restock Now
                     </Button>
                   </Flex>
@@ -287,17 +295,20 @@ const AdminInventory = () => {
                            borderColor="gray.200"
                            _focus={{ borderColor: 'brand.500', shadow: 'sm' }}
                            value={searchTerm}
-                           onChange={(e) => setSearchTerm(e.target.value)}
+                           onChange={(e) => {
+                             setSearchTerm(e.target.value);
+                             setCurrentPage(1);
+                           }}
                         />
                      </InputGroup>
                      <HStack spacing="3">
-                        <Tag size="lg" variant="subtle" colorScheme="gray" borderRadius="full" cursor="pointer" onClick={() => setFilterStatus('All')} opacity={filterStatus === 'All' ? 1 : 0.6}>
+                        <Tag size="lg" variant="subtle" colorScheme="gray" borderRadius="full" cursor="pointer" onClick={() => { setFilterStatus('All'); setCurrentPage(1); }} opacity={filterStatus === 'All' ? 1 : 0.6}>
                            <TagLabel fontSize="10px" fontWeight="800">ALL</TagLabel>
                         </Tag>
-                        <Tag size="lg" variant="subtle" colorScheme="orange" borderRadius="full" cursor="pointer" onClick={() => setFilterStatus('Low')} opacity={filterStatus === 'Low' ? 1 : 0.6}>
+                        <Tag size="lg" variant="subtle" colorScheme="orange" borderRadius="full" cursor="pointer" onClick={() => { setFilterStatus('Low'); setCurrentPage(1); }} opacity={filterStatus === 'Low' ? 1 : 0.6}>
                            <TagLabel fontSize="10px" fontWeight="800">LOW</TagLabel>
                         </Tag>
-                        <Tag size="lg" variant="subtle" colorScheme="red" borderRadius="full" cursor="pointer" onClick={() => setFilterStatus('Out')} opacity={filterStatus === 'Out' ? 1 : 0.6}>
+                        <Tag size="lg" variant="subtle" colorScheme="red" borderRadius="full" cursor="pointer" onClick={() => { setFilterStatus('Out'); setCurrentPage(1); }} opacity={filterStatus === 'Out' ? 1 : 0.6}>
                            <TagLabel fontSize="10px" fontWeight="800">OUT</TagLabel>
                         </Tag>
                         <Divider orientation="vertical" h="20px" />
@@ -312,6 +323,8 @@ const AdminInventory = () => {
                     <Thead bg="gray.50/50">
                       <Tr>
                         <Th color="gray.400" border="none" py="4" px="8" fontSize="10px">Product Model</Th>
+                        <Th color="gray.400" border="none" py="4" fontSize="10px">Pack Size</Th>
+                        <Th color="gray.400" border="none" py="4" fontSize="10px">Carten Size</Th>
                         <Th color="gray.400" border="none" py="4" fontSize="10px">Lifecycle</Th>
                         <Th color="gray.400" border="none" py="4" fontSize="10px">Inventory</Th>
                         <Th color="gray.400" border="none" py="4" fontSize="10px">Valuation</Th>
@@ -320,7 +333,7 @@ const AdminInventory = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {filteredProducts.length > 0 ? filteredProducts.map((p, idx) => (
+                      {currentProducts.length > 0 ? currentProducts.map((p, idx) => (
                         <MotionTr 
                           key={p._id} 
                           initial={{ opacity: 0, x: -10 }} 
@@ -342,6 +355,12 @@ const AdminInventory = () => {
                                    <Text fontSize="10px" color="gray.400" fontWeight="700" letterSpacing="0.5px">{p.sku}</Text>
                                 </Box>
                              </HStack>
+                          </Td>
+                          <Td borderColor="gray.100">
+                             <Text fontWeight="800" color="secondary" fontSize="xs">{p.packSize || 'N/A'}</Text>
+                          </Td>
+                          <Td borderColor="gray.100">
+                             <Text fontWeight="800" color="secondary" fontSize="xs">{p.cartenSize || 'N/A'}</Text>
                           </Td>
                           <Td borderColor="gray.100">
                              <HStack spacing="4">
@@ -424,6 +443,46 @@ const AdminInventory = () => {
                       )}
                     </Tbody>
                   </Table>
+
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <Flex justify="space-between" align="center" p="4" borderTop="1px solid" borderColor="gray.100" bg="white">
+                      <Text fontSize="sm" color="gray.500" fontWeight="600">
+                        Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} entries
+                      </Text>
+                      <HStack spacing="2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          isDisabled={currentPage === 1}
+                        >
+                          Previous
+                        </Button>
+                        <HStack spacing="1">
+                          {[...Array(totalPages)].map((_, i) => (
+                            <Button 
+                              key={i + 1} 
+                              size="sm" 
+                              variant={currentPage === i + 1 ? "solid" : "ghost"}
+                              colorScheme={currentPage === i + 1 ? "brand" : "gray"}
+                              onClick={() => setCurrentPage(i + 1)}
+                            >
+                              {i + 1}
+                            </Button>
+                          ))}
+                        </HStack>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          isDisabled={currentPage === totalPages}
+                        >
+                          Next
+                        </Button>
+                      </HStack>
+                    </Flex>
+                  )}
                </Box>
             </Box>
           </>

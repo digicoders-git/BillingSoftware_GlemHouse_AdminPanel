@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -23,7 +23,6 @@ import {
   Select,
   useToast,
   Spinner,
-  Badge,
   Switch
 } from '@chakra-ui/react';
 import { 
@@ -55,7 +54,7 @@ const BranchNewInvoice = () => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -73,7 +72,7 @@ const BranchNewInvoice = () => {
   useEffect(() => {
     setIsGst(location.pathname.includes('gst'));
     setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
     ]);
     setCustomerDetails({
       name: '',
@@ -101,7 +100,7 @@ const BranchNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -134,6 +133,7 @@ const BranchNewInvoice = () => {
             category: selectedProduct.product?.category || selectedProduct.category,
             price: price,
             qty: qty,
+            margin: 0,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || '',
@@ -181,7 +181,7 @@ const BranchNewInvoice = () => {
         return {
           ...item,
           qty: finalQty,
-          total: finalQty * item.price
+          total: finalQty * item.price * (1 - (item.margin || 0) / 100)
         };
       }
       return item;
@@ -195,7 +195,21 @@ const BranchNewInvoice = () => {
         return {
           ...item,
           price: parsedPrice,
-          total: item.qty * parsedPrice
+          total: item.qty * parsedPrice * (1 - (item.margin || 0) / 100)
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleMarginChange = (id, margin) => {
+    const parsedMargin = parseFloat(margin) || 0;
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          margin: parsedMargin,
+          total: item.qty * item.price * (1 - parsedMargin / 100)
         };
       }
       return item;
@@ -296,6 +310,7 @@ const BranchNewInvoice = () => {
           name: i.name,
           qty: i.qty,
           price: i.price,
+          margin: i.margin || 0,
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
@@ -403,13 +418,14 @@ const BranchNewInvoice = () => {
               </Flex>
               
               <Box overflowX="auto">
-                <Table variant="simple" minW="750px">
+                <Table variant="simple" minW="1000px">
                   <Thead bg="gray.50/50">
                     <Tr>
                       <Th py="4" border="none" fontSize="10px" minW="220px">Description</Th>
                       <Th py="4" border="none" fontSize="10px" w="140px">Expiry (Optional)</Th>
                       <Th py="4" border="none" fontSize="10px" w="110px">Qty</Th>
                       <Th py="4" border="none" fontSize="10px" w="120px">Unit Price</Th>
+                      <Th py="4" border="none" fontSize="10px" w="100px">Margin (%)</Th>
                       <Th py="4" border="none" fontSize="10px" textAlign="right" w="100px">Total</Th>
                       <Th py="4" border="none" fontSize="10px" w="50px"></Th>
                     </Tr>
@@ -468,6 +484,18 @@ const BranchNewInvoice = () => {
                             type="number" 
                             value={item.price}
                             onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                            variant="filled" 
+                            borderRadius="lg" 
+                            h="45px" 
+                            fontWeight="800"
+                          />
+                        </Td>
+                        <Td>
+                          <Input 
+                            type="number" 
+                            value={item.margin || ''}
+                            placeholder="0"
+                            onChange={(e) => handleMarginChange(item.id, e.target.value)}
                             variant="filled" 
                             borderRadius="lg" 
                             h="45px" 

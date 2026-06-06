@@ -194,11 +194,11 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
                     {profile?.name || (localStorage.getItem('userRole') === 'branch' ? 'Branch Manager' : 'Admin User')}
                   </Text>
                   <Text fontSize="11px" color="gray.500">
-                    {profile?.role === 'admin' ? 'Super Admin' : 
-                     profile?.role === 'sales' ? 'Superstockist Partner' : 
-                     profile?.role === 'branch' ? 'Depot Manager' :
-                     profile?.role === 'distributor' ? 'Distribution Partner' :
-                     'Superstockist Partner'}
+                    {(profile?.role || localStorage.getItem('userRole')) === 'admin' ? 'Super Admin' : 
+                     (profile?.role || localStorage.getItem('userRole')) === 'sales' ? 'Superstockist Partner' : 
+                     (profile?.role || localStorage.getItem('userRole')) === 'branch' ? 'Depot Manager' :
+                     (profile?.role || localStorage.getItem('userRole')) === 'distributor' ? 'Distribution Partner' :
+                     'Loading...'}
                   </Text>
                 </Box>
                 <ChevronDown size={14} color="gray" />

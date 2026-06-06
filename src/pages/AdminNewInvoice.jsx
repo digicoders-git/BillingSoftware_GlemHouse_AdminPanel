@@ -57,7 +57,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -77,7 +77,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
     setPreviewHtml('');
     setBillDataState(null);
     setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
     ]);
     setCustomerDetails({
       name: '',
@@ -101,7 +101,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
   };
 
   const removeItem = (id) => {
@@ -130,6 +130,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
             category: selectedProduct.category || 'General',
             price: price,
             qty: qty,
+            margin: 0,
             total: qty * price,
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.expiry || '',
@@ -177,7 +178,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
         return {
           ...item,
           qty: finalQty,
-          total: finalQty * item.price
+          total: finalQty * item.price * (1 - (item.margin || 0) / 100)
         };
       }
       return item;
@@ -191,7 +192,21 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
         return {
           ...item,
           price: parsedPrice,
-          total: item.qty * parsedPrice
+          total: item.qty * parsedPrice * (1 - (item.margin || 0) / 100)
+        };
+      }
+      return item;
+    }));
+  };
+
+  const handleMarginChange = (id, margin) => {
+    const parsedMargin = parseFloat(margin) || 0;
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          margin: parsedMargin,
+          total: item.qty * item.price * (1 - parsedMargin / 100)
         };
       }
       return item;
@@ -292,6 +307,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
           name: i.name,
           qty: i.qty,
           price: i.price,
+          margin: i.margin || 0,
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
@@ -471,13 +487,14 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
               </Flex>
               
               <Box overflowX="auto">
-                <Table variant="simple" minW="750px">
+                <Table variant="simple" minW="1000px">
                   <Thead bg="gray.50/50">
                     <Tr>
                       <Th py="4" border="none" fontSize="10px" minW="220px">Description</Th>
                       <Th py="4" border="none" fontSize="10px" w="140px">Expiry (Optional)</Th>
                       <Th py="4" border="none" fontSize="10px" w="110px">Qty</Th>
                       <Th py="4" border="none" fontSize="10px" w="120px">Unit Price</Th>
+                      <Th py="4" border="none" fontSize="10px" w="100px">Margin (%)</Th>
                       <Th py="4" border="none" fontSize="10px" textAlign="right" w="100px">Total</Th>
                       <Th py="4" border="none" fontSize="10px" w="50px"></Th>
                     </Tr>
@@ -537,6 +554,18 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
                             type="number" 
                             value={item.price}
                             onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                            variant="filled" 
+                            borderRadius="lg" 
+                            h="45px" 
+                            fontWeight="800"
+                          />
+                        </Td>
+                        <Td>
+                          <Input 
+                            type="number" 
+                            value={item.margin || ''}
+                            placeholder="0"
+                            onChange={(e) => handleMarginChange(item.id, e.target.value)}
                             variant="filled" 
                             borderRadius="lg" 
                             h="45px" 
