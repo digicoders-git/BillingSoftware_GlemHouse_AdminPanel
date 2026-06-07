@@ -44,7 +44,7 @@ const DeepoBilling = ({ isGst }) => {
   const toast = useToast();
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '' }
+    { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '', freeItem: '' }
   ]);
 
   const [dispatchData, setDispatchData] = useState({
@@ -85,7 +85,7 @@ const DeepoBilling = ({ isGst }) => {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', sku: '', hsn: '', batch: '', qty: 1, price: 0, total: 0, expiryDate: '', freeItem: '' }]);
   };
 
   const handleRemoveItem = (id) => {
@@ -342,6 +342,7 @@ const DeepoBilling = ({ isGst }) => {
                   <Thead bg="gray.50/50">
                     <Tr>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" minW="200px">Description</Th>
+                      <Th color="gray.500" border="none" py="4" fontSize="10px" w="130px">Free Promo Item</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="130px">Expiry (Optional)</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="120px">Quantity</Th>
                       <Th color="gray.500" border="none" py="4" fontSize="10px" w="150px">Unit Price</Th>
@@ -366,6 +367,18 @@ const DeepoBilling = ({ isGst }) => {
                               <option key={p._id} value={p._id}>{p.name} ({p.sku}) — Stock: {p.stock || 0}</option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            size="sm"
+                            h="40px"
+                            borderRadius="lg"
+                            fontWeight="700"
+                            value={item.freeItem || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, freeItem: e.target.value } : i))}
+                            placeholder="e.g. 1 Jug"
+                          />
                         </Td>
                         <Td>
                           <Input

@@ -57,7 +57,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -77,7 +77,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
     setPreviewHtml('');
     setBillDataState(null);
     setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }
     ]);
     setCustomerDetails({
       name: '',
@@ -101,7 +101,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }]);
   };
 
   const removeItem = (id) => {
@@ -135,7 +135,8 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.expiry || '',
             hsn: selectedProduct.hsn || '',
-            batch: selectedProduct.batch || ''
+            batch: selectedProduct.batch || '',
+            freeItem: ''
           };
         }
         return item;
@@ -311,7 +312,8 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
-          batch: i.batch || ''
+          batch: i.batch || '',
+          freeItem: i.freeItem || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,
@@ -491,6 +493,7 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
                   <Thead bg="gray.50/50">
                     <Tr>
                       <Th py="4" border="none" fontSize="10px" minW="220px">Description</Th>
+                      <Th py="4" border="none" fontSize="10px" w="140px">Free Promo Item</Th>
                       <Th py="4" border="none" fontSize="10px" w="140px">Expiry (Optional)</Th>
                       <Th py="4" border="none" fontSize="10px" w="110px">Qty</Th>
                       <Th py="4" border="none" fontSize="10px" w="120px">Unit Price</Th>
@@ -523,6 +526,19 @@ const AdminNewInvoice = ({ isGst: propIsGst }) => {
                               </option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            value={item.freeItem || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, freeItem: e.target.value } : i))}
+                            variant="filled"
+                            borderRadius="lg"
+                            h="45px"
+                            fontWeight="700"
+                            fontSize="sm"
+                            placeholder="e.g. 1 Bucket"
+                          />
                         </Td>
                         <Td>
                           <Input

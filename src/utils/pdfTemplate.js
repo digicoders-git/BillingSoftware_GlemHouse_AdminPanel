@@ -149,7 +149,10 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                         return `
                         <tr>
                             <td style="text-align: center;">${idx + 1}</td>
-                            <td>${item.name || item.description || 'Product'}</td>
+                            <td>
+                                ${item.name || item.description || 'Product'}
+                                ${item.freeItem ? `<br><span style="font-size: 11px; font-weight: bold; color: #333;">(Free: ${item.freeItem})</span>` : ''}
+                            </td>
                             <td style="text-align: center;">${item.hsn || item.product?.hsn || 'N/A'}</td>
                             <td style="text-align: center;">${item.batch || item.product?.batch || 'N/A'}</td>
                             <td style="text-align: center;">${expiryDisplay}</td>

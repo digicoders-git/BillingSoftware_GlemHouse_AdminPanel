@@ -63,7 +63,7 @@ const DistributorNewInvoice = () => {
   
   // Invoice State
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -84,7 +84,7 @@ const DistributorNewInvoice = () => {
     setPreviewHtml('');
     setBillDataState(null);
     setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }
     ]);
     setCustomerDetails({
       name: '',
@@ -108,7 +108,7 @@ const DistributorNewInvoice = () => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }]);
   };
 
   const removeItem = (id) => {
@@ -147,7 +147,8 @@ const DistributorNewInvoice = () => {
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.expiry || selectedProduct.expiryDate || '',
             hsn: selectedProduct.hsn || '',
-            batch: selectedProduct.batch || ''
+            batch: selectedProduct.batch || '',
+            freeItem: ''
           };
         }
         return item;
@@ -216,7 +217,8 @@ const DistributorNewInvoice = () => {
         maxStock: invItem.stock || 0,
         expiryDate: invItem.expiry || invItem.expiryDate || '',
         hsn: invItem.hsn || '',
-        batch: invItem.batch || ''
+        batch: invItem.batch || '',
+        freeItem: ''
      };
 
      // Replace the first empty item if it exists, else append
@@ -271,7 +273,8 @@ const DistributorNewInvoice = () => {
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
-          batch: i.batch || ''
+          batch: i.batch || '',
+          freeItem: i.freeItem || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,
@@ -478,6 +481,7 @@ const DistributorNewInvoice = () => {
                    <Thead>
                       <Tr>
                          <Th color="gray.400" fontSize="10px" py="4" minW="220px">PRODUCT DESCRIPTION</Th>
+                         <Th color="gray.400" fontSize="10px" py="4" w="140px">FREE PROMO ITEM</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="140px">EXPIRY (OPTIONAL)</Th>
                          <Th color="gray.400" fontSize="10px" py="4" textAlign="center" w="130px">QUANTITY</Th>
                          <Th color="gray.400" fontSize="10px" py="4" w="130px">UNIT RATE</Th>
@@ -507,6 +511,20 @@ const DistributorNewInvoice = () => {
                                     </option>
                                  ))}
                               </Select>
+                           </Td>
+                           <Td>
+                              <Input
+                                type="text"
+                                value={item.freeItem || ''}
+                                onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, freeItem: e.target.value } : i))}
+                                variant="filled"
+                                h="48px"
+                                borderRadius="xl"
+                                fontWeight="700"
+                                bg="gray.50"
+                                fontSize="sm"
+                                placeholder="e.g. 1 Jug"
+                              />
                            </Td>
                            <Td>
                               <Input

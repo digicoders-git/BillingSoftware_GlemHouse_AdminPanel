@@ -49,7 +49,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   const [isGst, setIsGst] = useState(propIsGst ?? false);
   
   const [items, setItems] = useState([
-    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }
   ]);
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
@@ -76,7 +76,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
   };
 
   const addItem = () => {
-    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
+    setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '', freeItem: '' }]);
   };
 
   const removeItem = (id) => {
@@ -107,7 +107,8 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
             maxStock: selectedProduct.stock || 0,
             expiryDate: selectedProduct.product?.expiry || selectedProduct.expiry || '',
             hsn: selectedProduct.product?.hsn || selectedProduct.hsn || '',
-            batch: selectedProduct.product?.batch || selectedProduct.batch || ''
+            batch: selectedProduct.product?.batch || selectedProduct.batch || '',
+            freeItem: ''
           };
         }
         return item;
@@ -165,7 +166,8 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
           total: i.total,
           expiryDate: i.expiryDate || '',
           hsn: i.hsn || '',
-          batch: i.batch || ''
+          batch: i.batch || '',
+          freeItem: i.freeItem || ''
         })),
         billingType: isGst ? 'With GST' : 'Without GST',
         gstRate: isGst ? gstRate : 0,
@@ -264,6 +266,7 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
                   <Thead>
                      <Tr>
                        <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" minW="220px">ITEM DESCRIPTION</Th>
+                       <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="140px">FREE PROMO ITEM</Th>
                        <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="140px">EXPIRY (OPTIONAL)</Th>
                        <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="110px" textAlign="center">QUANTITY</Th>
                        <Th py="4" color="gray.400" fontSize="10px" letterSpacing="1px" w="120px">UNIT PRICE</Th>
@@ -296,6 +299,20 @@ const SalesRepNewInvoice = ({ isGst: propIsGst }) => {
                               </option>
                             ))}
                           </Select>
+                        </Td>
+                        <Td>
+                          <Input
+                            type="text"
+                            value={item.freeItem || ''}
+                            onChange={(e) => setItems(items.map(i => i.id === item.id ? { ...i, freeItem: e.target.value } : i))}
+                            variant="filled"
+                            borderRadius="xl"
+                            h="45px"
+                            fontWeight="700"
+                            bg="gray.50"
+                            fontSize="sm"
+                            placeholder="e.g. 1 Bucket"
+                          />
                         </Td>
                         <Td>
                           <Input
