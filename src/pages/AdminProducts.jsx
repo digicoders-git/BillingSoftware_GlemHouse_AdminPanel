@@ -200,8 +200,8 @@ const AdminProducts = () => {
   };
 
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (p.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
