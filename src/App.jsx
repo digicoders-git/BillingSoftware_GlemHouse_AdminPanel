@@ -56,6 +56,11 @@ import DistributorSalesHistory from './pages/distributor/DistributorSalesHistory
 import DistributorInventoryLog from './pages/distributor/DistributorInventoryLog';
 import DistributorNewInvoice from './pages/distributor/DistributorNewInvoice';
 
+// Returns
+import InitiateReturn from './pages/returns/InitiateReturn';
+import ReturnHistory from './pages/returns/ReturnHistory';
+import IncomingReturns from './pages/returns/IncomingReturns';
+
 
 function App() {
   return (
@@ -138,6 +143,11 @@ function App() {
         <Route path="/distributor/dispatch-summary/:id" element={<DispatchSummary />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        
+        {/* Returns */}
+        <Route path="/returns/initiate" element={<InitiateReturn />} />
+        <Route path="/returns/history" element={<ReturnHistory />} />
+        <Route path="/returns/incoming" element={<IncomingReturns />} />
         
         {/* Redirect */}
         <Route path="*" element={<Navigate to="/login" replace />} />

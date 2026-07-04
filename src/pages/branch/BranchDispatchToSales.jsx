@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   Flex, 
@@ -32,7 +32,6 @@ import {
   Trash2, 
   Save, 
   ChevronLeft,
-  Printer,
   Truck,
   User as UserIcon,
   ShoppingBag
@@ -77,7 +76,8 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
         API.get('/branch-inventory')
       ]);
       setSalesReps(salesRes.data.sales || []);
-      setInventory(inventoryRes.data.inventory || []);
+      const fetchedInventory = inventoryRes.data.inventory || [];
+      setInventory(fetchedInventory.filter(inv => inv.product));
       setLoading(false);
     } catch (error) {
       toast({ title: "Error fetching data", status: "error" });
@@ -96,19 +96,19 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
   };
 
   const handleProductChange = (id, productId) => {
-    const invItem = inventory.find(i => i.productID === productId);
+    const invItem = inventory.find(i => i.product?._id === productId);
     setItems(items.map(item => 
       item.id === id 
         ? { 
             ...item, 
             product: productId, 
-            name: invItem?.name || '', 
-            sku: invItem?.sku || '', 
-            price: invItem?.price || 0,
+            name: invItem?.product?.name || '', 
+            sku: invItem?.product?.sku || '', 
+            price: invItem?.product?.price || 0,
             margin: 0,
-            total: (invItem?.price || 0) * item.qty,
-            maxStock: invItem?.stock || 0,
-            expiryDate: invItem?.product?.expiry || invItem?.expiry || ''
+            total: (invItem?.product?.price || 0) * item.qty,
+            maxStock: invItem?.currentStock || 0,
+            expiryDate: invItem?.product?.expiry || ''
           }
         : item
     ));
@@ -364,8 +364,8 @@ const BranchDispatchToSales = ({ isGst: propIsGst }) => {
                             onChange={(e) => handleProductChange(item.id, e.target.value)}
                           >
                             {inventory.map(inv => (
-                              <option key={inv._id} value={inv.productID || inv.product}>
-                                {inv.name} ({inv.sku || inv.product?.sku}) — {inv.stock} in stock
+                              <option key={inv._id} value={inv.product?._id}>
+                                {inv.product?.name} ({inv.product?.sku}) — {inv.currentStock} in stock
                               </option>
                             ))}
                           </Select>

@@ -26,14 +26,18 @@ import API from '../utils/api';
 
 const CreateSales = () => {
   const [formData, setFormData] = useState({
-    salesId: '',
     name: '',
     location: '',
+    address: '',
     contact: '',
     email: '',
-    password: ''
+    password: '',
+    agreementUrl: '',
+    employeeName: '',
+    employeeContact: ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
@@ -41,6 +45,25 @@ const CreateSales = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fileFormData = new FormData();
+    fileFormData.append('image', file); // API expects 'image' field for any file upload
+
+    setUploading(true);
+    try {
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      const { data } = await API.post('/upload', fileFormData, config);
+      setFormData({ ...formData, agreementUrl: data });
+      setUploading(false);
+      toast({ title: 'Agreement Uploaded', status: 'success', duration: 2000 });
+    } catch (error) {
+      toast({ title: 'Upload Failed', description: error.response?.data || 'An error occurred', status: 'error' });
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -101,9 +124,9 @@ const CreateSales = () => {
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
-                    <FormControl isRequired>
+                    <FormControl>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Superstockist ID</FormLabel>
-                      <Input name="salesId" value={formData.salesId} onChange={handleChange} placeholder="e.g. SL-001" h="45px" borderRadius="lg" />
+                      <Input value="Auto-generated" isReadOnly h="45px" borderRadius="lg" bg="gray.100" />
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
@@ -116,6 +139,44 @@ const CreateSales = () => {
                     <FormControl isRequired>
                       <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Location / Territory</FormLabel>
                       <Input name="location" value={formData.location} onChange={handleChange} placeholder="e.g. Delhi North" h="45px" borderRadius="lg" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={2}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Full Address</FormLabel>
+                      <Input as="textarea" name="address" value={formData.address} onChange={handleChange} placeholder="Enter full address" py="3" minH="80px" borderRadius="lg" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Upload Agreement (PDF, Image)</FormLabel>
+                      <Input type="file" onChange={uploadFileHandler} p="2" h="45px" borderRadius="lg" bg="white" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" />
+                      {uploading && <Text fontSize="xs" color="blue.500" mt="1">Uploading...</Text>}
+                      {formData.agreementUrl && <Text fontSize="xs" color="green.500" mt="1">Uploaded: {formData.agreementUrl}</Text>}
+                    </FormControl>
+                  </GridItem>
+                </Grid>
+              </Box>
+
+              <Box mb="10">
+                <Heading size="sm" mb="6" color="secondary" borderBottom="2px solid" borderColor="brand.500" display="inline-block" pb="1">Assigned Employee Details</Heading>
+                <Grid templateColumns="repeat(2, 1fr)" gap="6">
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Employee Name</FormLabel>
+                      <Input name="employeeName" value={formData.employeeName} onChange={handleChange} placeholder="Enter employee name" h="45px" borderRadius="lg" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Employee ID</FormLabel>
+                      <Input value="Auto-generated" isReadOnly h="45px" borderRadius="lg" bg="gray.100" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Employee Contact Number</FormLabel>
+                      <Input name="employeeContact" value={formData.employeeContact} onChange={handleChange} placeholder="Phone number" h="45px" borderRadius="lg" />
                     </FormControl>
                   </GridItem>
                 </Grid>

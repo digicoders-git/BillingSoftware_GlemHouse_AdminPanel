@@ -3,7 +3,6 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Building as Store, 
-  Search as PackageSearch, 
   Key, 
   User as UserCircle, 
   LogOut,
@@ -16,10 +15,9 @@ import {
   Receipt,
   Users,
   Truck,
-  ArrowRightLeft,
   ArrowUpRight,
-  Download,
-  Briefcase
+  Briefcase,
+  RefreshCw
 } from 'lucide-react';
 import { 
   Box, 
@@ -303,10 +301,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
-              <SidebarItem icon={Briefcase} label="Partners (Dist)" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Briefcase} label="Distributors" isCollapsed={isCollapsed}>
                 {[
                   { label: 'Distributor List', to: '/manage-distributors' },
-                  { label: 'Add New Partner', to: '/create-distributor' },
+                  { label: 'Add New Distributor', to: '/create-distributor' },
                 ]}
               </SidebarItem>
 
@@ -327,6 +325,12 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 {[
                   { label: 'Stock Transfer', to: '/admin/transfer-stock' },
                   { label: 'All Transfer History', to: '/total-dispatch-stock' },
+                ]}
+              </SidebarItem>
+
+              <SidebarItem icon={RefreshCw} label="Return Management" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Incoming Returns', to: '/returns/incoming' },
                 ]}
               </SidebarItem>
 
@@ -371,6 +375,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
 
+              <SidebarItem icon={RefreshCw} label="Return Management" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Initiate Return', to: '/returns/initiate' },
+                  { label: 'My Returns', to: '/returns/history' },
+                  { label: 'Incoming Returns', to: '/returns/incoming' },
+                ]}
+              </SidebarItem>
+
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Sales & Billing
@@ -406,6 +418,14 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                   { label: 'Dispatch History', to: '/total-dispatch-stock' },
                 ]}
               </SidebarItem>
+              
+              <SidebarItem icon={RefreshCw} label="Return Management" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Initiate Return', to: '/returns/initiate' },
+                  { label: 'My Returns', to: '/returns/history' },
+                  { label: 'Incoming Returns', to: '/returns/incoming' },
+                ]}
+              </SidebarItem>
               <SidebarItem icon={FileText} label="My Reports" to="/sales/reports" isCollapsed={isCollapsed} />
             </>
           )}
@@ -413,7 +433,7 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
           {/* DISTRIBUTOR SIDEBAR */}
           {userRole === 'distributor' && (
             <>
-              <SidebarItem icon={LayoutDashboard} label="Partner Dashboard" to="/distributor/dashboard" isCollapsed={isCollapsed} />
+              <SidebarItem icon={LayoutDashboard} label="Distributor Dashboard" to="/distributor/dashboard" isCollapsed={isCollapsed} />
               
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
@@ -428,19 +448,26 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, isMobileOpen, onMobileClose })
                 ]}
               </SidebarItem>
               
+              <SidebarItem icon={RefreshCw} label="Return Management" isCollapsed={isCollapsed}>
+                {[
+                  { label: 'Initiate Return', to: '/returns/initiate' },
+                  { label: 'My Returns', to: '/returns/history' },
+                ]}
+              </SidebarItem>
+              
               {!isCollapsed && (
                 <Text px="6" pt="4" pb="2" fontSize="15px" fontWeight="700" color="#222021">
                   Sales & Records
                 </Text>
               )}
-              <SidebarItem icon={Receipt} label="Partner Sales" isCollapsed={isCollapsed}>
+              <SidebarItem icon={Receipt} label="Distributor Sales" isCollapsed={isCollapsed}>
                 {[
                   { label: 'New Sale (GST)', to: '/distributor/new-invoice-gst' },
                   { label: 'New Sale (Non-GST)', to: '/distributor/new-invoice' },
                   { label: 'Sales History', to: '/distributor/history' },
                 ]}
               </SidebarItem>
-              <SidebarItem icon={FileText} label="Partner Reports" to="/distributor/reports" isCollapsed={isCollapsed} />
+              <SidebarItem icon={FileText} label="Distributor Reports" to="/distributor/reports" isCollapsed={isCollapsed} />
             </>
           )}
 

@@ -207,7 +207,7 @@ const Dashboard = () => {
           />
           <ColoredStatCard 
             title="Total Distributors" 
-            value={`${data.stats?.totalDistributors || 0} Partners`} 
+            value={`${data.stats?.totalDistributors || 0} Distributors`} 
             icon={Truck} 
             trend="up" 
             trendValue="Logistics"

@@ -223,7 +223,7 @@ const Profile = () => {
                 <Heading size="md" color="secondary" fontWeight="800">{profile.name}</Heading>
                 <Text color="gray.500" fontSize="sm" fontWeight="600" mb="4">
                    {profile.role === 'admin' ? 'System Administrator' : 
-                    profile.role === 'sales' ? 'Superstockist Partner' : 
+                    profile.role === 'sales' ? 'Superstockist' : 
                     profile.role === 'distributor' ? 'Authorized Distributor' :
                     `${branchInfo?.name || 'Depot'} Manager`}
                 </Text>
@@ -246,8 +246,8 @@ const Profile = () => {
                       <Text fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Designation</Text>
                       <Text fontSize="sm" fontWeight="700" color="secondary">
                         {profile.role === 'admin' ? 'Master Admin' : 
-                         profile.role === 'sales' ? 'Superstockist Partner' : 
-                         profile.role === 'distributor' ? 'Distribution Partner' :
+                         profile.role === 'sales' ? 'Superstockist' : 
+                         profile.role === 'distributor' ? 'Distributor' :
                          'Depot Manager'}
                       </Text>
                     </Box>

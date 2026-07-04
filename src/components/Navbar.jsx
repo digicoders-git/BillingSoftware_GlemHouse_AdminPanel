@@ -195,9 +195,9 @@ const Navbar = ({ isCollapsed, onMobileOpen }) => {
                   </Text>
                   <Text fontSize="11px" color="gray.500">
                     {(profile?.role || localStorage.getItem('userRole')) === 'admin' ? 'Super Admin' : 
-                     (profile?.role || localStorage.getItem('userRole')) === 'sales' ? 'Superstockist Partner' : 
+                     (profile?.role || localStorage.getItem('userRole')) === 'sales' ? 'Superstockist' : 
                      (profile?.role || localStorage.getItem('userRole')) === 'branch' ? 'Depot Manager' :
-                     (profile?.role || localStorage.getItem('userRole')) === 'distributor' ? 'Distribution Partner' :
+                     (profile?.role || localStorage.getItem('userRole')) === 'distributor' ? 'Distributor' :
                      'Loading...'}
                   </Text>
                 </Box>

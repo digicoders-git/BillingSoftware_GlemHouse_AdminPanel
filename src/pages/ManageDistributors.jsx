@@ -132,7 +132,7 @@ const ManageDistributors = () => {
         <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'start', md: 'center' }} mb="10" gap="4">
           <Box>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">Distributor Network</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="500">Manage your verified distribution partners and their portal access</Text>
+            <Text fontSize="sm" color="gray.500" fontWeight="500">Manage your verified distributors and their portal access</Text>
           </Box>
           <Button 
             leftIcon={<Plus size={18} />} 
@@ -145,7 +145,7 @@ const ManageDistributors = () => {
             onClick={() => navigate('/create-distributor')}
             _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }}
           >
-            Add New Partner
+            Add New Distributor
           </Button>
         </Flex>
 
@@ -154,7 +154,7 @@ const ManageDistributors = () => {
             <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'stretch', md: 'center' }} gap="4">
                <HStack spacing="4">
                   <Badge colorScheme="brand" variant="subtle" px="3" py="1" borderRadius="lg" fontSize="10px" fontWeight="800">
-                     TOTAL: {total} PARTNERS
+                     TOTAL: {total} DISTRIBUTORS
                   </Badge>
                   <Divider orientation="vertical" h="20px" />
                   <Text fontSize="xs" fontWeight="700" color="gray.400">ACTIVE NETWORK</Text>
@@ -188,10 +188,12 @@ const ManageDistributors = () => {
               <Table variant="simple">
                 <Thead bg="gray.50/50">
                   <Tr>
-                    <Th py="5" px="8" fontSize="10px" color="gray.400" letterSpacing="1px">PARTNER ID</Th>
+                    <Th py="5" px="8" fontSize="10px" color="gray.400" letterSpacing="1px">DISTRIBUTOR ID</Th>
                     <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px">DISTRIBUTOR NAME</Th>
                     <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px">PRIMARY REGION</Th>
                     <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px">CONTACT INFO</Th>
+                    <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px">AGREEMENT</Th>
+                    <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px" whiteSpace="nowrap">ASSIGNED EMPLOYEE</Th>
                     <Th py="5" fontSize="10px" color="gray.400" letterSpacing="1px">PORTAL ACCESS</Th>
                     <Th py="5" px="8" textAlign="right"></Th>
                   </Tr>
@@ -207,7 +209,7 @@ const ManageDistributors = () => {
                             <Avatar size="sm" name={dist.name} bg="brand.50" color="brand.500" fontWeight="800" borderRadius="xl" />
                             <VStack align="start" spacing="0">
                                 <Text fontWeight="800" fontSize="sm" color="secondary">{dist.name}</Text>
-                                <Text fontSize="10px" fontWeight="600" color="gray.400">Verified Partner</Text>
+                                <Text fontSize="10px" fontWeight="600" color="gray.400">Verified Distributor</Text>
                             </VStack>
                          </HStack>
                       </Td>
@@ -222,6 +224,25 @@ const ManageDistributors = () => {
                             <Text fontWeight="800" fontSize="xs">{dist.contact}</Text>
                             <Text fontSize="10px" color="gray.400">Direct Contact</Text>
                         </VStack>
+                      </Td>
+                      <Td py="5">
+                        {dist.agreementUrl ? (
+                          <Tag size="sm" variant="outline" colorScheme="green" as="a" href={`${API.defaults.baseURL ? API.defaults.baseURL.replace('/api', '') : 'http://localhost:5555'}/uploads/${dist.agreementUrl}`} target="_blank" rel="noopener noreferrer" cursor="pointer" textDecoration="none">
+                            <TagLabel fontSize="10px" fontWeight="800">View</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Text fontSize="10px" color="gray.400" fontWeight="700">N/A</Text>
+                        )}
+                      </Td>
+                      <Td py="5">
+                        {dist.employeeName ? (
+                          <VStack align="start" spacing="0" whiteSpace="nowrap">
+                              <Text fontWeight="800" fontSize="xs" color="brand.600">{dist.employeeName}</Text>
+                              <Text fontSize="10px" color="gray.500">ID: {dist.employeeId}</Text>
+                          </VStack>
+                        ) : (
+                          <Text fontSize="10px" color="gray.400">N/A</Text>
+                        )}
                       </Td>
                       <Td py="5">
                         <Tooltip label="Click to copy email" borderRadius="lg">
@@ -252,7 +273,7 @@ const ManageDistributors = () => {
                             onClick={() => { setViewDist(dist); onViewOpen(); }}
                           />
                           <IconButton 
-                            aria-label="Delete Partner" 
+                            aria-label="Delete Distributor" 
                             icon={<Trash2 size={18} />} 
                             size="sm" 
                             variant="ghost" 
@@ -266,7 +287,7 @@ const ManageDistributors = () => {
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="6" textAlign="center" py="20">
+                      <Td colSpan="8" textAlign="center" py="16">
                          <VStack spacing="3">
                             <Box p="4" bg="gray.50" borderRadius="full" color="gray.300"><Search size={40}/></Box>
                             <Text fontWeight="800" color="gray.400">No distributors found in the network</Text>
@@ -368,6 +389,26 @@ const ManageDistributors = () => {
                      <Text fontWeight="800" fontSize="md">{viewDist.location}</Text>
                   </Flex>
                 </Box>
+                
+                <Box>
+                  <Text fontSize="10px" fontWeight="900" color="gray.400" mb="2" textTransform="uppercase">Assigned Employee</Text>
+                  <Box bg="blue.50" p="4" borderRadius="2xl">
+                    <Grid templateColumns="repeat(2, 1fr)" gap="4">
+                      <GridItem>
+                        <Text fontSize="10px" color="gray.500" fontWeight="700">NAME</Text>
+                        <Text fontWeight="800" color="secondary" fontSize="sm">{viewDist.employeeName || 'N/A'}</Text>
+                      </GridItem>
+                      <GridItem>
+                        <Text fontSize="10px" color="gray.500" fontWeight="700">ID</Text>
+                        <Text fontWeight="800" color="secondary" fontSize="sm">{viewDist.employeeId || 'N/A'}</Text>
+                      </GridItem>
+                      <GridItem colSpan={2}>
+                        <Text fontSize="10px" color="gray.500" fontWeight="700">CONTACT</Text>
+                        <Text fontWeight="800" color="secondary" fontSize="sm">{viewDist.employeeContact || 'N/A'}</Text>
+                      </GridItem>
+                    </Grid>
+                  </Box>
+                </Box>
               </VStack>
             )}
           </ModalBody>
@@ -383,7 +424,7 @@ const ManageDistributors = () => {
       <AlertDialog isOpen={isDelOpen} leastDestructiveRef={cancelRef} onClose={onDelClose} isCentered>
         <AlertDialogOverlay backdropFilter="blur(4px)" />
         <AlertDialogContent borderRadius="3xl" p="4">
-          <AlertDialogHeader fontSize="xl" fontWeight="900" color="secondary">Delete Partner?</AlertDialogHeader>
+          <AlertDialogHeader fontSize="xl" fontWeight="900" color="secondary">Delete Distributor?</AlertDialogHeader>
           <AlertDialogBody fontWeight="600" color="gray.500">
              Are you absolutely sure? This will permanently remove the distributor and terminate their access to the portal. This action cannot be undone.
           </AlertDialogBody>

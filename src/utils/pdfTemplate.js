@@ -40,7 +40,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
         </div>
     ` : '';
 
-    const invoiceTitle = isTransfer ? 'STOCK TRANSFER' : (isGstEnabled ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION');
+    const invoiceTitle = billingType === 'Return Slip' ? 'RETURN SLIP' : (isTransfer ? 'STOCK TRANSFER' : (isGstEnabled ? 'TAX INVOICE' : 'ESTIMATE / QUOTATION'));
 
     return `
     <!DOCTYPE html>

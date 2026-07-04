@@ -11,7 +11,6 @@ import {
   Tr, 
   Th, 
   Td, 
-  Badge, 
   HStack, 
   IconButton,
   Input,
@@ -32,38 +31,19 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
   Grid,
   GridItem,
-  Divider,
   Tag,
   TagLabel,
 } from '@chakra-ui/react';
 import { 
   Plus, 
   Search, 
-  Pencil as Edit, 
   Trash2, 
-  Filter,
-  Download,
   Eye,
-  MapPin,
-  User,
-  Phone,
-  Mail,
-  Lock,
-  Copy,
-  ChevronDown
-} from 'lucide-react';
-import { 
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider
-} from '@chakra-ui/react';
+  Copy} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import API from '../utils/api';
@@ -195,6 +175,8 @@ const ManageSales = () => {
                     <Th fontSize="10px">Name</Th>
                     <Th fontSize="10px">Location</Th>
                     <Th fontSize="10px">Contact</Th>
+                    <Th fontSize="10px">Agreement</Th>
+                    <Th fontSize="10px" whiteSpace="nowrap">Assigned Employee</Th>
                     <Th fontSize="10px">Credentials</Th>
                     <Th fontSize="10px" textAlign="right">Actions</Th>
                   </Tr>
@@ -213,6 +195,25 @@ const ManageSales = () => {
                       </Td>
                       <Td fontSize="xs" color="gray.600">{rep.location}</Td>
                       <Td fontSize="xs" color="gray.600">{rep.contact}</Td>
+                      <Td>
+                        {rep.agreementUrl ? (
+                          <Tag size="sm" variant="outline" colorScheme="green" as="a" href={`${API.defaults.baseURL ? API.defaults.baseURL.replace('/api', '') : 'http://localhost:5555'}/uploads/${rep.agreementUrl}`} target="_blank" rel="noopener noreferrer" cursor="pointer" textDecoration="none">
+                            <TagLabel fontSize="10px" fontWeight="700">View</TagLabel>
+                          </Tag>
+                        ) : (
+                          <Text fontSize="10px" color="gray.400">N/A</Text>
+                        )}
+                      </Td>
+                      <Td>
+                        {rep.employeeName ? (
+                          <VStack align="start" spacing="0" whiteSpace="nowrap">
+                              <Text fontWeight="800" fontSize="xs" color="brand.600">{rep.employeeName}</Text>
+                              <Text fontSize="10px" color="gray.500">ID: {rep.employeeId}</Text>
+                          </VStack>
+                        ) : (
+                          <Text fontSize="10px" color="gray.400">N/A</Text>
+                        )}
+                      </Td>
                       <Td>
                         <Tag size="sm" variant="subtle" colorScheme="blue" cursor="pointer" onClick={() => copyToClipboard(rep.password)}>
                           <TagLabel fontSize="10px" fontWeight="700">{rep.email}</TagLabel>
@@ -240,7 +241,7 @@ const ManageSales = () => {
                     </Tr>
                   )) : (
                     <Tr>
-                      <Td colSpan="6" textAlign="center" py="10" color="gray.500">No Superstockist records found</Td>
+                      <Td colSpan="8" textAlign="center" py="10" color="gray.500">No Superstockist records found</Td>
                     </Tr>
                   )}
                 </Tbody>
@@ -300,6 +301,27 @@ const ManageSales = () => {
                 <Box>
                   <Text fontSize="xs" color="gray.500" fontWeight="700">LOCATION</Text>
                   <Text fontWeight="600">{viewSales.location}</Text>
+                </Box>
+                <Box>
+                  <Text fontSize="xs" color="gray.500" fontWeight="700">FULL ADDRESS</Text>
+                  <Text fontWeight="600">{viewSales.address || 'N/A'}</Text>
+                </Box>
+                <Box bg="blue.50" p="4" borderRadius="xl">
+                  <Text fontSize="xs" color="blue.500" fontWeight="800" mb="2">ASSIGNED EMPLOYEE</Text>
+                  <Grid templateColumns="repeat(2, 1fr)" gap="2">
+                    <GridItem>
+                      <Text fontSize="10px" color="gray.500" fontWeight="700">NAME</Text>
+                      <Text fontWeight="700" fontSize="sm">{viewSales.employeeName || 'N/A'}</Text>
+                    </GridItem>
+                    <GridItem>
+                      <Text fontSize="10px" color="gray.500" fontWeight="700">ID</Text>
+                      <Text fontWeight="700" fontSize="sm">{viewSales.employeeId || 'N/A'}</Text>
+                    </GridItem>
+                    <GridItem colSpan={2}>
+                      <Text fontSize="10px" color="gray.500" fontWeight="700">CONTACT</Text>
+                      <Text fontWeight="700" fontSize="sm">{viewSales.employeeContact || 'N/A'}</Text>
+                    </GridItem>
+                  </Grid>
                 </Box>
               </VStack>
             )}

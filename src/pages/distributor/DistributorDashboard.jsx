@@ -96,9 +96,9 @@ const DistributorDashboard = () => {
           position="relative"
         >
           <Box zIndex="1">
-            <Badge colorScheme="whiteAlpha" mb="2">Partner (Distributor) Panel</Badge>
+            <Badge colorScheme="whiteAlpha" mb="2">Distributor Panel</Badge>
             <Heading size="lg" fontWeight="900" letterSpacing="-1px">
-               Welcome, {data.name || 'Partner'}
+               Welcome, {data.name || 'Distributor'}
             </Heading>
             <Text fontSize="sm" opacity="0.9">Manage your stock and retail distribution</Text>
           </Box>
@@ -149,7 +149,7 @@ const DistributorDashboard = () => {
             subtitle={`${data.stats.todayQty} units sold today`}
           />
           <StatCard 
-            title="Partner Stock" 
+            title="Distributor Stock" 
             value={data.stats.totalItems}
             icon={Package}
             color="brand"

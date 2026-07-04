@@ -24,14 +24,17 @@ import API from '../utils/api';
 
 const CreateDistributor = () => {
   const [formData, setFormData] = useState({
-    distributorId: '',
     name: '',
     location: '',
     contact: '',
     email: '',
-    password: ''
+    password: '',
+    agreementUrl: '',
+    employeeName: '',
+    employeeContact: ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const navigate = useNavigate();
@@ -41,6 +44,25 @@ const CreateDistributor = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const uploadFileHandler = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fileFormData = new FormData();
+    fileFormData.append('image', file);
+
+    setUploading(true);
+    try {
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      const { data } = await API.post('/upload', fileFormData, config);
+      setFormData({ ...formData, agreementUrl: data });
+      setUploading(false);
+      toast({ title: 'Agreement Uploaded', status: 'success', duration: 2000 });
+    } catch (error) {
+      toast({ title: 'Upload Failed', description: error.response?.data || 'An error occurred', status: 'error' });
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -48,7 +70,7 @@ const CreateDistributor = () => {
       await API.post('/distributors', formData);
       toast({
         title: 'Success',
-        description: 'Distributor partner created successfully',
+        description: 'Distributor created successfully',
         status: 'success',
         duration: 3000,
         position: 'top-right'
@@ -73,10 +95,10 @@ const CreateDistributor = () => {
           <Box>
              <HStack spacing="3" mb="2" cursor="pointer" onClick={() => navigate(-1)} _hover={{ color: 'brand.500' }}>
                <ChevronRight size={18} style={{ transform: 'rotate(180deg)' }} />
-               <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase" letterSpacing="1px">Back to Partners</Text>
+               <Text fontSize="xs" fontWeight="800" color="gray.400" textTransform="uppercase" letterSpacing="1px">Back to Distributors</Text>
             </HStack>
             <Heading size="lg" color="secondary" fontWeight="900" letterSpacing="-1.5px">Onboard Distributor</Heading>
-            <Text fontSize="sm" color="gray.500" fontWeight="500">Register a new distribution partner in the supply chain</Text>
+            <Text fontSize="sm" color="gray.500" fontWeight="500">Register a new distributor in the supply chain</Text>
           </Box>
         </Flex>
 
@@ -87,7 +109,7 @@ const CreateDistributor = () => {
                 <HStack spacing="4" mb="8">
                     <Box p="3" bg="brand.50" color="brand.500" borderRadius="2xl" shadow="sm"><User size={20} /></Box>
                     <Box>
-                        <Heading size="sm" color="secondary" fontWeight="800">Partner Information</Heading>
+                        <Heading size="sm" color="secondary" fontWeight="800">Distributor Information</Heading>
                         <Text fontSize="xs" color="gray.400">Basic business and identification details</Text>
                     </Box>
                 </HStack>
@@ -112,18 +134,16 @@ const CreateDistributor = () => {
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
-                    <FormControl isRequired>
+                    <FormControl>
                       <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Distributor Unique ID</FormLabel>
                       <Input 
-                        name="distributorId" 
-                        value={formData.distributorId} 
-                        onChange={handleChange} 
-                        placeholder="e.g. DST-2024-001" 
+                        value="Auto-generated" 
+                        isReadOnly 
                         h="55px" 
                         variant="filled"
                         borderRadius="xl" 
                         fontWeight="900"
-                        bg="white"
+                        bg="gray.100"
                         border="1px solid"
                         borderColor="gray.100"
                       />
@@ -165,6 +185,55 @@ const CreateDistributor = () => {
                       />
                     </FormControl>
                   </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Upload Agreement (PDF, Image)</FormLabel>
+                      <Input 
+                        type="file" 
+                        onChange={uploadFileHandler} 
+                        p="3" 
+                        h="55px" 
+                        variant="filled"
+                        borderRadius="xl" 
+                        bg="white" 
+                        border="1px solid"
+                        borderColor="gray.100"
+                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" 
+                      />
+                      {uploading && <Text fontSize="xs" color="blue.500" mt="1" fontWeight="600">Uploading...</Text>}
+                      {formData.agreementUrl && <Text fontSize="xs" color="green.500" mt="1" fontWeight="600">Uploaded: {formData.agreementUrl}</Text>}
+                    </FormControl>
+                  </GridItem>
+                </Grid>
+              </Box>
+
+              <Box p="8" bg="white">
+                <HStack spacing="4" mb="8">
+                    <Box p="3" bg="brand.50" color="brand.500" borderRadius="2xl" shadow="sm"><User size={20} /></Box>
+                    <Box>
+                        <Heading size="sm" color="secondary" fontWeight="800">Assigned Employee</Heading>
+                        <Text fontSize="xs" color="gray.400">Employee managing this distributor</Text>
+                    </Box>
+                </HStack>
+                <Grid templateColumns="repeat(2, 1fr)" gap="8">
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Employee Name</FormLabel>
+                      <Input name="employeeName" value={formData.employeeName} onChange={handleChange} placeholder="Enter employee name" h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Employee ID</FormLabel>
+                      <Input value="Auto-generated" isReadOnly h="55px" variant="filled" borderRadius="xl" fontWeight="900" bg="gray.100" border="1px solid" borderColor="gray.100" />
+                    </FormControl>
+                  </GridItem>
+                  <GridItem colSpan={{ base: 2, md: 1 }}>
+                    <FormControl isRequired>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Employee Contact Number</FormLabel>
+                      <Input name="employeeContact" value={formData.employeeContact} onChange={handleChange} placeholder="Phone number" h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100" />
+                    </FormControl>
+                  </GridItem>
                 </Grid>
               </Box>
 
@@ -173,7 +242,7 @@ const CreateDistributor = () => {
                     <Box p="3" bg="purple.50" color="purple.500" borderRadius="2xl" shadow="sm"><Eye size={20} /></Box>
                     <Box>
                         <Heading size="sm" color="secondary" fontWeight="800">Account Credentials</Heading>
-                        <Text fontSize="xs" color="gray.400">Used for partner portal authentication</Text>
+                        <Text fontSize="xs" color="gray.400">Used for distributor portal authentication</Text>
                     </Box>
                 </HStack>
                 
@@ -186,7 +255,7 @@ const CreateDistributor = () => {
                         value={formData.email} 
                         onChange={handleChange} 
                         type="email" 
-                        placeholder="dist@partner.com" 
+                        placeholder="dist@distributor.com" 
                         h="55px" 
                         variant="filled"
                         borderRadius="xl" 
@@ -250,7 +319,7 @@ const CreateDistributor = () => {
                         shadow="xl"
                         _hover={{ transform: 'translateY(-2px)', shadow: '2xl' }}
                     >
-                        Create Partner Profile
+                        Create Distributor Profile
                     </Button>
                 </Flex>
               </Box>
