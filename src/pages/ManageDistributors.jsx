@@ -39,7 +39,8 @@ import {
   TagLabel,
   SimpleGrid,
   Divider,
-  Tooltip
+  Tooltip,
+  GridItem
 } from '@chakra-ui/react';
 import { 
   Plus, 
@@ -48,6 +49,7 @@ import {
   Eye, 
   Copy,
   ChevronRight,
+  Grid,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
