@@ -59,30 +59,13 @@ const BranchNewInvoice = () => {
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
     phone: '',
+    customerGst: '',
+    sellerGst: '',
     paymentMethod: 'Cash',
     notes: ''
   });
   const [discount, setDiscount] = useState(0);
   const [gstRate, setGstRate] = useState(18);
-
-  useEffect(() => {
-    fetchInventory();
-  }, []);
-
-  useEffect(() => {
-    setIsGst(location.pathname.includes('gst'));
-    setItems([
-      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
-    ]);
-    setCustomerDetails({
-      name: '',
-      phone: '',
-      paymentMethod: 'Cash',
-      notes: ''
-    });
-    setDiscount(0);
-    setGstRate(18);
-  }, [location.pathname]);
 
   const fetchInventory = async () => {
     try {
@@ -98,6 +81,27 @@ const BranchNewInvoice = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  useEffect(() => {
+    setIsGst(location.pathname.includes('gst'));
+    setItems([
+      { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }
+    ]);
+    setCustomerDetails({
+      name: '',
+      phone: '',
+      customerGst: '',
+      sellerGst: '',
+      paymentMethod: 'Cash',
+      notes: ''
+    });
+    setDiscount(0);
+    setGstRate(18);
+  }, [location.pathname]);
 
   const addItem = () => {
     setItems([...items, { id: Date.now(), product: '', name: '', qty: 1, price: 0, margin: 0, total: 0, maxStock: 0, expiryDate: '', hsn: '', batch: '' }]);
@@ -232,6 +236,8 @@ const BranchNewInvoice = () => {
       clientName: customerDetails.name,
       clientPhone: customerDetails.phone,
       clientAddress: customerDetails.notes,
+      clientGSTIN: customerDetails.customerGst,
+      sellerGSTIN: customerDetails.sellerGst,
       items: validItems,
       subTotal: taxableAmount,
       totalTax: gstAmount,
@@ -260,6 +266,8 @@ const BranchNewInvoice = () => {
       clientName: customerDetails.name,
       clientPhone: customerDetails.phone,
       clientAddress: customerDetails.notes,
+      clientGSTIN: customerDetails.customerGst,
+      sellerGSTIN: customerDetails.sellerGst,
       items: validItems,
       subTotal: taxableAmount,
       totalTax: gstAmount,
@@ -303,6 +311,8 @@ const BranchNewInvoice = () => {
       const payload = {
         customerName: customerDetails.name,
         customerPhone: customerDetails.phone,
+        customerGstNumber: customerDetails.customerGst,
+        sellerGstNumber: customerDetails.sellerGst,
         paymentMethod: customerDetails.paymentMethod,
         notes: customerDetails.notes,
         items: validItems.map(i => ({
@@ -337,6 +347,8 @@ const BranchNewInvoice = () => {
         clientName: customerDetails.name,
         clientPhone: customerDetails.phone,
         clientAddress: customerDetails.notes,
+        clientGSTIN: customerDetails.customerGst,
+        sellerGSTIN: customerDetails.sellerGst,
         items: payload.items,
         subTotal: taxableAmount,
         totalTax: gstAmount,
@@ -568,6 +580,32 @@ const BranchNewInvoice = () => {
                         value={customerDetails.phone}
                         onChange={handleCustomerChange}
                         placeholder="+91 00000 00000" 
+                        h="45px" 
+                        variant="filled"
+                        borderRadius="lg" 
+                        fontWeight="700"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Purchaser GST No.</FormLabel>
+                      <Input 
+                        name="customerGst"
+                        value={customerDetails.customerGst}
+                        onChange={handleCustomerChange}
+                        placeholder="e.g. 09AAACG1234H1Z5" 
+                        h="45px" 
+                        variant="filled"
+                        borderRadius="lg" 
+                        fontWeight="700"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize="10px" fontWeight="800" color="gray.500" textTransform="uppercase">Seller GST No.</FormLabel>
+                      <Input 
+                        name="sellerGst"
+                        value={customerDetails.sellerGst}
+                        onChange={handleCustomerChange}
+                        placeholder="e.g. 09AAACG1234H1Z5" 
                         h="45px" 
                         variant="filled"
                         borderRadius="lg" 

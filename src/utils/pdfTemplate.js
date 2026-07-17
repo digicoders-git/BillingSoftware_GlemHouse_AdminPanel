@@ -22,7 +22,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
     const absoluteLogo = logoBase64 || (typeof window !== 'undefined' ? window.location.origin + '/logo.png' : '/logo.png');
     
     const { 
-        billNo, clientName, clientPhone, clientAddress, clientGSTIN, items, 
+        billNo, clientName, clientPhone, clientAddress, clientGSTIN, sellerGSTIN, items, 
         totalAmount, subTotal, totalTax, taxPercentage, createdAt, isGstEnabled, billingType, senderType, receiverType
     } = bill;
     
@@ -99,7 +99,7 @@ export const pdfTemplate = (bill, logoBase64 = '') => {
                 <div class="comp-name">GLEM HOUSE CONSUMER CARE PVT LTD</div>
                 <div class="comp-addr">
                     Address: 1/093,New A, Jiyamau, Hazratganj, Lucknow (Uttar Pradesh)-226001<br>
-                    Gst no: 09AAACG1234H1Z5<br>
+                    ${sellerGSTIN ? `Gst no: ${sellerGSTIN}<br>` : 'Gst no: 09AAACG1234H1Z5<br>'}
                     Email Id: contact@glemhouse.com
                 </div>
             </div>

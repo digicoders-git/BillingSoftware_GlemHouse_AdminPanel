@@ -68,6 +68,8 @@ const DistributorNewInvoice = () => {
   const [customerDetails, setCustomerDetails] = useState({
     name: '',
     phone: '',
+    customerGst: '',
+    sellerGst: '',
     paymentMethod: 'Cash',
     notes: ''
   });
@@ -89,6 +91,8 @@ const DistributorNewInvoice = () => {
     setCustomerDetails({
       name: '',
       phone: '',
+      customerGst: '',
+      sellerGst: '',
       paymentMethod: 'Cash',
       notes: ''
     });
@@ -262,6 +266,8 @@ const DistributorNewInvoice = () => {
       const payload = {
         customerName: customerDetails.name,
         customerPhone: customerDetails.phone,
+        customerGstNumber: customerDetails.customerGst,
+        sellerGstNumber: customerDetails.sellerGst,
         paymentMethod: customerDetails.paymentMethod,
         notes: customerDetails.notes,
         items: validItems.map(i => ({
@@ -293,6 +299,8 @@ const DistributorNewInvoice = () => {
         clientName: customerDetails.name,
         clientPhone: customerDetails.phone,
         clientAddress: customerDetails.notes,
+        clientGSTIN: customerDetails.customerGst,
+        sellerGSTIN: customerDetails.sellerGst,
         items: payload.items,
         subTotal: taxableAmount,
         totalTax: gstAmount,
@@ -603,6 +611,14 @@ const DistributorNewInvoice = () => {
                    <FormControl isRequired>
                       <FormLabel fontSize="11px" fontWeight="800" color="gray.500">PHONE NUMBER</FormLabel>
                       <Input placeholder="10-digit mobile" variant="filled" h="50px" borderRadius="xl" fontWeight="700" value={customerDetails.phone} onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})} />
+                   </FormControl>
+                   <FormControl>
+                      <FormLabel fontSize="11px" fontWeight="800" color="gray.500">PURCHASER GST NO.</FormLabel>
+                      <Input placeholder="e.g. 09AAACG1234H1Z5" variant="filled" h="50px" borderRadius="xl" fontWeight="700" value={customerDetails.customerGst} onChange={(e) => setCustomerDetails({...customerDetails, customerGst: e.target.value})} />
+                   </FormControl>
+                   <FormControl>
+                      <FormLabel fontSize="11px" fontWeight="800" color="gray.500">SELLER GST NO.</FormLabel>
+                      <Input placeholder="e.g. 09AAACG1234H1Z5" variant="filled" h="50px" borderRadius="xl" fontWeight="700" value={customerDetails.sellerGst} onChange={(e) => setCustomerDetails({...customerDetails, sellerGst: e.target.value})} />
                    </FormControl>
                    <Box>
                       <FormLabel fontSize="11px" fontWeight="800" color="gray.500">PAYMENT MODE</FormLabel>

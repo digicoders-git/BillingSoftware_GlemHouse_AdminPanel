@@ -37,6 +37,7 @@ import {
   GridItem,
   Tag,
   TagLabel,
+  Tooltip
 } from '@chakra-ui/react';
 import { 
   Plus, 
@@ -193,7 +194,13 @@ const ManageSales = () => {
                             <Text fontWeight="700" color="secondary" fontSize="xs">{rep.name}</Text>
                          </HStack>
                       </Td>
-                      <Td fontSize="xs" color="gray.600">{rep.location}</Td>
+                      <Td>
+                         <Tooltip label={rep.location} placement="top" hasArrow bg="gray.800" color="white" borderRadius="lg" p={2}>
+                           <Text fontSize="xs" color="gray.600" noOfLines={2} maxW="150px" whiteSpace="normal">
+                             {rep.location}
+                           </Text>
+                         </Tooltip>
+                      </Td>
                       <Td fontSize="xs" color="gray.600">{rep.contact}</Td>
                       <Td>
                         {rep.agreementUrl ? (

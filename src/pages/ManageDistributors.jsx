@@ -218,7 +218,11 @@ const ManageDistributors = () => {
                       <Td py="5">
                         <HStack spacing="2">
                            <Box p="1" bg="blue.50" color="blue.500" borderRadius="md"><Eye size={10}/></Box>
-                           <Text fontWeight="700" fontSize="xs" color="gray.600">{dist.location}</Text>
+                           <Tooltip label={dist.location} placement="top" hasArrow bg="gray.800" color="white" borderRadius="lg" p={2}>
+                             <Text fontWeight="700" fontSize="xs" color="gray.600" noOfLines={2} maxW="150px" whiteSpace="normal">
+                               {dist.location}
+                             </Text>
+                           </Tooltip>
                         </HStack>
                       </Td>
                       <Td py="5">

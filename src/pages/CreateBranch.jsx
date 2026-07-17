@@ -17,12 +17,14 @@ import {
   useToast,
   InputGroup,
   InputRightElement,
-  IconButton
+  IconButton,
+  Select
 } from '@chakra-ui/react';
 import { ChevronRight, Save, X, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import API from '../utils/api';
+import locationData from '../utils/locationData.json';
 
 const CreateBranch = () => {
   const [formData, setFormData] = useState({
@@ -34,6 +36,12 @@ const CreateBranch = () => {
     gstin: '',
     email: '',
     password: ''
+  });
+  const [addressDetails, setAddressDetails] = useState({
+    state: 'Uttar Pradesh',
+    district: '',
+    tehsil: '',
+    localAddress: ''
   });
   const [loading, setLoading] = useState(false);
   
@@ -50,7 +58,15 @@ const CreateBranch = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post('/Branches', formData);
+      const fullLocation = [
+        addressDetails.localAddress,
+        addressDetails.tehsil,
+        addressDetails.district,
+        addressDetails.state
+      ].filter(Boolean).join(', ');
+
+      const submitData = { ...formData, location: fullLocation };
+      await API.post('/Branches', submitData);
       toast({
         title: 'Success',
         description: 'Branch created successfully',
@@ -110,10 +126,66 @@ const CreateBranch = () => {
                     </FormControl>
                   </GridItem>
                   <GridItem colSpan={2}>
-                    <FormControl isRequired>
-                      <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Full Address / Location</FormLabel>
-                      <Input name="location" value={formData.location} onChange={handleChange} placeholder="Enter complete address" h="45px" borderRadius="lg" />
-                    </FormControl>
+                    <Grid templateColumns="repeat(2, 1fr)" gap="6" mb="6">
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="sm" fontWeight="600" color="gray.700">State</FormLabel>
+                          <Select 
+                            value={addressDetails.state}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, state: e.target.value, district: '', tehsil: '' })}
+                            h="45px" borderRadius="lg"
+                          >
+                            <option value="">Select State</option>
+                            {Object.keys(locationData).map(state => (
+                              <option key={state} value={state}>{state}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="sm" fontWeight="600" color="gray.700">District</FormLabel>
+                          <Select 
+                            value={addressDetails.district}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, district: e.target.value, tehsil: '' })}
+                            h="45px" borderRadius="lg"
+                            isDisabled={!addressDetails.state}
+                          >
+                            <option value="">Select District</option>
+                            {addressDetails.state && Object.keys(locationData[addressDetails.state] || {}).map(district => (
+                              <option key={district} value={district}>{district}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Tehsil</FormLabel>
+                          <Select 
+                            value={addressDetails.tehsil}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, tehsil: e.target.value })}
+                            h="45px" borderRadius="lg"
+                            isDisabled={!addressDetails.district}
+                          >
+                            <option value="">Select Tehsil</option>
+                            {addressDetails.district && (locationData[addressDetails.state]?.[addressDetails.district] || []).map(tehsil => (
+                              <option key={tehsil} value={tehsil}>{tehsil}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="sm" fontWeight="600" color="gray.700">Local Address / Street</FormLabel>
+                          <Input 
+                            value={addressDetails.localAddress} 
+                            onChange={(e) => setAddressDetails({ ...addressDetails, localAddress: e.target.value })} 
+                            placeholder="Enter complete address" 
+                            h="45px" borderRadius="lg" 
+                          />
+                        </FormControl>
+                      </GridItem>
+                    </Grid>
                   </GridItem>
                 </Grid>
               </Box>

@@ -15,12 +15,14 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
-  HStack 
+  HStack,
+  Select
 } from '@chakra-ui/react';
 import { ChevronRight, Save, Eye, EyeOff, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import API from '../utils/api';
+import locationData from '../utils/locationData.json';
 
 const CreateDistributor = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +34,12 @@ const CreateDistributor = () => {
     agreementUrl: '',
     employeeName: '',
     employeeContact: ''
+  });
+  const [addressDetails, setAddressDetails] = useState({
+    state: 'Uttar Pradesh',
+    district: '',
+    tehsil: '',
+    localAddress: ''
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -67,7 +75,15 @@ const CreateDistributor = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post('/distributors', formData);
+      const fullLocation = [
+        addressDetails.localAddress,
+        addressDetails.tehsil,
+        addressDetails.district,
+        addressDetails.state
+      ].filter(Boolean).join(', ');
+
+      const submitData = { ...formData, location: fullLocation };
+      await API.post('/distributors', submitData);
       toast({
         title: 'Success',
         description: 'Distributor created successfully',
@@ -167,23 +183,67 @@ const CreateDistributor = () => {
                       />
                     </FormControl>
                   </GridItem>
-                  <GridItem colSpan={{ base: 2, md: 1 }}>
-                    <FormControl isRequired>
-                      <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Primary Region / City</FormLabel>
-                      <Input 
-                        name="location" 
-                        value={formData.location} 
-                        onChange={handleChange} 
-                        placeholder="e.g. Indore, Madhya Pradesh" 
-                        h="55px" 
-                        variant="filled"
-                        borderRadius="xl" 
-                        fontWeight="700"
-                        bg="white"
-                        border="1px solid"
-                        borderColor="gray.100"
-                      />
-                    </FormControl>
+                  <GridItem colSpan={2}>
+                    <Grid templateColumns="repeat(2, 1fr)" gap="6" mb="4">
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">State</FormLabel>
+                          <Select 
+                            value={addressDetails.state}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, state: e.target.value, district: '', tehsil: '' })}
+                            h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100"
+                          >
+                            <option value="">Select State</option>
+                            {Object.keys(locationData).map(state => (
+                              <option key={state} value={state}>{state}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">District</FormLabel>
+                          <Select 
+                            value={addressDetails.district}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, district: e.target.value, tehsil: '' })}
+                            h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100"
+                            isDisabled={!addressDetails.state}
+                          >
+                            <option value="">Select District</option>
+                            {addressDetails.state && Object.keys(locationData[addressDetails.state] || {}).map(district => (
+                              <option key={district} value={district}>{district}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Tehsil</FormLabel>
+                          <Select 
+                            value={addressDetails.tehsil}
+                            onChange={(e) => setAddressDetails({ ...addressDetails, tehsil: e.target.value })}
+                            h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100"
+                            isDisabled={!addressDetails.district}
+                          >
+                            <option value="">Select Tehsil</option>
+                            {addressDetails.district && (locationData[addressDetails.state]?.[addressDetails.district] || []).map(tehsil => (
+                              <option key={tehsil} value={tehsil}>{tehsil}</option>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </GridItem>
+                      <GridItem colSpan={{ base: 2, md: 1 }}>
+                        <FormControl isRequired>
+                          <FormLabel fontSize="10px" fontWeight="800" color="gray.400" textTransform="uppercase">Local Address</FormLabel>
+                          <Input 
+                            value={addressDetails.localAddress} 
+                            onChange={(e) => setAddressDetails({ ...addressDetails, localAddress: e.target.value })} 
+                            placeholder="Street / Area details" 
+                            h="55px" variant="filled" borderRadius="xl" fontWeight="700" bg="white" border="1px solid" borderColor="gray.100" 
+                          />
+                        </FormControl>
+                      </GridItem>
+                    </Grid>
                   </GridItem>
                   <GridItem colSpan={{ base: 2, md: 1 }}>
                     <FormControl>
